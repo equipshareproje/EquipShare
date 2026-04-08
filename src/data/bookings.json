@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "listingId": 1,
+    "renterId": 4,
+    "lenderId": 1,
+    "startDate": "2026-04-10",
+    "endDate": "2026-04-12",
+    "totalCost": 330,
+    "status": "approved",
+    "createdAt": "2026-04-08"
+  },
+  {
+    "id": 2,
+    "listingId": 2,
+    "renterId": 5,
+    "lenderId": 2,
+    "startDate": "2026-04-15",
+    "endDate": "2026-04-17",
+    "totalCost": 165,
+    "status": "pending",
+    "createdAt": "2026-04-08"
+  },
+  {
+    "id": 3,
+    "listingId": 3,
+    "renterId": 4,
+    "lenderId": 3,
+    "startDate": "2026-04-20",
+    "endDate": "2026-04-22",
+    "totalCost": 264,
+    "status": "completed",
+    "createdAt": "2026-04-01"
+  }
+]

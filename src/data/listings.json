@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "name": "Canon EOS 5D Mark IV",
+    "category": "Photography",
+    "description": "Professional DSLR camera with full-frame sensor. Perfect for photography assignments and creative projects.",
+    "dailyRate": 150,
+    "image": "https://via.placeholder.com/400x300?text=Canon+EOS+5D",
+    "rating": 4.8,
+    "reviews": 23,
+    "verified": true,
+    "lenderId": 1,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 2,
+    "name": "GoPro Hero 11",
+    "category": "Action Cameras",
+    "description": "4K action camera with waterproof design. Ideal for vlogging and outdoor activities.",
+    "dailyRate": 75,
+    "image": "https://via.placeholder.com/400x300?text=GoPro+Hero+11",
+    "rating": 4.9,
+    "reviews": 45,
+    "verified": true,
+    "lenderId": 2,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 3,
+    "name": "MacBook Pro 14",
+    "category": "Computers",
+    "description": "High-performance laptop with M3 Pro chip. Great for video editing and development work.",
+    "dailyRate": 120,
+    "image": "https://via.placeholder.com/400x300?text=MacBook+Pro+14",
+    "rating": 4.7,
+    "reviews": 18,
+    "verified": true,
+    "lenderId": 3,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 4,
+    "name": "Drone DJI Air 3S",
+    "category": "Drones",
+    "description": "Professional-grade drone with excellent stabilization and long flight time.",
+    "dailyRate": 200,
+    "image": "https://via.placeholder.com/400x300?text=DJI+Air+3S",
+    "rating": 4.6,
+    "reviews": 31,
+    "verified": true,
+    "lenderId": 2,
+    "location": "KFUPM Main Campus",
+    "available": false,
+    "availability": {
+      "startDate": "2026-04-15",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 5,
+    "name": "Sony A6700 Mirrorless",
+    "category": "Photography",
+    "description": "Compact mirrorless camera with stunning autofocus and 4K video capabilities.",
+    "dailyRate": 110,
+    "image": "https://via.placeholder.com/400x300?text=Sony+A6700",
+    "rating": 4.9,
+    "reviews": 52,
+    "verified": true,
+    "lenderId": 1,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 6,
+    "name": "Professional Lighting Kit",
+    "category": "Photography",
+    "description": "Complete studio lighting setup with softboxes, stands, and diffusers.",
+    "dailyRate": 85,
+    "image": "https://via.placeholder.com/400x300?text=Lighting+Kit",
+    "rating": 4.5,
+    "reviews": 14,
+    "verified": true,
+    "lenderId": 3,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  }
+]
