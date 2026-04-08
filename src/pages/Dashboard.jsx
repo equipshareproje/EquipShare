@@ -14,6 +14,13 @@ export default function Dashboard() {
     reliability: '',
     comment: '',
   });
+  const [reviewingLenderBooking, setReviewingLenderBooking] = useState(null);
+  const [lenderReviewForm, setLenderReviewForm] = useState({
+    rating: 5,
+    renterBehavior: '',
+    itemCare: '',
+    comment: '',
+  });
   const [expandedDetails, setExpandedDetails] = useState(null); // Track which row's details are expanded
 
   // Mock rental history (as renter - items user has rented)
@@ -147,6 +154,23 @@ export default function Dashboard() {
     alert('Review submitted! 🎉');
   };
 
+  const handleLenderReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!lenderReviewForm.rating) {
+      alert('Please select a rating');
+      return;
+    }
+    // Mock: mark booking as reviewed by lender
+    const booking = lenderBookings.find(b => b.id === reviewingLenderBooking.id);
+    if (booking) {
+      booking.reviewedByLender = true;
+      booking.lenderReview = lenderReviewForm;
+    }
+    setReviewingLenderBooking(null);
+    setLenderReviewForm({ rating: 5, renterBehavior: '', itemCare: '', comment: '' });
+    alert('Renter review submitted! 🎉');
+  };
+
   const formatDate = (dateStr) => {
     const [year, month, day] = dateStr.split('-');
     return `${month}/${day}`;
@@ -244,7 +268,12 @@ export default function Dashboard() {
                         </td>
                         <td className="px-6 py-4 text-[#0A1F29]">
                           <div>
-                            <p className="font-medium">{rental.lenderName}</p>
+                            <button
+                              onClick={() => navigate(`/user/${rental.lenderId || rental.id}`)}
+                              className="font-medium text-[#00879E] hover:text-[#003E51] hover:underline transition-colors"
+                            >
+                              {rental.lenderName}
+                            </button>
                             <p className="text-xs text-[#4A6572]">⭐ {rental.lenderRating}</p>
                           </div>
                         </td>
@@ -351,7 +380,12 @@ export default function Dashboard() {
                         </td>
                         <td className="px-6 py-4 text-[#0A1F29]">
                           <div>
-                            <p className="font-medium">{booking.renterName}</p>
+                            <button
+                              onClick={() => navigate(`/user/renter-${booking.id}`)}
+                              className="font-medium text-[#00879E] hover:text-[#003E51] hover:underline transition-colors"
+                            >
+                              {booking.renterName}
+                            </button>
                             <p className="text-xs text-[#4A6572]">⭐ {booking.renterRating}</p>
                           </div>
                         </td>
@@ -380,6 +414,14 @@ export default function Dashboard() {
                                 className="text-[#00879E] hover:underline font-medium"
                               >
                                 Details
+                              </button>
+                            )}
+                            {booking.status === 'completed' && (
+                              <button
+                                onClick={() => setReviewingLenderBooking(booking)}
+                                className="text-[#00879E] hover:underline font-medium"
+                              >
+                                Review
                               </button>
                             )}
                             {booking.status === 'pending' && (
@@ -519,6 +561,121 @@ export default function Dashboard() {
                   onClick={() => {
                     setReviewingRental(null);
                     setReviewForm({ rating: 5, condition: '', reliability: '', comment: '' });
+                  }}
+                  className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-[#003E51] text-white rounded-lg font-medium hover:bg-[#002A38]"
+                >
+                  Submit Review
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Lender Review Modal */}
+      {reviewingLenderBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-[#0A1F29] mb-4">Review Renter</h2>
+            <p className="text-[#4A6572] mb-6">
+              Review for: <strong>{reviewingLenderBooking.renterName}</strong> for{' '}
+              <strong>{reviewingLenderBooking.equipmentName}</strong>
+            </p>
+
+            <form onSubmit={handleLenderReviewSubmit} className="space-y-5">
+              {/* Star Rating */}
+              <div>
+                <label className="block text-sm font-medium text-[#0A1F29] mb-2">
+                  Renter Rating
+                </label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setLenderReviewForm(prev => ({ ...prev, rating: star }))}
+                      className={`text-2xl transition ${
+                        star <= lenderReviewForm.rating ? 'text-yellow-400' : 'text-gray-300'
+                      }`}
+                    >
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Renter Behavior Field */}
+              <div>
+                <label htmlFor="renterBehavior" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                  Renter Behavior
+                </label>
+                <select
+                  id="renterBehavior"
+                  value={lenderReviewForm.renterBehavior}
+                  onChange={(e) =>
+                    setLenderReviewForm(prev => ({ ...prev, renterBehavior: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                >
+                  <option value="">Select behavior</option>
+                  <option value="excellent">Excellent - Very professional</option>
+                  <option value="good">Good - Professional</option>
+                  <option value="fair">Fair - Acceptable</option>
+                  <option value="poor">Poor - Issues encountered</option>
+                </select>
+              </div>
+
+              {/* Item Care Field */}
+              <div>
+                <label htmlFor="itemCare" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                  Item Care
+                </label>
+                <select
+                  id="itemCare"
+                  value={lenderReviewForm.itemCare}
+                  onChange={(e) =>
+                    setLenderReviewForm(prev => ({ ...prev, itemCare: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                >
+                  <option value="">Select item care</option>
+                  <option value="excellent">Excellent - Perfect condition returned</option>
+                  <option value="good">Good - Minimal wear</option>
+                  <option value="fair">Fair - Some wear and tear</option>
+                  <option value="poor">Poor - Damaged or not returned on time</option>
+                </select>
+              </div>
+
+              {/* Comment */}
+              <div>
+                <label htmlFor="comment" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                  Additional Comments (Optional)
+                </label>
+                <textarea
+                  id="comment"
+                  value={lenderReviewForm.comment}
+                  onChange={(e) =>
+                    setLenderReviewForm(prev => ({ ...prev, comment: e.target.value }))
+                  }
+                  placeholder="Share your experience..."
+                  className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                  rows="4"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReviewingLenderBooking(null);
+                    setLenderReviewForm({ rating: 5, renterBehavior: '', itemCare: '', comment: '' });
                   }}
                   className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50"
                 >
