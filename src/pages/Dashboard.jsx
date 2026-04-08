@@ -14,6 +14,7 @@ export default function Dashboard() {
     reliability: '',
     comment: '',
   });
+  const [expandedDetails, setExpandedDetails] = useState(null); // Track which row's details are expanded
 
   // Mock rental history (as renter - items user has rented)
   const rentalHistory = [
@@ -32,6 +33,8 @@ export default function Dashboard() {
       status: 'completed',
       reviewed: false,
       image: 'https://via.placeholder.com/80?text=Canon+EOS',
+      bookingRef: 'BOOK-2026-0301-1782',
+      pickupLocation: '123 Main St, Downtown',
     },
     {
       id: 2,
@@ -48,6 +51,8 @@ export default function Dashboard() {
       status: 'completed',
       reviewed: false,
       image: 'https://via.placeholder.com/80?text=Drone+DJI',
+      bookingRef: 'BOOK-2026-0305-2847',
+      pickupLocation: '456 Tech Ave, Campus',
     },
     {
       id: 3,
@@ -64,6 +69,8 @@ export default function Dashboard() {
       status: 'active',
       reviewed: false,
       image: 'https://via.placeholder.com/80?text=iPad+Pro',
+      bookingRef: 'BOOK-2026-0401-5123',
+      pickupLocation: '789 Student Center, Building A',
     },
   ];
 
@@ -78,6 +85,9 @@ export default function Dashboard() {
       startDate: '2026-03-05',
       endDate: '2026-03-08',
       status: 'completed',
+      bookingRef: 'BOOK-2026-0301-1782',
+      pickupLocation: '123 Main St, Downtown',
+      totalCost: 155.25,
     },
     {
       id: 102,
@@ -88,6 +98,9 @@ export default function Dashboard() {
       startDate: '2026-03-01',
       endDate: '2026-03-03',
       status: 'active',
+      bookingRef: 'BOOK-2026-0201-5521',
+      pickupLocation: '456 Tech Ave, Campus',
+      totalCost: 299.90,
     },
     {
       id: 103,
@@ -98,6 +111,9 @@ export default function Dashboard() {
       startDate: '2026-04-10',
       endDate: '2026-04-15',
       status: 'pending',
+      bookingRef: 'BOOK-2026-0410-3394',
+      pickupLocation: '789 Student Center, Building A',
+      totalCost: 440.00,
     },
   ];
 
@@ -207,58 +223,88 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {rentalHistory.map((rental, index) => (
-                    <tr
-                      key={rental.id}
-                      className={`border-b border-[#D0DDE2] hover:bg-gray-50 transition ${
-                        index === rentalHistory.length - 1 ? 'border-b-0' : ''
-                      }`}
-                    >
-                      <td className="px-6 py-4 text-[#0A1F29]">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={rental.image}
-                            alt={rental.equipmentName}
-                            className="w-10 h-10 rounded object-cover"
-                          />
-                          <div>
-                            <p className="font-medium">{rental.equipmentName}</p>
-                            <p className="text-xs text-[#4A6572]">{rental.category}</p>
+                    <React.Fragment key={rental.id}>
+                      <tr
+                        className={`border-b border-[#D0DDE2] hover:bg-gray-50 transition ${
+                          index === rentalHistory.length - 1 ? 'border-b-0' : ''
+                        }`}
+                      >
+                        <td className="px-6 py-4 text-[#0A1F29]">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={rental.image}
+                              alt={rental.equipmentName}
+                              className="w-10 h-10 rounded object-cover"
+                            />
+                            <div>
+                              <p className="font-medium">{rental.equipmentName}</p>
+                              <p className="text-xs text-[#4A6572]">{rental.category}</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-[#0A1F29]">
-                        <div>
-                          <p className="font-medium">{rental.lenderName}</p>
-                          <p className="text-xs text-[#4A6572]">⭐ {rental.lenderRating}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-[#0A1F29]">
-                        <p>
-                          {formatDate(rental.startDate)} - {formatDate(rental.endDate)}
-                        </p>
-                        <p className="text-xs text-[#4A6572]">{rental.days} days</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={getStatusBadge(rental.status)}>
-                          {rental.status.charAt(0).toUpperCase() + rental.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="flex gap-3">
-                          <button className="text-[#00879E] hover:underline font-medium">
-                            Details
-                          </button>
-                          {rental.status === 'completed' && (
-                            <button
-                              onClick={() => setReviewingRental(rental)}
-                              className="text-[#00879E] hover:underline font-medium"
-                            >
-                              Review
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="px-6 py-4 text-[#0A1F29]">
+                          <div>
+                            <p className="font-medium">{rental.lenderName}</p>
+                            <p className="text-xs text-[#4A6572]">⭐ {rental.lenderRating}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-[#0A1F29]">
+                          <p>
+                            {formatDate(rental.startDate)} - {formatDate(rental.endDate)}
+                          </p>
+                          <p className="text-xs text-[#4A6572]">{rental.days} days</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={getStatusBadge(rental.status)}>
+                            {rental.status.charAt(0).toUpperCase() + rental.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <div className="flex gap-3">
+                            {expandedDetails === rental.id ? (
+                              <button
+                                onClick={() => setExpandedDetails(null)}
+                                className="text-[#00879E] hover:underline font-medium"
+                              >
+                                Hide
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setExpandedDetails(rental.id)}
+                                className="text-[#00879E] hover:underline font-medium"
+                              >
+                                Details
+                              </button>
+                            )}
+                            {rental.status === 'completed' && (
+                              <button
+                                onClick={() => setReviewingRental(rental)}
+                                className="text-[#00879E] hover:underline font-medium"
+                              >
+                                Review
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedDetails === rental.id && (
+                        <tr className="bg-gray-50 border-b border-[#D0DDE2]">
+                          <td colSpan="5" className="px-6 py-4">
+                            <div className="space-y-2">
+                              <p className="text-sm text-[#0A1F29]">
+                                <span className="font-medium">Booking Reference:</span> {rental.bookingRef}
+                              </p>
+                              <p className="text-sm text-[#0A1F29]">
+                                <span className="font-medium">Total Paid:</span> ${rental.totalCost.toFixed(2)}
+                              </p>
+                              <p className="text-sm text-[#0A1F29]">
+                                <span className="font-medium">Pickup Location:</span> {rental.pickupLocation}
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
@@ -292,51 +338,81 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {lenderBookings.map((booking, index) => (
-                    <tr
-                      key={booking.id}
-                      className={`border-b border-[#D0DDE2] hover:bg-gray-50 transition ${
-                        index === lenderBookings.length - 1 ? 'border-b-0' : ''
-                      }`}
-                    >
-                      <td className="px-6 py-4 text-[#0A1F29]">
-                        <div>
-                          <p className="font-medium">{booking.equipmentName}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-[#0A1F29]">
-                        <div>
-                          <p className="font-medium">{booking.renterName}</p>
-                          <p className="text-xs text-[#4A6572]">⭐ {booking.renterRating}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-[#0A1F29]">
-                        <p>
-                          {formatDate(booking.startDate)} - {formatDate(booking.endDate)}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={getStatusBadge(booking.status)}>
-                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="flex gap-3">
-                          <button className="text-[#00879E] hover:underline font-medium">
-                            Details
-                          </button>
-                          {booking.status === 'pending' && (
-                            <>
-                              <button className="text-green-600 hover:underline font-medium">
-                                Approve
+                    <React.Fragment key={booking.id}>
+                      <tr
+                        className={`border-b border-[#D0DDE2] hover:bg-gray-50 transition ${
+                          index === lenderBookings.length - 1 ? 'border-b-0' : ''
+                        }`}
+                      >
+                        <td className="px-6 py-4 text-[#0A1F29]">
+                          <div>
+                            <p className="font-medium">{booking.equipmentName}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-[#0A1F29]">
+                          <div>
+                            <p className="font-medium">{booking.renterName}</p>
+                            <p className="text-xs text-[#4A6572]">⭐ {booking.renterRating}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-[#0A1F29]">
+                          <p>
+                            {formatDate(booking.startDate)} - {formatDate(booking.endDate)}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={getStatusBadge(booking.status)}>
+                            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <div className="flex gap-3">
+                            {expandedDetails === booking.id ? (
+                              <button
+                                onClick={() => setExpandedDetails(null)}
+                                className="text-[#00879E] hover:underline font-medium"
+                              >
+                                Hide
                               </button>
-                              <button className="text-red-600 hover:underline font-medium">
-                                Reject
+                            ) : (
+                              <button
+                                onClick={() => setExpandedDetails(booking.id)}
+                                className="text-[#00879E] hover:underline font-medium"
+                              >
+                                Details
                               </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                            )}
+                            {booking.status === 'pending' && (
+                              <>
+                                <button className="text-green-600 hover:underline font-medium">
+                                  Approve
+                                </button>
+                                <button className="text-red-600 hover:underline font-medium">
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedDetails === booking.id && (
+                        <tr className="bg-gray-50 border-b border-[#D0DDE2]">
+                          <td colSpan="5" className="px-6 py-4">
+                            <div className="space-y-2">
+                              <p className="text-sm text-[#0A1F29]">
+                                <span className="font-medium">Booking Reference:</span> {booking.bookingRef}
+                              </p>
+                              <p className="text-sm text-[#0A1F29]">
+                                <span className="font-medium">Total Paid:</span> ${booking.totalCost.toFixed(2)}
+                              </p>
+                              <p className="text-sm text-[#0A1F29]">
+                                <span className="font-medium">Pickup Location:</span> {booking.pickupLocation}
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
