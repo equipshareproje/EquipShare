@@ -34,7 +34,7 @@ const Navbar = () => {
   const navLinks = [
     { label: 'Home', href: '/' },
     { label: 'Marketplace', href: '/marketplace' },
-    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Dashboard', href: user ? '/renter-dashboard' : '/dashboard' },
     { label: 'About', href: '/about' },
   ];
 
