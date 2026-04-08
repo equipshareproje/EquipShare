@@ -77,7 +77,7 @@ export default function EquipmentDetail() {
       navigate('/signin');
       return;
     }
-    setShowBookingForm(true);
+    navigate(`/checkout/${equipment.id}`);
   };
 
   return (
