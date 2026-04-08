@@ -9,7 +9,7 @@ import SignIn from './pages/SignIn';
 import Marketplace from './pages/Marketplace';
 import EquipmentDetail from './pages/EquipmentDetail';
 import Checkout from './pages/Checkout';
-import RenterDashboard from './pages/RenterDashboard';
+import Dashboard from './pages/Dashboard';
 import './index.css';
 
 function App() {
@@ -26,7 +26,7 @@ function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/equipment/:id" element={<EquipmentDetail />} />
               <Route path="/checkout/:id" element={<Checkout />} />
-              <Route path="/renter-dashboard" element={<RenterDashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               {/* Other routes will be added here */}
             </Routes>
           </main>
