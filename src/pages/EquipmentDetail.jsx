@@ -314,17 +314,6 @@ export default function EquipmentDetail() {
                 <p>💳 Secure payment with Stripe</p>
               </div>
             </div>
-
-            {/* Trust Signals */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h4 className="font-bold text-[#003E51] mb-3">🛡️ Why Book With Confidence</h4>
-              <ul className="space-y-2 text-sm text-[#4A6572]">
-                <li>✓ Verified lender and equipment</li>
-                <li>✓ Money-back guarantee</li>
-                <li>✓ Damage protection included</li>
-                <li>✓ 24/7 customer support</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
