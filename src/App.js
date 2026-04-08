@@ -10,6 +10,7 @@ import Marketplace from './pages/Marketplace';
 import EquipmentDetail from './pages/EquipmentDetail';
 import Checkout from './pages/Checkout';
 import Dashboard from './pages/Dashboard';
+import UserProfile from './pages/UserProfile';
 import './index.css';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
               <Route path="/equipment/:id" element={<EquipmentDetail />} />
               <Route path="/checkout/:id" element={<Checkout />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/user/:userId" element={<UserProfile />} />
               {/* Other routes will be added here */}
             </Routes>
           </main>

@@ -168,7 +168,10 @@ export default function EquipmentDetail() {
             </div>
 
             {/* Lender Profile */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div
+              onClick={() => navigate(`/user/${lender.id}`)}
+              className="bg-white rounded-lg shadow-md p-6 mb-6 hover:shadow-lg hover:bg-[#F4F7F8] cursor-pointer transition-all"
+            >
               <h3 className="text-lg font-bold text-[#003E51] mb-4">👤 About the Lender</h3>
               <div className="flex items-start gap-4">
                 <img
@@ -177,7 +180,9 @@ export default function EquipmentDetail() {
                   className="w-16 h-16 rounded-full"
                 />
                 <div className="flex-1">
-                  <h4 className="text-lg font-semibold text-[#003E51]">{lender.name}</h4>
+                  <h4 className="text-lg font-semibold text-[#00879E] hover:text-[#003E51] transition-colors">
+                    {lender.name}
+                  </h4>
                   <div className="text-sm text-[#4A6572] mb-3">
                     <p>⭐ {lender.rating} rating • {lender.reviewCount} reviews</p>
                     <p>⏱️ Responds ~{lender.responseTime}</p>
@@ -189,6 +194,11 @@ export default function EquipmentDetail() {
                     </span>
                   )}
                 </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-[#D0DDE2]">
+                <span className="text-[#00879E] text-sm font-semibold hover:underline">
+                  View Profile & Reviews →
+                </span>
               </div>
             </div>
 
