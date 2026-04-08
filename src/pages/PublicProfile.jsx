@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 
-export default function UserProfile() {
+export default function PublicProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
 
@@ -417,38 +417,6 @@ export default function UserProfile() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-white rounded-lg shadow-md p-6 mb-6">
-              <h3 className="text-lg font-bold text-[#003E51] mb-4">🤝 Connect</h3>
-
-              {userProfile.role === 'lender' ? (
-                <>
-                  <p className="text-sm text-[#4A6572] mb-4">
-                    Interested in renting from {userProfile.name}?
-                  </p>
-                  <Button
-                    onClick={() => navigate('/marketplace')}
-                    variant="primary"
-                    className="w-full"
-                  >
-                    View Listings
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-[#4A6572] mb-4">
-                    Looking to rent from a trusted community member?
-                  </p>
-                  <Button
-                    onClick={() => navigate('/marketplace')}
-                    variant="primary"
-                    className="w-full"
-                  >
-                    Browse Equipment
-                  </Button>
-                </>
-              )}
-            </div>
-
             {/* Trust Indicators */}
             <div className="bg-[#F4F7F8] rounded-lg p-6">
               <h4 className="font-bold text-[#003E51] mb-4">🛡️ Trust Indicators</h4>
