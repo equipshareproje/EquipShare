@@ -311,7 +311,6 @@ export default function EquipmentDetail() {
               )}
 
               <div className="mt-6 pt-6 border-t border-[#D0DDE2] text-sm text-[#4A6572]">
-                <p className="mb-2">✅ Free cancellation up to 48 hours before</p>
                 <p>💳 Secure payment with Stripe</p>
               </div>
             </div>
