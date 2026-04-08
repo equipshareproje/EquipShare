@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "listingId": 1,
+    "renterId": 4,
+    "lenderId": 1,
+    "rating": 5,
+    "comment": "Amazing camera! Perfect condition and very responsive lender.",
+    "createdAt": "2026-04-13"
+  },
+  {
+    "id": 2,
+    "listingId": 2,
+    "renterId": 5,
+    "lenderId": 2,
+    "rating": 4,
+    "comment": "Good GoPro, works great. Minor battery issues.",
+    "createdAt": "2026-04-18"
+  },
+  {
+    "id": 3,
+    "listingId": 3,
+    "renterId": 4,
+    "lenderId": 3,
+    "rating": 5,
+    "comment": "Excellent laptop performance. Great for video editing.",
+    "createdAt": "2026-04-23"
+  }
+]
