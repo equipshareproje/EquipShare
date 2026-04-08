@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
-import Card from '../components/Card';
 import listings from '../data/listings.json';
 
 export default function EquipmentDetail() {
@@ -112,7 +111,7 @@ export default function EquipmentDetail() {
             </div>
 
             {/* Equipment Info */}
-            <Card className="mb-6">
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h1 className="text-3xl font-bold text-[#003E51] mb-2">{equipment.name}</h1>
               <p className="text-[#4A6572] mb-4">{equipment.category}</p>
 
@@ -166,10 +165,10 @@ export default function EquipmentDetail() {
                   {new Date(equipment.availability.endDate).toLocaleDateString()}
                 </p>
               </div>
-            </Card>
+            </div>
 
             {/* Lender Profile */}
-            <Card className="mb-6">
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h3 className="text-lg font-bold text-[#003E51] mb-4">👤 About the Lender</h3>
               <div className="flex items-start gap-4">
                 <img
@@ -191,10 +190,10 @@ export default function EquipmentDetail() {
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
 
             {/* Reviews Section */}
-            <Card>
+            <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-bold text-[#003E51] mb-4">⭐ Reviews</h3>
               <div className="space-y-4">
                 {reviews.map(review => (
@@ -217,12 +216,12 @@ export default function EquipmentDetail() {
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Booking Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-24 mb-6">
+            <div className="sticky top-24 mb-6 bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-bold text-[#003E51] mb-4">💰 Booking Summary</h3>
 
               <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6">
@@ -315,10 +314,10 @@ export default function EquipmentDetail() {
                 <p className="mb-2">✅ Free cancellation up to 48 hours before</p>
                 <p>💳 Secure payment with Stripe</p>
               </div>
-            </Card>
+            </div>
 
             {/* Trust Signals */}
-            <Card>
+            <div className="bg-white rounded-lg shadow-md p-6">
               <h4 className="font-bold text-[#003E51] mb-3">🛡️ Why Book With Confidence</h4>
               <ul className="space-y-2 text-sm text-[#4A6572]">
                 <li>✓ Verified lender and equipment</li>
@@ -326,7 +325,7 @@ export default function EquipmentDetail() {
                 <li>✓ Damage protection included</li>
                 <li>✓ 24/7 customer support</li>
               </ul>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
