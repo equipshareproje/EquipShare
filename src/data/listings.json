@@ -106,5 +106,221 @@
       "startDate": "2026-04-08",
       "endDate": "2026-12-31"
     }
+  },
+  {
+    "id": 7,
+    "name": "iPad Pro 12.9",
+    "category": "Computers",
+    "description": "Large tablet perfect for design and creative applications.",
+    "dailyRate": 95,
+    "image": "https://via.placeholder.com/400x300?text=iPad+Pro",
+    "rating": 4.7,
+    "reviews": 29,
+    "verified": true,
+    "lenderId": 4,
+    "location": "Khobar",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 8,
+    "name": "Nikon D850",
+    "category": "Photography",
+    "description": "Professional DSLR with advanced autofocus and 4K video.",
+    "dailyRate": 180,
+    "image": "https://via.placeholder.com/400x300?text=Nikon+D850",
+    "rating": 4.9,
+    "reviews": 38,
+    "verified": true,
+    "lenderId": 5,
+    "location": "Dhahran",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 9,
+    "name": "3D Printer Creality Ender 3",
+    "category": "Tools",
+    "description": "Desktop 3D printer for prototyping and modeling projects.",
+    "dailyRate": 65,
+    "image": "https://via.placeholder.com/400x300?text=3D+Printer",
+    "rating": 4.3,
+    "reviews": 22,
+    "verified": false,
+    "lenderId": 6,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 10,
+    "name": "Wireless Microphone System",
+    "category": "Audio",
+    "description": "Professional wireless audio setup for events and recording.",
+    "dailyRate": 45,
+    "image": "https://via.placeholder.com/400x300?text=Microphone",
+    "rating": 4.6,
+    "reviews": 17,
+    "verified": true,
+    "lenderId": 7,
+    "location": "Khobar",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 11,
+    "name": "Projector BenQ LU9715",
+    "category": "Computers",
+    "description": "High-brightness projector for presentations and large events.",
+    "dailyRate": 140,
+    "image": "https://via.placeholder.com/400x300?text=Projector",
+    "rating": 4.8,
+    "reviews": 25,
+    "verified": true,
+    "lenderId": 8,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 12,
+    "name": "Gimbal Stabilizer DJI RS4",
+    "category": "Photography",
+    "description": "Professional camera gimbal for smooth video production.",
+    "dailyRate": 130,
+    "image": "https://via.placeholder.com/400x300?text=Gimbal",
+    "rating": 4.7,
+    "reviews": 19,
+    "verified": true,
+    "lenderId": 9,
+    "location": "Dhahran",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 13,
+    "name": "Gaming Laptop ASUS ROG",
+    "category": "Computers",
+    "description": "High-performance laptop for gaming and development.",
+    "dailyRate": 160,
+    "image": "https://via.placeholder.com/400x300?text=Gaming+Laptop",
+    "rating": 4.4,
+    "reviews": 34,
+    "verified": true,
+    "lenderId": 10,
+    "location": "Khobar",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 14,
+    "name": "Portable Power Bank 40000mAh",
+    "category": "Accessories",
+    "description": "High-capacity portable charger for all your devices.",
+    "dailyRate": 20,
+    "image": "https://via.placeholder.com/400x300?text=Power+Bank",
+    "rating": 4.6,
+    "reviews": 56,
+    "verified": true,
+    "lenderId": 11,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 15,
+    "name": "VR Headset Meta Quest 3",
+    "category": "Electronics",
+    "description": "Virtual reality headset for immersive experiences.",
+    "dailyRate": 85,
+    "image": "https://via.placeholder.com/400x300?text=VR+Headset",
+    "rating": 4.5,
+    "reviews": 42,
+    "verified": true,
+    "lenderId": 12,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 16,
+    "name": "Electric Scooter Xiaomi Pro",
+    "category": "Equipment",
+    "description": "Modern electric scooter for commuting and recreation.",
+    "dailyRate": 35,
+    "image": "https://via.placeholder.com/400x300?text=E-Scooter",
+    "rating": 4.3,
+    "reviews": 61,
+    "verified": true,
+    "lenderId": 13,
+    "location": "Khobar",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 17,
+    "name": "Film Camera Pentax K1000",
+    "category": "Photography",
+    "description": "Classic film camera for analog photography enthusiasts.",
+    "dailyRate": 40,
+    "image": "https://via.placeholder.com/400x300?text=Film+Camera",
+    "rating": 4.8,
+    "reviews": 13,
+    "verified": false,
+    "lenderId": 14,
+    "location": "KFUPM Main Campus",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
+  },
+  {
+    "id": 18,
+    "name": "Thermal Camera FLIR A70",
+    "category": "Equipment",
+    "description": "Thermal imaging camera for inspection and diagnostics.",
+    "dailyRate": 220,
+    "image": "https://via.placeholder.com/400x300?text=Thermal+Camera",
+    "rating": 4.9,
+    "reviews": 9,
+    "verified": true,
+    "lenderId": 15,
+    "location": "Dhahran",
+    "available": true,
+    "availability": {
+      "startDate": "2026-04-08",
+      "endDate": "2026-12-31"
+    }
   }
 ]
