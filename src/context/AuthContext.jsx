@@ -8,6 +8,27 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
+    // Initialize demo user if no users exist
+    const existingUsers = localStorage.getItem('equipshare_users');
+    if (!existingUsers) {
+      const demoUser = {
+        id: '1',
+        fullName: 'Demo User',
+        email: 'demo@example.com',
+        password: 'TestPass123',
+        phone: '+966 50 1234567',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: true,
+        canLend: true,
+        rating: 4.8,
+        reviews: 12,
+        rentalHistory: [],
+        listings: []
+      };
+      localStorage.setItem('equipshare_users', JSON.stringify([demoUser]));
+    }
+
     const storedUser = localStorage.getItem('equipshare_user');
     if (storedUser) {
       try {
