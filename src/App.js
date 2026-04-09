@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import PublicProfile from './pages/PublicProfile';
 import CreateListing from './pages/CreateListing';
 import AdminDashboard from './pages/AdminDashboard';
+import EarningsDashboard from './pages/EarningsDashboard';
 import './index.css';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
               <Route path="/user/:userId" element={<PublicProfile />} />
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/earnings" element={<EarningsDashboard />} />
               {/* Other routes will be added here */}
             </Routes>
           </main>
