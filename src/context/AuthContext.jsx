@@ -8,25 +8,44 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    // Initialize demo user if no users exist
+    // Initialize demo users if no users exist
     const existingUsers = localStorage.getItem('equipshare_users');
     if (!existingUsers) {
-      const demoUser = {
-        id: '1',
-        fullName: 'Demo User',
-        email: 'demo@example.com',
-        password: 'TestPass123',
-        phone: '+966 50 1234567',
-        createdAt: new Date().toISOString(),
-        verified: true,
-        canRent: true,
-        canLend: true,
-        rating: 4.8,
-        reviews: 12,
-        rentalHistory: [],
-        listings: []
-      };
-      localStorage.setItem('equipshare_users', JSON.stringify([demoUser]));
+      const demoUsers = [
+        {
+          id: '1',
+          fullName: 'Demo User',
+          email: 'demo@example.com',
+          password: 'TestPass123',
+          phone: '+966 50 1234567',
+          role: 'renter', // 'admin', 'lender', or 'renter'
+          createdAt: new Date().toISOString(),
+          verified: true,
+          canRent: true,
+          canLend: true,
+          rating: 4.8,
+          reviews: 12,
+          rentalHistory: [],
+          listings: []
+        },
+        {
+          id: '99', // Admin ID
+          fullName: 'Platform Admin',
+          email: 'admin@equipshare.com',
+          password: 'AdminPass123',
+          phone: '+966 50 9999999',
+          role: 'admin',
+          createdAt: new Date().toISOString(),
+          verified: true,
+          canRent: false,
+          canLend: false,
+          rating: 0,
+          reviews: 0,
+          rentalHistory: [],
+          listings: []
+        }
+      ];
+      localStorage.setItem('equipshare_users', JSON.stringify(demoUsers));
     }
 
     const storedUser = localStorage.getItem('equipshare_user');
@@ -65,10 +84,11 @@ export const AuthProvider = ({ children }) => {
     const newUser = {
       id: Date.now().toString(),
       ...userData,
+      role: userData.role || 'renter', // Default to renter if not specified
       createdAt: new Date().toISOString(),
       verified: false,
       canRent: true,
-      canLend: true,
+      canLend: userData.role !== 'admin', // Admins can't rent/lend
       rating: 0,
       reviews: 0,
       rentalHistory: [],
@@ -100,12 +120,27 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Invalid password');
     }
 
+    // Ensure user has a role (for backward compatibility)
+    const userWithRole = {
+      ...foundUser,
+      role: foundUser.role || 'renter'
+    };
+
+    // Update user with role if missing
+    if (!foundUser.role) {
+      const userIndex = users.findIndex(u => u.id === foundUser.id);
+      if (userIndex !== -1) {
+        users[userIndex] = userWithRole;
+        localStorage.setItem('equipshare_users', JSON.stringify(users));
+      }
+    }
+
     // Set current user (without password)
-    const userWithoutPassword = { ...foundUser };
+    const userWithoutPassword = { ...userWithRole };
     delete userWithoutPassword.password;
     saveUser(userWithoutPassword);
 
-    return foundUser;
+    return userWithRole;
   }, [getAllUsers, saveUser]);
 
   // Logout user
