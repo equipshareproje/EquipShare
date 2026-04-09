@@ -10,9 +10,9 @@ export default function EquipmentDetail() {
   const { user } = useAuth();
   
   const equipment = listings.find(item => item.id === parseInt(id));
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [bookingDays, setBookingDays] = useState(1);
 
   if (!equipment) {
     return (
@@ -27,10 +27,26 @@ export default function EquipmentDetail() {
     );
   }
 
+  // Calculate number of days based on selected dates
+  let bookingDays = 1;
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    bookingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+  }
+
   // Calculate cost
   const totalCost = equipment.dailyRate * bookingDays;
   const serviceFee = totalCost * 0.1;
   const finalCost = totalCost + serviceFee;
+
+  // Get availability dates
+  const availStart = new Date(equipment.availability.startDate);
+  const availEnd = new Date(equipment.availability.endDate);
+  const today = new Date().toISOString().split('T')[0];
+  const minDate = new Date(Math.max(availStart, new Date())).toISOString().split('T')[0];
+  const maxDate = availEnd.toISOString().split('T')[0];
 
   // Mock lender data
   const lender = {
@@ -242,36 +258,75 @@ export default function EquipmentDetail() {
                   </span>
                 </div>
 
+                {/* Available Dates Info */}
+                <div className="mb-4 p-3 bg-white rounded-lg">
+                  <p className="text-xs font-semibold text-[#003E51] mb-2">📅 Available Dates</p>
+                  <p className="text-xs text-[#4A6572]">
+                    {new Date(equipment.availability.startDate).toLocaleDateString()} -{' '}
+                    {new Date(equipment.availability.endDate).toLocaleDateString()}
+                  </p>
+                </div>
+
+                {/* Start Date */}
                 <div className="mb-4">
                   <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                    Number of Days
+                    Start Date <span className="text-red-600">*</span>
                   </label>
                   <input
-                    type="number"
-                    min="1"
-                    value={bookingDays}
-                    onChange={(e) => setBookingDays(Math.max(1, parseInt(e.target.value) || 1))}
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    min={minDate}
+                    max={maxDate}
+                    className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                  />
+                </div>
+
+                {/* End Date */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
+                    End Date <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate || minDate}
+                    max={maxDate}
                     className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
                   />
                 </div>
 
                 <div className="space-y-2 pb-4 border-b border-[#D0DDE2]">
-                  <div className="flex justify-between text-[#4A6572]">
-                    <span>Subtotal ({bookingDays} day{bookingDays > 1 ? 's' : ''})</span>
-                    <span>{totalCost} SAR</span>
-                  </div>
-                  <div className="flex justify-between text-[#4A6572]">
-                    <span>Service Fee (10%)</span>
-                    <span>{serviceFee.toFixed(2)} SAR</span>
-                  </div>
+                  {startDate && endDate && (
+                    <>
+                      <div className="flex justify-between text-[#4A6572]">
+                        <span>Duration</span>
+                        <span className="font-semibold">{bookingDays} day{bookingDays > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="flex justify-between text-[#4A6572]">
+                        <span>Subtotal ({bookingDays} day{bookingDays > 1 ? 's' : ''})</span>
+                        <span>{totalCost} SAR</span>
+                      </div>
+                      <div className="flex justify-between text-[#4A6572]">
+                        <span>Service Fee (10%)</span>
+                        <span>{serviceFee.toFixed(2)} SAR</span>
+                      </div>
+                    </>
+                  )}
+                  {(!startDate || !endDate) && (
+                    <p className="text-sm text-[#4A6572] italic">Select dates to see pricing</p>
+                  )}
                 </div>
 
-                <div className="flex justify-between items-center mt-4 mb-6">
-                  <span className="font-bold text-[#003E51]">Total</span>
-                  <span className="text-2xl font-bold text-[#003E51]">
-                    {finalCost.toFixed(2)} SAR
-                  </span>
-                </div>
+                {startDate && endDate && (
+                  <div className="flex justify-between items-center mt-4 mb-6">
+                    <span className="font-bold text-[#003E51]">Total</span>
+                    <span className="text-2xl font-bold text-[#003E51]">
+                      {finalCost.toFixed(2)} SAR
+                    </span>
+                  </div>
+                )}
               </div>
 
               {!showBookingForm ? (
@@ -279,46 +334,13 @@ export default function EquipmentDetail() {
                   onClick={handleBooking}
                   variant="primary"
                   className="w-full"
-                  disabled={!equipment.available}
+                  disabled={!equipment.available || !startDate || !endDate}
                 >
-                  {equipment.available ? '📅 Book Now' : '❌ Not Available'}
+                  {!equipment.available && '❌ Not Available'}
+                  {equipment.available && (!startDate || !endDate) && '📅 Select Dates to Book'}
+                  {equipment.available && startDate && endDate && '📅 Book Now'}
                 </Button>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      min={equipment.availability.startDate}
-                      max={equipment.availability.endDate}
-                      className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      min={equipment.availability.startDate}
-                      max={equipment.availability.endDate}
-                      className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
-                    />
-                  </div>
-                  <Button variant="primary" className="w-full">
-                    Continue to Payment
-                  </Button>
-                  <Button
-                    onClick={() => setShowBookingForm(false)}
-                    variant="secondary"
-                    className="w-full"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
+              ) : null}
 
               <div className="mt-6 pt-6 border-t border-[#D0DDE2] text-sm text-[#4A6572]">
                 <p>💳 Secure payment with Stripe</p>
