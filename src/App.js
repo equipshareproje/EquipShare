@@ -11,6 +11,7 @@ import EquipmentDetail from './pages/EquipmentDetail';
 import Checkout from './pages/Checkout';
 import Dashboard from './pages/Dashboard';
 import PublicProfile from './pages/PublicProfile';
+import CreateListing from './pages/CreateListing';
 import './index.css';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
               <Route path="/checkout/:id" element={<Checkout />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/user/:userId" element={<PublicProfile />} />
+              <Route path="/create-listing" element={<CreateListing />} />
               {/* Other routes will be added here */}
             </Routes>
           </main>
