@@ -483,26 +483,27 @@ export default function Dashboard() {
               <div>
                 <h3 className="text-lg font-bold text-[#003E51]">My Listings</h3>
                 <p className="text-sm text-[#4A6572]">Manage your equipment listings and bookings</p>
-                <button
-                  onClick={() => navigate('/my-listings')}
-                  className="text-[#00879E] hover:text-[#003E51] text-sm font-medium mt-2 underline"
-                >
-                  → View all your listings
-                </button>
               </div>
               <div className="flex gap-3">
-                <button
-                  onClick={() => navigate('/earnings')}
-                  className="bg-[#00879E] hover:bg-[#005570] text-white font-medium py-2 px-6 rounded-lg transition"
-                >
-                  Earnings Dashboard
-                </button>
                 <button
                   onClick={() => navigate('/create-listing')}
                   className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
                 >
                   + Add New Listing
                 </button>
+                <button
+                  onClick={() => navigate('/my-listings')}
+                  className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
+                >
+                  View All Listings
+                </button>
+                <button
+                  onClick={() => navigate('/earnings')}
+                  className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
+                >
+                  Earnings Dashboard
+                </button>
+
               </div>
             </div>
 

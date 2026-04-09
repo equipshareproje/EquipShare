@@ -10,7 +10,7 @@ const Landing = () => {
   const [selectedCard, setSelectedCard] = useState(null);
 
   const handleCardClick = (id) => {
-    navigate(`/listing/${id}`);
+    navigate(`/equipment/${id}`);
   };
 
   const handleGetStarted = () => {
@@ -54,15 +54,15 @@ const Landing = () => {
               <div className="flex items-center space-x-8 pt-4 text-sm">
                 <div>
                   <p className="font-bold text-2xl">1,200+</p>
-                  <p className="text-primary-light">Items Available</p>
+                  <p className="text-white">Items Available</p>
                 </div>
                 <div>
                   <p className="font-bold text-2xl">500+</p>
-                  <p className="text-primary-light">Active Members</p>
+                  <p className="text-white">Active Members</p>
                 </div>
                 <div>
                   <p className="font-bold text-2xl">4.7/5</p>
-                  <p className="text-primary-light">Community Rating</p>
+                  <p className="text-white">Community Rating</p>
                 </div>
               </div>
             </div>

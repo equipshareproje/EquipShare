@@ -195,7 +195,7 @@ export default function Marketplace() {
                   onChange={(e) => handleFilterChange('trustedCircles', e.target.checked)}
                   className="w-4 h-4 rounded border-[#D0DDE2]"
                 />
-                <span className="text-sm font-medium text-[#0A1F29]">🤝 Trusted Circles Only</span>
+                <span className="text-sm font-medium text-[#0A1F29]"> Trusted Circles Only</span>
               </label>
             </div>
           </div>
@@ -217,52 +217,17 @@ export default function Marketplace() {
                   {currentItems.map(item => (
                     <Card
                       key={item.id}
+                      id={item.id}
+                      name={item.name}
+                      image={item.image}
+                      dailyRate={item.dailyRate}
+                      rating={item.rating}
+                      reviews={item.reviews}
+                      verified={item.verified}
+                      location={item.location}
+                      available={item.available}
                       onClick={() => navigate(`/equipment/${item.id}`)}
-                      className="hover:shadow-lg transition-shadow cursor-pointer"
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-40 object-cover rounded-t-lg"
-                      />
-                      <div className="p-4">
-                        <h3 className="font-bold text-[#003E51] truncate">{item.name}</h3>
-                        <p className="text-sm text-[#4A6572] mb-2">{item.category}</p>
-
-                        {/* Verified Badge */}
-                        {item.verified && (
-                          <span className="inline-block text-xs font-semibold text-[#1A7F5A] bg-green-100 px-2 py-1 rounded mb-2">
-                            ✅ Verified
-                          </span>
-                        )}
-
-                        {/* Rating */}
-                        <div className="flex items-center gap-1 mb-3 text-sm">
-                          <span>⭐ {item.rating}</span>
-                          <span className="text-[#4A6572]">({item.reviews})</span>
-                        </div>
-
-                        {/* Price & Location */}
-                        <div className="flex justify-between items-end">
-                          <div>
-                            <p className="text-2xl font-bold text-[#003E51]">
-                              {item.dailyRate} <span className="text-sm text-[#4A6572]">SAR</span>
-                            </p>
-                            <p className="text-xs text-[#4A6572]">per day</p>
-                          </div>
-                          <p className="text-xs text-[#4A6572]">LOCATION: {item.location}</p>
-                        </div>
-
-                        {/* Availability Status */}
-                        <div className="mt-3 pt-3 border-t border-[#D0DDE2]">
-                          {item.available ? (
-                            <span className="text-xs text-[#1A7F5A] font-semibold">✓ Available</span>
-                          ) : (
-                            <span className="text-xs text-[#DC2626] font-semibold">✗ Not Available</span>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
+                    />
                   ))}
                 </div>
 
