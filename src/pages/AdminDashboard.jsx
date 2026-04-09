@@ -752,34 +752,6 @@ export default function AdminDashboard() {
                           </div>
                         </div>
 
-                        {/* Chat/Communication Log */}
-                        <div className="mb-6">
-                          <h3 className="font-bold text-[#003E51] mb-3">💬 Communication Log</h3>
-                          <div className="border border-[#D0DDE2] rounded-lg p-4 bg-gray-50 space-y-3 max-h-48 overflow-y-auto">
-                            <div className="flex justify-start">
-                              <div className="bg-white p-3 rounded-lg border border-[#D0DDE2] max-w-xs">
-                                <p className="text-xs text-[#4A6572] font-medium mb-1">{selectedDispute.lenderName}</p>
-                                <p className="text-sm text-[#0A1F29]">Equipment was returned with visible damage on lens. This will cost me significant repairs.</p>
-                                <p className="text-xs text-[#4A6572] mt-1">04/08/2026, 3:30 PM</p>
-                              </div>
-                            </div>
-                            <div className="flex justify-end">
-                              <div className="bg-blue-100 p-3 rounded-lg border border-blue-300 max-w-xs">
-                                <p className="text-xs text-[#4A6572] font-medium mb-1">{selectedDispute.renterName}</p>
-                                <p className="text-sm text-[#0A1F29]">I don't think the damage happened during my rental. I was very careful throughout.</p>
-                                <p className="text-xs text-[#4A6572] mt-1">04/08/2026, 4:15 PM</p>
-                              </div>
-                            </div>
-                            <div className="flex justify-start">
-                              <div className="bg-white p-3 rounded-lg border border-[#D0DDE2] max-w-xs">
-                                <p className="text-xs text-[#4A6572] font-medium mb-1">{selectedDispute.lenderName}</p>
-                                <p className="text-sm text-[#0A1F29]">The photos clearly show the scratches appeared during your rental period. I have before and after pictures.</p>
-                                <p className="text-xs text-[#4A6572] mt-1">04/08/2026, 5:00 PM</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
                         <h3 className="text-lg font-bold text-[#003E51] mb-4">Visual Evidence</h3>
 
                         {/* Pre-rental photos */}
