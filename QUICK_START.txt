@@ -1,0 +1,69 @@
+===============================================
+EQUIPSHARE - TESTER QUICK START
+===============================================
+
+START THE APP:
+  Windows Terminal → Run: npm start
+  Wait for "Compiled successfully!" message
+  Open: http://localhost:3003
+
+DEMO ACCOUNTS:
+  RENTER:
+    Email:    demo@example.com
+    Password: TestPass123
+  
+  ADMIN:
+    Email:    admin@equipshare.com
+    Password: AdminPass123
+
+MAIN FEATURES TO TEST:
+  1. Search & Filter Equipment (Left Sidebar)
+  2. Book Equipment (Calendar + Checkout Flow)
+  3. Upload Handshake Photos (During Rental)
+  4. Admin Dashboard (Top Right → Admin Panel)
+     - Verify Users
+     - Manage Trusted Circles
+     - Resolve Disputes
+     - Moderate Flagged Listings
+  5. Earnings Dashboard (As Lender)
+  6. Create Equipment Listing (List Equipment button)
+
+QUICK TEST FLOW (5 minutes):
+  1. Login as Renter
+  2. Search for "camera"
+  3. Select "Canon EOS 5D Mark IV"
+  4. Pick dates: Apr 11-13, 2026
+  5. Click "Book Now"
+  6. Complete mock payment
+  7. Upload 3 test photos
+  8. View booking in Dashboard
+
+SAMPLE DATA INCLUDED:
+  ✅ 15+ Equipment Listings
+  ✅ 10+ Test Users
+  ✅ 5 Sample Bookings
+  ✅ 3 Pending Verifications
+  ✅ 2 Open Disputes (with photos)
+  ✅ 3 Flagged Content Items
+  ✅ 2 Trusted Circles
+
+FULL GUIDES:
+  - See: DEMO_SETUP.md (detailed setup & flows)
+  - See: TESTING_GUIDE.md (comprehensive test checklist)
+
+TROUBLESHOOTING:
+  Not starting?        → Try: npm install && npm start
+  Port 3003 in use?    → Kill process or change port
+  Data disappeared?    → Clear LocalStorage (F12 → Application)
+  Photos won't upload? → Min 3 required, max 5MB each
+
+KEYBOARD SHORTCUTS:
+  F12                  → Open Browser DevTools
+  Ctrl+Shift+Delete    → Clear Browser Cache
+  Ctrl+Shift+M         → Toggle Mobile Preview
+
+CONTACT:
+  If stuck, check browser console (F12) for errors
+
+READY TO TEST!
+===============================================
