@@ -31,10 +31,15 @@ export default function EquipmentDetail() {
   // Calculate number of days based on selected dates
   let bookingDays = 1;
   if (startDate && endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    // Parse dates in local timezone to avoid UTC offset issues
+    const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+    const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+    
+    const start = new Date(startYear, startMonth - 1, startDay);
+    const end = new Date(endYear, endMonth - 1, endDay);
+    
     const diffTime = Math.abs(end - start);
-    bookingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    bookingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end dates
   }
 
   // Calculate cost
@@ -302,6 +307,10 @@ export default function EquipmentDetail() {
                 <div className="space-y-2 pb-4 border-b border-[#D0DDE2]">
                   {startDate && endDate && (
                     <>
+                      <div className="flex justify-between text-[#4A6572]">
+                        <span>Selected Dates</span>
+                        <span className="font-semibold">{new Date(startDate + 'T00:00:00').toLocaleDateString()} - {new Date(endDate + 'T00:00:00').toLocaleDateString()}</span>
+                      </div>
                       <div className="flex justify-between text-[#4A6572]">
                         <span>Duration</span>
                         <span className="font-semibold">{bookingDays} day{bookingDays > 1 ? 's' : ''}</span>

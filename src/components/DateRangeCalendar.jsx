@@ -11,17 +11,16 @@ export default function DateRangeCalendar({ startDate, endDate, onStartDateChang
   const daysInMonth = lastDay.getDate();
   const startingDayOfWeek = firstDay.getDay();
 
-  // Convert date strings to Date objects for comparison
+  // Convert date strings to Date objects for comparison (in local timezone)
   const parseDate = (dateStr) => {
     if (!dateStr) return null;
-    const date = new Date(dateStr);
-    date.setHours(0, 0, 0, 0);
-    return date;
+    // Parse the date string directly as local date to avoid UTC timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
   };
 
   const isDateInRange = (date, start, end) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const s = parseDate(start);
     const e = parseDate(end);
     if (!s || !e) return false;
@@ -29,15 +28,18 @@ export default function DateRangeCalendar({ startDate, endDate, onStartDateChang
   };
 
   const isDateDisabled = (date) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const min = parseDate(minDate);
     const max = parseDate(maxDate);
-    return d < min || d > max;
+    return (min && d < min) || (max && d > max);
   };
 
   const formatDateForInput = (date) => {
-    return date.toISOString().split('T')[0];
+    // Format as YYYY-MM-DD using local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const handleDateClick = (day) => {
