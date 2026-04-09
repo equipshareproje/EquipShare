@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import VisualHandshake from '../components/VisualHandshake';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -25,6 +26,9 @@ export default function Dashboard() {
   const [approvingBooking, setApprovingBooking] = useState(null); // For approval modal
   const [rejectingBooking, setRejectingBooking] = useState(null); // For rejection modal
   const [rejectionReason, setRejectionReason] = useState(''); // For rejection reason
+  const [visualHandshakeBooking, setVisualHandshakeBooking] = useState(null); // For visual handshake modal
+  const [handshakeType, setHandshakeType] = useState('pre-rental'); // 'pre-rental' or 'post-rental'
+  const [lenderBookingsWithHandshakes, setLenderBookingsWithHandshakes] = useState([]);
 
   // Mock rental history (as renter - items user has rented)
   const rentalHistory = [
@@ -125,6 +129,15 @@ export default function Dashboard() {
       totalCost: 299.90,
       renterPreviousRentals: 15,
       renterReviewCount: 15,
+      preRentalHandshake: {
+        photos: [
+          { id: 1, caption: 'Front view', timestamp: '03/01/2026, 09:15:32 AM' },
+          { id: 2, caption: 'Screen intact', timestamp: '03/01/2026, 09:16:02 AM' },
+          { id: 3, caption: 'Lens cap on', timestamp: '03/01/2026, 09:16:45 AM' },
+        ],
+        submittedAt: '03/01/2026, 09:17:00 AM',
+      },
+      postRentalHandshake: null,
     },
     {
       id: 103,
@@ -222,6 +235,31 @@ export default function Dashboard() {
       setRejectionReason('');
       alert('❌ Booking request rejected. Payment hold released and renter notified.');
     }
+  };
+
+  const handleStartHandover = (booking, type = 'pre-rental') => {
+    setVisualHandshakeBooking(booking);
+    setHandshakeType(type);
+  };
+
+  const handleCompleteHandshake = (handshakeData) => {
+    // Find the booking and add the handshake photos
+    const bookingIndex = lenderBookings.findIndex(b => b.id === handshakeData.bookingId);
+    if (bookingIndex !== -1) {
+      if (handshakeData.type === 'pre-rental') {
+        lenderBookings[bookingIndex].preRentalHandshake = {
+          photos: handshakeData.photos,
+          submittedAt: handshakeData.submittedAt,
+        };
+      } else {
+        lenderBookings[bookingIndex].postRentalHandshake = {
+          photos: handshakeData.photos,
+          submittedAt: handshakeData.submittedAt,
+        };
+      }
+    }
+    setVisualHandshakeBooking(null);
+    alert(`✅ ${handshakeData.type === 'pre-rental' ? 'Pre-rental' : 'Post-rental'} handover photos submitted successfully!`);
   };
 
   const formatDate = (dateStr) => {
@@ -489,6 +527,29 @@ export default function Dashboard() {
                                 Review
                               </button>
                             )}
+                            {booking.status === 'active' && (
+                              <>
+                                {!booking.preRentalHandshake && (
+                                  <button
+                                    onClick={() => handleStartHandover(booking, 'pre-rental')}
+                                    className="text-blue-600 hover:underline font-medium"
+                                  >
+                                    📸 Start Handover
+                                  </button>
+                                )}
+                                {booking.preRentalHandshake && !booking.postRentalHandshake && (
+                                  <button
+                                    onClick={() => handleStartHandover(booking, 'post-rental')}
+                                    className="text-orange-600 hover:underline font-medium"
+                                  >
+                                    📸 Return Handover
+                                  </button>
+                                )}
+                                {booking.preRentalHandshake && booking.postRentalHandshake && (
+                                  <span className="text-green-600 font-medium">✅ Handshakes Complete</span>
+                                )}
+                              </>
+                            )}
                             {booking.status === 'pending' && (
                               <>
                                 <button
@@ -511,16 +572,62 @@ export default function Dashboard() {
                       {expandedDetails === booking.id && (
                         <tr className="bg-gray-50 border-b border-[#D0DDE2]">
                           <td colSpan="5" className="px-6 py-4">
-                            <div className="space-y-2">
-                              <p className="text-sm text-[#0A1F29]">
-                                <span className="font-medium">Booking Reference:</span> {booking.bookingRef}
-                              </p>
-                              <p className="text-sm text-[#0A1F29]">
-                                <span className="font-medium">Total Paid:</span> ${booking.totalCost.toFixed(2)}
-                              </p>
-                              <p className="text-sm text-[#0A1F29]">
-                                <span className="font-medium">Pickup Location:</span> {booking.pickupLocation}
-                              </p>
+                            <div className="space-y-4">
+                              <div>
+                                <p className="text-sm text-[#0A1F29]">
+                                  <span className="font-medium">Booking Reference:</span> {booking.bookingRef}
+                                </p>
+                                <p className="text-sm text-[#0A1F29]">
+                                  <span className="font-medium">Total Paid:</span> ${booking.totalCost.toFixed(2)}
+                                </p>
+                                <p className="text-sm text-[#0A1F29]">
+                                  <span className="font-medium">Pickup Location:</span> {booking.pickupLocation}
+                                </p>
+                              </div>
+
+                              {/* Pre-rental Handshake */}
+                              {booking.preRentalHandshake && (
+                                <div className="border-t pt-4">
+                                  <p className="text-sm font-medium text-[#003E51] mb-2">
+                                    📸 Pre-Rental Handover Photos
+                                  </p>
+                                  <p className="text-xs text-[#4A6572] mb-3">
+                                    Submitted: {booking.preRentalHandshake.submittedAt}
+                                  </p>
+                                  <div className="grid grid-cols-3 gap-2">
+                                    {booking.preRentalHandshake.photos.map((photo) => (
+                                      <div key={photo.id} className="border border-[#D0DDE2] rounded p-2 bg-white text-center">
+                                        <p className="text-xs font-medium text-[#0A1F29] truncate mb-1">
+                                          {photo.caption}
+                                        </p>
+                                        <p className="text-xs text-[#4A6572]">🕐 {photo.timestamp}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Post-rental Handshake */}
+                              {booking.postRentalHandshake && (
+                                <div className="border-t pt-4">
+                                  <p className="text-sm font-medium text-[#003E51] mb-2">
+                                    📸 Post-Rental Return Photos
+                                  </p>
+                                  <p className="text-xs text-[#4A6572] mb-3">
+                                    Submitted: {booking.postRentalHandshake.submittedAt}
+                                  </p>
+                                  <div className="grid grid-cols-3 gap-2">
+                                    {booking.postRentalHandshake.photos.map((photo) => (
+                                      <div key={photo.id} className="border border-[#D0DDE2] rounded p-2 bg-white text-center">
+                                        <p className="text-xs font-medium text-[#0A1F29] truncate mb-1">
+                                          {photo.caption}
+                                        </p>
+                                        <p className="text-xs text-[#4A6572]">🕐 {photo.timestamp}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -945,6 +1052,16 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Visual Handshake Modal */}
+      {visualHandshakeBooking && (
+        <VisualHandshake
+          booking={visualHandshakeBooking}
+          handshakeType={handshakeType}
+          onClose={() => setVisualHandshakeBooking(null)}
+          onComplete={handleCompleteHandshake}
+        />
       )}
     </div>
   );
