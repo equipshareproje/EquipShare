@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
@@ -36,11 +37,10 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/user/:userId" element={<PublicProfile />} />
               <Route path="/create-listing" element={<CreateListing />} />
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} requiredRole="admin" fallbackPath="/signin" />} />
               <Route path="/earnings" element={<EarningsDashboard />} />
               <Route path="/my-listings" element={<MyListings />} />
               <Route path="/circles" element={<Circles />} />
-
               <Route path="/edit-listing/:listingId" element={<EditListing />} />
             </Routes>
           </main>

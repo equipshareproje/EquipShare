@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 
@@ -6,8 +6,8 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
-  // FR-A1: Pending Verifications (stateful)
-  const [pendingVerifications, setPendingVerifications] = useState([
+  // Initialize mock data
+  const mockVerifications = [
     {
       id: 1,
       name: 'Muhammad Al-Rasheed',
@@ -38,10 +38,9 @@ export default function AdminDashboard() {
       submittedDate: '2026-04-05',
       status: 'pending',
     },
-  ]);
+  ];
 
-  // FR-A2: Trusted Circles (stateful)
-  const [trustedCircles, setTrustedCircles] = useState([
+  const mockCircles = [
     {
       id: 1,
       name: 'KFUPM Students',
@@ -60,10 +59,9 @@ export default function AdminDashboard() {
       created: '2026-01-20',
       active: true,
     },
-  ]);
+  ];
 
-  // FR-A3: Disputes with Visual Handshake photo evidence
-  const [disputes, setDisputes] = useState([
+  const mockDisputes = [
     {
       id: 'D001',
       bookingRef: 'BOOK-2026-0201-5521',
@@ -108,10 +106,9 @@ export default function AdminDashboard() {
       postRentalPhotos: [],
       ruling: null,
     },
-  ]);
+  ];
 
-  // FR-A4: Flagged Listings
-  const [flaggedListings, setFlaggedListings] = useState([
+  const mockFlaggedListings = [
     {
       id: 'F001',
       listing: 'Professional Camera Package',
@@ -156,28 +153,175 @@ export default function AdminDashboard() {
         'Similar scam listings by same user',
       ],
     },
-  ]);
+  ];
+
+  // FR-A1: Pending Verifications (with localStorage)
+  const [pendingVerifications, setPendingVerifications] = useState([]);
+
+  // FR-A2: Trusted Circles (with localStorage)
+  const [trustedCircles, setTrustedCircles] = useState([]);
+
+  // FR-A3: Disputes (with localStorage)
+  const [disputes, setDisputes] = useState([]);
+
+  // FR-A4: Flagged Listings (with localStorage)
+  const [flaggedListings, setFlaggedListings] = useState([]);
 
   // UI State
   const [showNewCircleForm, setShowNewCircleForm] = useState(false);
   const [newCircle, setNewCircle] = useState({ name: '', description: '', eligibility: '' });
   const [selectedDispute, setSelectedDispute] = useState(null);
   const [selectedRuling, setSelectedRuling] = useState('');
+  const [selectedCircle, setSelectedCircle] = useState(null); // For member management
+  const [showMembersModal, setShowMembersModal] = useState(false);
+  const [circleMembers, setCircleMembers] = useState({}); // Store members by circle ID
 
-  // Handlers
+  // Load admin data from localStorage on mount
+  useEffect(() => {
+    const savedVerifications = localStorage.getItem('admin_pendingVerifications');
+    const savedCircles = localStorage.getItem('admin_trustedCircles');
+    const savedDisputes = localStorage.getItem('admin_disputes');
+    const savedFlaggedListings = localStorage.getItem('admin_flaggedListings');
+    const savedMembers = localStorage.getItem('admin_circleMembers');
+
+    if (savedVerifications) {
+      try {
+        setPendingVerifications(JSON.parse(savedVerifications));
+      } catch (error) {
+        console.error('Failed to load verifications:', error);
+        setPendingVerifications(mockVerifications);
+      }
+    } else {
+      setPendingVerifications(mockVerifications);
+    }
+
+    if (savedCircles) {
+      try {
+        setTrustedCircles(JSON.parse(savedCircles));
+      } catch (error) {
+        console.error('Failed to load circles:', error);
+        setTrustedCircles(mockCircles);
+      }
+    } else {
+      setTrustedCircles(mockCircles);
+    }
+
+    if (savedDisputes) {
+      try {
+        setDisputes(JSON.parse(savedDisputes));
+      } catch (error) {
+        console.error('Failed to load disputes:', error);
+        setDisputes(mockDisputes);
+      }
+    } else {
+      setDisputes(mockDisputes);
+    }
+
+    if (savedFlaggedListings) {
+      try {
+        setFlaggedListings(JSON.parse(savedFlaggedListings));
+      } catch (error) {
+        console.error('Failed to load flagged listings:', error);
+        setFlaggedListings(mockFlaggedListings);
+      }
+    } else {
+      setFlaggedListings(mockFlaggedListings);
+    }
+
+    // Load circle members
+    if (savedMembers) {
+      try {
+        setCircleMembers(JSON.parse(savedMembers));
+      } catch (error) {
+        console.error('Failed to load circle members:', error);
+        initializeDefaultMembers();
+      }
+    } else {
+      initializeDefaultMembers();
+    }
+  }, []);
+
+  // Save functions
+  const savePendingVerifications = (data) => {
+    setPendingVerifications(data);
+    localStorage.setItem('admin_pendingVerifications', JSON.stringify(data));
+  };
+
+  const saveTrustedCircles = (data) => {
+    setTrustedCircles(data);
+    localStorage.setItem('admin_trustedCircles', JSON.stringify(data));
+  };
+
+  const saveDisputes = (data) => {
+    setDisputes(data);
+    localStorage.setItem('admin_disputes', JSON.stringify(data));
+  };
+
+  const saveFlaggedListings = (data) => {
+    setFlaggedListings(data);
+    localStorage.setItem('admin_flaggedListings', JSON.stringify(data));
+  };
+
+  // Initialize default members for circles
+  const initializeDefaultMembers = () => {
+    const defaultMembers = {
+      1: [ // KFUPM Students
+        { id: 1, name: 'Muhammad Al-Rasheed', email: 'm.rasheed@kfupm.edu.sa', joinedDate: '2026-03-20', status: 'active', violationCount: 0 },
+        { id: 2, name: 'Fatima Al-Dossary', email: 'f.dossary@kfupm.edu.sa', joinedDate: '2026-02-10', status: 'active', violationCount: 0 },
+        { id: 3, name: 'Ahmed Hassan', email: 'a.hassan@kfupm.edu.sa', joinedDate: '2026-01-15', status: 'active', violationCount: 1 },
+        { id: 4, name: 'Nora Al-Otaibi', email: 'n.otaibi@kfupm.edu.sa', joinedDate: '2026-02-28', status: 'active', violationCount: 0 },
+        { id: 5, name: 'Salem Al-Subaie', email: 's.subaie@kfupm.edu.sa', joinedDate: '2026-01-05', status: 'suspended', violationCount: 3 },
+      ],
+      2: [ // KFUPM Faculty
+        { id: 6, name: 'Dr. Mohammed Al-Zamil', email: 'm.zamil@kfupm.edu.sa', joinedDate: '2026-01-10', status: 'active', violationCount: 0 },
+        { id: 7, name: 'Dr. Huda Al-Rasheed', email: 'h.rasheed@kfupm.edu.sa', joinedDate: '2026-01-20', status: 'active', violationCount: 0 },
+      ]
+    };
+    setCircleMembers(defaultMembers);
+    localStorage.setItem('admin_circleMembers', JSON.stringify(defaultMembers));
+  };
+
+  const saveCircleMembers = (data) => {
+    setCircleMembers(data);
+    localStorage.setItem('admin_circleMembers', JSON.stringify(data));
+  };
+
+  // Member management handlers
+  const handleViewMembers = (circle) => {
+    setSelectedCircle(circle);
+    setShowMembersModal(true);
+  };
+
+  const handleRemoveMember = (memberId) => {
+    if (!selectedCircle) return;
+    const updated = { ...circleMembers };
+    updated[selectedCircle.id] = updated[selectedCircle.id].filter(m => m.id !== memberId);
+    saveCircleMembers(updated);
+    alert('✅ Member removed from circle');
+  };
+
+  const handleSuspendMember = (memberId) => {
+    if (!selectedCircle) return;
+    const updated = { ...circleMembers };
+    const circleIdx = updated[selectedCircle.id].findIndex(m => m.id === memberId);
+    if (circleIdx !== -1) {
+      updated[selectedCircle.id][circleIdx].status = 'suspended';
+      updated[selectedCircle.id][circleIdx].violationCount += 1;
+      saveCircleMembers(updated);
+      alert('⚠️ Member suspended due to violations');
+    }
+  };
 
   // FR-A1 Handlers
   const handleVerifyUser = (userId) => {
-    setPendingVerifications(prev =>
-      prev.filter(v => v.id !== userId)
-    );
+    const updated = pendingVerifications.filter(v => v.id !== userId);
+    savePendingVerifications(updated);
     alert('✅ User verified and account activated!');
   };
 
   const handleRejectUser = (userId) => {
-    setPendingVerifications(prev =>
-      prev.filter(v => v.id !== userId)
-    );
+    const updated = pendingVerifications.filter(v => v.id !== userId);
+    savePendingVerifications(updated);
     alert('❌ User verification rejected. Rejection email sent.');
   };
 
@@ -191,7 +335,7 @@ export default function AdminDashboard() {
         created: new Date().toISOString().split('T')[0],
         active: true,
       };
-      setTrustedCircles([...trustedCircles, circle]);
+      saveTrustedCircles([...trustedCircles, circle]);
       setNewCircle({ name: '', description: '', eligibility: '' });
       setShowNewCircleForm(false);
       alert('✅ Trusted Circle created successfully!');
@@ -199,9 +343,8 @@ export default function AdminDashboard() {
   };
 
   const handleDeactivateCircle = (circleId) => {
-    setTrustedCircles(prev =>
-      prev.map(c => c.id === circleId ? { ...c, active: false } : c)
-    );
+    const updated = trustedCircles.map(c => c.id === circleId ? { ...c, active: false } : c);
+    saveTrustedCircles(updated);
     alert('⚠️ Trusted Circle deactivated');
   };
 
@@ -214,7 +357,7 @@ export default function AdminDashboard() {
     const updatedDisputes = disputes.map(d =>
       d.id === selectedDispute.id ? { ...d, status: 'resolved', ruling: selectedRuling } : d
     );
-    setDisputes(updatedDisputes);
+    saveDisputes(updatedDisputes);
     setSelectedDispute(null);
     setSelectedRuling('');
     alert(`✅ Dispute resolved: ${selectedRuling}`);
@@ -222,14 +365,35 @@ export default function AdminDashboard() {
 
   // FR-A4 Handlers
   const handleModerationAction = (listingId, action) => {
+    const timestamp = new Date().toISOString();
+    const auditLog = {
+      listingId,
+      action,
+      timestamp,
+      adminId: 'admin@equipshare.com',
+    };
+
+    // Save to audit log
+    const existingLogs = localStorage.getItem('admin_auditLogs') || '[]';
+    let logs = [];
+    try {
+      logs = JSON.parse(existingLogs);
+    } catch (e) {
+      logs = [];
+    }
+    logs.push(auditLog);
+    localStorage.setItem('admin_auditLogs', JSON.stringify(logs));
+
     if (action === 'dismiss') {
-      setFlaggedListings(prev => prev.filter(f => f.listingId !== listingId));
+      const updated = flaggedListings.filter(f => f.listingId !== listingId);
+      saveFlaggedListings(updated);
       alert('✅ Flag dismissed - listing remains active');
     } else if (action === 'warn') {
-      alert('⚠️ Warning sent to lender - listing remains active');
+      alert('⚠️ Warning sent to lender - listing remains active\n📧 Email notification queued');
     } else if (action === 'remove') {
-      setFlaggedListings(prev => prev.filter(f => f.listingId !== listingId));
-      alert('🚫 Listing removed and lender notified');
+      const updated = flaggedListings.filter(f => f.listingId !== listingId);
+      saveFlaggedListings(updated);
+      alert('🚫 Listing removed and lender notified\n📧 Removal notice sent to lender');
     }
   };
 
@@ -491,7 +655,10 @@ export default function AdminDashboard() {
                     <p><span className="font-medium text-[#0A1F29]">Created:</span> {circle.created}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button className="flex-1 text-[#00879E] hover:underline font-medium text-sm">
+                    <button
+                      onClick={() => handleViewMembers(circle)}
+                      className="flex-1 text-[#00879E] hover:underline font-medium text-sm"
+                    >
                       View Members
                     </button>
                     <button
@@ -558,6 +725,61 @@ export default function AdminDashboard() {
                           ← Back to Disputes
                         </button>
 
+                        {/* Booking Details */}
+                        <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-[#D0DDE2]">
+                          <h3 className="font-bold text-[#003E51] mb-3">📋 Booking Details</h3>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <p className="text-[#4A6572]">Booking Ref</p>
+                              <p className="font-medium text-[#0A1F29]">{selectedDispute.bookingRef}</p>
+                            </div>
+                            <div>
+                              <p className="text-[#4A6572]">Equipment</p>
+                              <p className="font-medium text-[#0A1F29]">{selectedDispute.equipment}</p>
+                            </div>
+                            <div>
+                              <p className="text-[#4A6572]">Lender</p>
+                              <p className="font-medium text-[#0A1F29]">{selectedDispute.lenderName}</p>
+                            </div>
+                            <div>
+                              <p className="text-[#4A6572]">Renter</p>
+                              <p className="font-medium text-[#0A1F29]">{selectedDispute.renterName}</p>
+                            </div>
+                            <div className="col-span-2">
+                              <p className="text-[#4A6572]">Dispute Reason</p>
+                              <p className="font-medium text-[#0A1F29]">{selectedDispute.issue}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chat/Communication Log */}
+                        <div className="mb-6">
+                          <h3 className="font-bold text-[#003E51] mb-3">💬 Communication Log</h3>
+                          <div className="border border-[#D0DDE2] rounded-lg p-4 bg-gray-50 space-y-3 max-h-48 overflow-y-auto">
+                            <div className="flex justify-start">
+                              <div className="bg-white p-3 rounded-lg border border-[#D0DDE2] max-w-xs">
+                                <p className="text-xs text-[#4A6572] font-medium mb-1">{selectedDispute.lenderName}</p>
+                                <p className="text-sm text-[#0A1F29]">Equipment was returned with visible damage on lens. This will cost me significant repairs.</p>
+                                <p className="text-xs text-[#4A6572] mt-1">04/08/2026, 3:30 PM</p>
+                              </div>
+                            </div>
+                            <div className="flex justify-end">
+                              <div className="bg-blue-100 p-3 rounded-lg border border-blue-300 max-w-xs">
+                                <p className="text-xs text-[#4A6572] font-medium mb-1">{selectedDispute.renterName}</p>
+                                <p className="text-sm text-[#0A1F29]">I don't think the damage happened during my rental. I was very careful throughout.</p>
+                                <p className="text-xs text-[#4A6572] mt-1">04/08/2026, 4:15 PM</p>
+                              </div>
+                            </div>
+                            <div className="flex justify-start">
+                              <div className="bg-white p-3 rounded-lg border border-[#D0DDE2] max-w-xs">
+                                <p className="text-xs text-[#4A6572] font-medium mb-1">{selectedDispute.lenderName}</p>
+                                <p className="text-sm text-[#0A1F29]">The photos clearly show the scratches appeared during your rental period. I have before and after pictures.</p>
+                                <p className="text-xs text-[#4A6572] mt-1">04/08/2026, 5:00 PM</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                         <h3 className="text-lg font-bold text-[#003E51] mb-4">Visual Evidence</h3>
 
                         {/* Pre-rental photos */}
@@ -606,7 +828,7 @@ export default function AdminDashboard() {
                                 checked={selectedRuling === 'lender-win'}
                                 onChange={() => setSelectedRuling('lender-win')}
                               />
-                              <span className="text-sm"><span className="font-medium">Lender Responsible:</span> Renter caused damage (charge fee)</span>
+                              <span className="text-sm"><span className="font-medium">Renter Responsible:</span> Renter caused damage (charge fee)</span>
                             </label>
                             <label className="flex items-center gap-2 p-2 border border-[#D0DDE2] rounded hover:bg-green-50 cursor-pointer">
                               <input
@@ -614,7 +836,7 @@ export default function AdminDashboard() {
                                 checked={selectedRuling === 'renter-win'}
                                 onChange={() => setSelectedRuling('renter-win')}
                               />
-                              <span className="text-sm"><span className="font-medium">Renter Responsible:</span> Pre-existing damage (full refund)</span>
+                              <span className="text-sm"><span className="font-medium">Lender Responsible:</span> Pre-existing damage (full refund)</span>
                             </label>
                             <label className="flex items-center gap-2 p-2 border border-[#D0DDE2] rounded hover:bg-purple-50 cursor-pointer">
                               <input
@@ -625,6 +847,41 @@ export default function AdminDashboard() {
                               <span className="text-sm"><span className="font-medium">Split Decision:</span> Both parties at fault (50/50 split)</span>
                             </label>
                           </div>
+
+                          {/* Financial Impact Preview */}
+                          {selectedRuling && (
+                            <div className={`mb-6 p-4 rounded-lg border-2 ${
+                              selectedRuling === 'lender-win' 
+                                ? 'bg-green-50 border-green-300' 
+                                : selectedRuling === 'renter-win'
+                                ? 'bg-blue-50 border-blue-300'
+                                : 'bg-purple-50 border-purple-300'
+                            }`}>
+                              <p className="text-sm font-bold text-[#0A1F29] mb-2">💰 Financial Impact</p>
+                              <div className="text-sm space-y-1">
+                                <p><span className="font-medium">Rental Amount:</span> SAR 250</p>
+                                {selectedRuling === 'lender-win' && (
+                                  <>
+                                    <p><span className="font-medium text-green-700">Damage Charge:</span> SAR 150</p>
+                                    <p className="font-bold text-green-800">Renter Charged: SAR 150 | Lender Receives: SAR 150</p>
+                                  </>
+                                )}
+                                {selectedRuling === 'renter-win' && (
+                                  <>
+                                    <p><span className="font-medium text-blue-700">Full Refund:</span> SAR 250</p>
+                                    <p className="font-bold text-blue-800">Renter Refunded: SAR 250 | Lender Charged: SAR 250</p>
+                                  </>
+                                )}
+                                {selectedRuling === 'split' && (
+                                  <>
+                                    <p><span className="font-medium text-purple-700">Split Charge:</span> SAR 75 each</p>
+                                    <p className="font-bold text-purple-800">Renter Refunded: SAR 175 | Lender Receives: SAR 75 (loses SAR 75)</p>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
                           <div className="flex gap-2">
                             <button
                               onClick={() => setSelectedDispute(null)}
@@ -634,7 +891,8 @@ export default function AdminDashboard() {
                             </button>
                             <button
                               onClick={handleResolveDispute}
-                              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
+                              disabled={!selectedRuling}
                             >
                               Submit Ruling
                             </button>
@@ -704,7 +962,18 @@ export default function AdminDashboard() {
                       </ul>
                     </div>
 
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-300 rounded">
+                      <p className="text-xs font-medium text-blue-800 mb-2">ℹ️ Listing ID: {listing.listingId}</p>
+                      <p className="text-sm text-blue-900">Preview this listing to verify the content before taking action.</p>
+                    </div>
+
                     <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => window.open(`/equipment/${listing.listingId}`, '_blank')}
+                        className="px-4 py-2 border border-blue-300 text-blue-700 rounded-lg font-medium hover:bg-blue-50 text-sm transition"
+                      >
+                        👁️ View Listing
+                      </button>
                       <button
                         onClick={() => handleModerationAction(listing.listingId, 'dismiss')}
                         className="px-4 py-2 border border-green-300 text-green-700 rounded-lg font-medium hover:bg-green-50 text-sm transition"
@@ -728,6 +997,81 @@ export default function AdminDashboard() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Members Modal */}
+        {showMembersModal && selectedCircle && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-[#D0DDE2] p-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#003E51]">{selectedCircle.name} - Members</h2>
+                  <p className="text-[#4A6572] text-sm mt-1">Total: {circleMembers[selectedCircle.id]?.length || 0} members</p>
+                </div>
+                <button
+                  onClick={() => setShowMembersModal(false)}
+                  className="text-gray-400 hover:text-gray-600 text-3xl font-light"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="p-6 space-y-3">
+                {circleMembers[selectedCircle.id]?.length > 0 ? (
+                  circleMembers[selectedCircle.id].map(member => (
+                    <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-[#D0DDE2]">
+                      <div className="flex-1">
+                        <p className="font-medium text-[#0A1F29]">{member.name}</p>
+                        <p className="text-sm text-[#4A6572]">{member.email}</p>
+                        <div className="flex gap-2 mt-1 flex-wrap">
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            member.status === 'active' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {member.status === 'active' ? '✓ Active' : '⚠️ Suspended'}
+                          </span>
+                          {member.violationCount > 0 && (
+                            <span className="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded">
+                              {member.violationCount} violation{member.violationCount > 1 ? 's' : ''}
+                            </span>
+                          )}
+                          <span className="text-xs text-[#4A6572]">Joined: {member.joinedDate}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        {member.status === 'active' && (
+                          <button
+                            onClick={() => handleSuspendMember(member.id)}
+                            className="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition"
+                          >
+                            Suspend
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleRemoveMember(member.id)}
+                          className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-[#4A6572] py-6">No members in this circle yet</p>
+                )}
+              </div>
+
+              <div className="sticky bottom-0 bg-gray-50 border-t border-[#D0DDE2] p-4 flex justify-end">
+                <button
+                  onClick={() => setShowMembersModal(false)}
+                  className="px-6 py-2 bg-[#003E51] text-white rounded-lg font-medium hover:bg-[#002A38] transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

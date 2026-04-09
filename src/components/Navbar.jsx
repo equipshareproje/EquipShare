@@ -72,12 +72,22 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/create-listing"
-              className="text-text-secondary hover:text-primary font-medium transition-colors"
-            >
-              List Equipment
-            </Link>
+            {user?.role === 'admin' && (
+              <Link
+                to="/admin"
+                className="text-text-secondary hover:text-error font-medium transition-colors"
+              >
+                🔐 Admin Panel
+              </Link>
+            )}
+            {user?.role !== 'admin' && (
+              <Link
+                to="/create-listing"
+                className="text-text-secondary hover:text-primary font-medium transition-colors"
+              >
+                List Equipment
+              </Link>
+            )}
           </div>
 
           {/* Auth Buttons / User Menu */}
@@ -135,6 +145,24 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="text-text-secondary hover:text-error font-medium px-2 py-2 hover:bg-surface rounded transition-colors"
+                  onClick={handleNavClick}
+                >
+                  🔐 Admin Panel
+                </Link>
+              )}
+              {user?.role !== 'admin' && (
+                <Link
+                  to="/create-listing"
+                  className="text-text-secondary hover:text-primary font-medium px-2 py-2 hover:bg-surface rounded transition-colors"
+                  onClick={handleNavClick}
+                >
+                  List Equipment
+                </Link>
+              )}
               <div className="border-t border-border pt-3 flex flex-col space-y-2">
                 {!user ? (
                   <>

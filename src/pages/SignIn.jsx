@@ -9,6 +9,7 @@ const SignIn = () => {
     password: '',
     rememberMe: false
   });
+  const [userType, setUserType] = useState('renter'); // 'renter' or 'admin'
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -55,7 +56,7 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      signin(formData.email, formData.password);
+      const user = signin(formData.email, formData.password);
 
       // Store remember me preference
       if (formData.rememberMe) {
@@ -64,8 +65,19 @@ const SignIn = () => {
         localStorage.removeItem('equipshare_remember_email');
       }
 
-      // Redirect to marketplace after successful signin
-      navigate('/marketplace');
+      // Redirect based on user type and actual role
+      if (userType === 'admin') {
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          setErrors({
+            submit: 'This account does not have admin privileges.'
+          });
+          return;
+        }
+      } else {
+        navigate('/marketplace');
+      }
     } catch (error) {
       setErrors({
         submit: error.message || 'Failed to sign in. Please check your credentials.'
@@ -82,6 +94,40 @@ const SignIn = () => {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-primary mb-2">Sign In</h1>
           <p className="text-text-secondary">Welcome back to EquipShare</p>
+        </div>
+
+        {/* User Type Selection */}
+        <div className="mb-6 flex gap-3">
+          <label className="flex-1 flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition"
+            style={{
+              borderColor: userType === 'renter' ? '#003E51' : '#D0DDE2',
+              backgroundColor: userType === 'renter' ? '#F4F7F8' : '#FFFFFF'
+            }}>
+            <input
+              type="radio"
+              name="userType"
+              value="renter"
+              checked={userType === 'renter'}
+              onChange={(e) => setUserType(e.target.value)}
+              className="mr-2"
+            />
+            <span className="text-sm font-medium text-text-primary">Renter</span>
+          </label>
+          <label className="flex-1 flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition"
+            style={{
+              borderColor: userType === 'admin' ? '#003E51' : '#D0DDE2',
+              backgroundColor: userType === 'admin' ? '#F4F7F8' : '#FFFFFF'
+            }}>
+            <input
+              type="radio"
+              name="userType"
+              value="admin"
+              checked={userType === 'admin'}
+              onChange={(e) => setUserType(e.target.value)}
+              className="mr-2"
+            />
+            <span className="text-sm font-medium text-text-primary">🔐 Admin</span>
+          </label>
         </div>
 
         {/* Submit Error */}
@@ -172,11 +218,23 @@ const SignIn = () => {
 
         {/* Demo Credentials */}
         <div className="mt-8 p-4 bg-surface rounded-lg border border-border">
-          <p className="text-xs text-text-secondary font-medium mb-2">💡 Demo Credentials</p>
-          <p className="text-xs text-text-secondary">
-            Email: <span className="font-mono">demo@example.com</span><br />
-            Password: <span className="font-mono">TestPass123</span>
-          </p>
+          <p className="text-xs text-text-secondary font-medium mb-3">💡 Demo Credentials</p>
+          <div className="space-y-2">
+            <div>
+              <p className="text-xs font-semibold text-text-primary mb-1">Renter Account:</p>
+              <p className="text-xs text-text-secondary">
+                Email: <span className="font-mono">demo@example.com</span><br />
+                Password: <span className="font-mono">TestPass123</span>
+              </p>
+            </div>
+            <div className="pt-2 border-t border-border">
+              <p className="text-xs font-semibold text-text-primary mb-1">🔐 Admin Account:</p>
+              <p className="text-xs text-text-secondary">
+                Email: <span className="font-mono">admin@equipshare.com</span><br />
+                Password: <span className="font-mono">AdminPass123</span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
