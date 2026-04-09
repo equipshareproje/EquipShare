@@ -297,7 +297,7 @@ export default function AdminDashboard() {
     const updated = { ...circleMembers };
     updated[selectedCircle.id] = updated[selectedCircle.id].filter(m => m.id !== memberId);
     saveCircleMembers(updated);
-    alert('✅ Member removed from circle');
+    alert('Member removed from circle');
   };
 
   const handleSuspendMember = (memberId) => {
@@ -308,7 +308,7 @@ export default function AdminDashboard() {
       updated[selectedCircle.id][circleIdx].status = 'suspended';
       updated[selectedCircle.id][circleIdx].violationCount += 1;
       saveCircleMembers(updated);
-      alert('⚠️ Member suspended due to violations');
+      alert('Member suspended due to violations');
     }
   };
 
@@ -316,13 +316,13 @@ export default function AdminDashboard() {
   const handleVerifyUser = (userId) => {
     const updated = pendingVerifications.filter(v => v.id !== userId);
     savePendingVerifications(updated);
-    alert('✅ User verified and account activated!');
+    alert('User verified and account activated!');
   };
 
   const handleRejectUser = (userId) => {
     const updated = pendingVerifications.filter(v => v.id !== userId);
     savePendingVerifications(updated);
-    alert('❌ User verification rejected. Rejection email sent.');
+    alert('User verification rejected. Rejection email sent.');
   };
 
   // FR-A2 Handlers
@@ -338,14 +338,14 @@ export default function AdminDashboard() {
       saveTrustedCircles([...trustedCircles, circle]);
       setNewCircle({ name: '', description: '', eligibility: '' });
       setShowNewCircleForm(false);
-      alert('✅ Trusted Circle created successfully!');
+      alert('Trusted Circle created successfully!');
     }
   };
 
   const handleDeactivateCircle = (circleId) => {
     const updated = trustedCircles.map(c => c.id === circleId ? { ...c, active: false } : c);
     saveTrustedCircles(updated);
-    alert('⚠️ Trusted Circle deactivated');
+    alert('Trusted Circle deactivated');
   };
 
   // FR-A3 Handlers
@@ -360,7 +360,7 @@ export default function AdminDashboard() {
     saveDisputes(updatedDisputes);
     setSelectedDispute(null);
     setSelectedRuling('');
-    alert(`✅ Dispute resolved: ${selectedRuling}`);
+    alert(`Dispute resolved: ${selectedRuling}`);
   };
 
   // FR-A4 Handlers
@@ -387,13 +387,13 @@ export default function AdminDashboard() {
     if (action === 'dismiss') {
       const updated = flaggedListings.filter(f => f.listingId !== listingId);
       saveFlaggedListings(updated);
-      alert('✅ Flag dismissed - listing remains active');
+      alert('Flag dismissed - listing remains active');
     } else if (action === 'warn') {
-      alert('⚠️ Warning sent to lender - listing remains active\n📧 Email notification queued');
+      alert('Warning sent to lender - listing remains active\nEmail notification queued');
     } else if (action === 'remove') {
       const updated = flaggedListings.filter(f => f.listingId !== listingId);
       saveFlaggedListings(updated);
-      alert('🚫 Listing removed and lender notified\n📧 Removal notice sent to lender');
+      alert('Listing removed and lender notified\nRemoval notice sent to lender');
     }
   };
 
@@ -402,7 +402,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="bg-gradient-to-r from-[#003E51] to-[#002A38] text-white py-8">
         <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-4xl font-bold mb-2">🛡️ Admin Dashboard</h1>
+          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-gray-200">Platform moderation, verifications, and trust management</p>
         </div>
       </div>
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
             </div>
             {pendingVerifications.length === 0 ? (
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                <p className="text-green-700 font-medium">✅ All users verified! No pending verifications.</p>
+                <p className="text-green-700 font-medium">All users verified! No pending verifications.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -552,13 +552,13 @@ export default function AdminDashboard() {
                           onClick={() => handleVerifyUser(user.id)}
                           className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition"
                         >
-                          ✅ Approve
+                          APPROVE
                         </button>
                         <button
                           onClick={() => handleRejectUser(user.id)}
                           className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition"
                         >
-                          ❌ Reject
+                          REJECT
                         </button>
                       </div>
                     </div>
@@ -713,7 +713,7 @@ export default function AdminDashboard() {
                           onClick={() => setSelectedDispute(dispute)}
                           className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition"
                         >
-                          👁️ Review Evidence & Make Ruling
+                          Review Evidence & Make Ruling
                         </button>
                       </div>
                     ) : (
@@ -727,7 +727,7 @@ export default function AdminDashboard() {
 
                         {/* Booking Details */}
                         <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-[#D0DDE2]">
-                          <h3 className="font-bold text-[#003E51] mb-3">📋 Booking Details</h3>
+                          <h3 className="font-bold text-[#003E51] mb-3">Booking Details</h3>
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             <div>
                               <p className="text-[#4A6572]">Booking Ref</p>
@@ -756,7 +756,7 @@ export default function AdminDashboard() {
 
                         {/* Pre-rental photos */}
                         <div className="mb-6">
-                          <p className="text-sm font-bold text-[#0A1F29] mb-2">📸 Pre-Rental Handover ({selectedDispute.preRentalPhotos.length} photos)</p>
+                          <p className="text-sm font-bold text-[#0A1F29] mb-2">Pre-Rental Handover ({selectedDispute.preRentalPhotos.length} photos)</p>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {selectedDispute.preRentalPhotos.map(photo => (
                               <div key={photo.id} className="border border-[#D0DDE2] rounded-lg overflow-hidden">
@@ -772,7 +772,7 @@ export default function AdminDashboard() {
 
                         {/* Post-rental photos */}
                         <div className="mb-6">
-                          <p className="text-sm font-bold text-[#0A1F29] mb-2">📸 Post-Rental Return ({selectedDispute.postRentalPhotos.length} photos)</p>
+                          <p className="text-sm font-bold text-[#0A1F29] mb-2">Post-Rental Return ({selectedDispute.postRentalPhotos.length} photos)</p>
                           {selectedDispute.postRentalPhotos.length > 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                               {selectedDispute.postRentalPhotos.map(photo => (
@@ -829,7 +829,7 @@ export default function AdminDashboard() {
                                 ? 'bg-blue-50 border-blue-300'
                                 : 'bg-purple-50 border-purple-300'
                             }`}>
-                              <p className="text-sm font-bold text-[#0A1F29] mb-2">💰 Financial Impact</p>
+                              <p className="text-sm font-bold text-[#0A1F29] mb-2">Financial Impact</p>
                               <div className="text-sm space-y-1">
                                 <p><span className="font-medium">Rental Amount:</span> SAR 250</p>
                                 {selectedRuling === 'lender-win' && (
@@ -914,7 +914,7 @@ export default function AdminDashboard() {
                           ? 'bg-yellow-200 text-yellow-800'
                           : 'bg-orange-200 text-orange-800'
                       }`}>
-                        🚩 {listing.flags} flags
+                        {listing.flags} flags
                       </span>
                     </div>
 
@@ -944,13 +944,13 @@ export default function AdminDashboard() {
                         onClick={() => window.open(`/equipment/${listing.listingId}`, '_blank')}
                         className="px-4 py-2 border border-blue-300 text-blue-700 rounded-lg font-medium hover:bg-blue-50 text-sm transition"
                       >
-                        👁️ View Listing
+                        View Listing
                       </button>
                       <button
                         onClick={() => handleModerationAction(listing.listingId, 'dismiss')}
                         className="px-4 py-2 border border-green-300 text-green-700 rounded-lg font-medium hover:bg-green-50 text-sm transition"
                       >
-                        👍 Dismiss
+                        Dismiss
                       </button>
                       <button
                         onClick={() => handleModerationAction(listing.listingId, 'warn')}
@@ -962,7 +962,7 @@ export default function AdminDashboard() {
                         onClick={() => handleModerationAction(listing.listingId, 'remove')}
                         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition"
                       >
-                        🚫 Remove Listing
+                        Remove Listing
                       </button>
                     </div>
                   </div>

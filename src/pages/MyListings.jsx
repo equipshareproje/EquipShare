@@ -40,7 +40,7 @@ export default function MyListings() {
     localStorage.setItem('myListings', JSON.stringify(updatedListings));
     setMyListings(updatedListings);
     alert(updatedListings.find(l => l.id === listingId).status === 'archived' 
-      ? '🔒 Listing archived' 
+      ? 'Listing archived' 
       : '✅ Listing reactivated');
   };
 
@@ -66,7 +66,7 @@ export default function MyListings() {
         {/* Header */}
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-4xl font-bold text-[#0A1F29] mb-2">📋 My Listings</h1>
+            <h1 className="text-4xl font-bold text-[#0A1F29] mb-2">My Listings</h1>
             <p className="text-[#4A6572] text-lg">Manage your equipment listings</p>
           </div>
           <button
@@ -132,7 +132,7 @@ export default function MyListings() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[#4A6572]">
-                      📷 No photo
+                      No photo
                     </div>
                   )}
                   {/* Status Badge */}
@@ -142,7 +142,7 @@ export default function MyListings() {
                         ? 'bg-green-100 text-green-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {listing.status === 'active' ? '✓ Active' : '🔒 Archived'}
+                      {listing.status === 'active' ? 'Active' : 'Archived'}
                     </span>
                   </div>
                 </div>
@@ -154,17 +154,17 @@ export default function MyListings() {
                   </h3>
 
                   <div className="mb-4 space-y-2 text-sm text-[#4A6572]">
-                    <p>📂 {listing.category}</p>
-                    <p>💰 SAR {listing.dailyRate}/day</p>
-                    <p>📅 {listing.availabilityStartDate} to {listing.availabilityEndDate}</p>
-                    <p>👁️ {listing.viewCount || 0} views • 📦 {listing.bookingCount || 0} bookings</p>
+                    <p>{listing.category}</p>
+                    <p>SAR {listing.dailyRate}/day</p>
+                    <p>{listing.availabilityStartDate} to {listing.availabilityEndDate}</p>
+                    <p>{listing.viewCount || 0} views • {listing.bookingCount || 0} bookings</p>
                   </div>
 
                   {/* Blocked Dates */}
                   {listing.blockedDates && listing.blockedDates.length > 0 && (
                     <div className="mb-4 p-3 bg-[#F4F7F8] rounded-lg">
                       <p className="text-xs font-semibold text-[#0A1F29] mb-2">
-                        🚫 Blocked Dates ({listing.blockedDates.length}):
+                        Blocked Dates ({listing.blockedDates.length}):
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {listing.blockedDates.slice(0, 3).map(date => (
@@ -197,13 +197,13 @@ export default function MyListings() {
                           : 'bg-[#1A7F5A] hover:bg-[#156A4A] text-white'
                       }`}
                     >
-                      {listing.status === 'active' ? '🔒 Archive' : '✓ Reactivate'}
+                      {listing.status === 'active' ? 'Archive' : 'Reactivate'}
                     </button>
                     <button
                       onClick={() => handleDeleteListing(listing)}
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
                     >
-                      🗑️ Delete
+                      Delete
                     </button>
                   </div>
                 </div>

@@ -22,28 +22,28 @@ export default function Circles() {
       name: 'Tech Hub',
       members: 245,
       verificationCriteria: '@techub.com',
-      image: '🏢', // Placeholder emoji
+      image: 'BUSINESS',
     },
     {
       id: 2,
       name: 'University Circle',
       members: 1863,
       verificationCriteria: '@university.edu',
-      image: '🎓',
+      image: 'EDUCATION',
     },
     {
       id: 3,
       name: 'Downtown Neighborhood',
       members: 57,
       verificationCriteria: 'Verified address',
-      image: '🏘️',
+      image: 'COMMUNITY',
     },
     {
       id: 4,
       name: 'Creative Studios',
       members: 142,
       verificationCriteria: '@creativestudios.com',
-      image: '🎨',
+      image: 'DESIGN',
     },
   ];
 

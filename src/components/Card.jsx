@@ -31,7 +31,7 @@ const Card = ({
         )}
         {verified && (
           <div className="absolute top-3 right-3 bg-success p-1.5 rounded-full flex items-center justify-center shadow-md text-white font-bold">
-            ✓
+            VERIFIED
           </div>
         )}
       </div>
@@ -45,7 +45,7 @@ const Card = ({
 
         {/* Location */}
         <div className="flex items-center text-text-secondary text-sm mb-3">
-          <span className="mr-1 flex-shrink-0">📍</span>
+          <span className="mr-1 flex-shrink-0">LOCATION</span>
           <span className="truncate">{location}</span>
         </div>
 

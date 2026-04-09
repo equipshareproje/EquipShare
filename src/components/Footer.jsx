@@ -25,7 +25,7 @@ const Footer = () => {
   const socialLinks = [
     { text: 'f', href: '#', label: 'Facebook' },
     { text: '𝕏', href: '#', label: 'Twitter' },
-    { text: '📷', href: '#', label: 'Instagram' },
+    { text: 'Instagram', href: '#', label: 'Instagram' },
   ];
 
   return (
@@ -123,7 +123,7 @@ const Footer = () => {
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <span className="text-accent flex-shrink-0 mt-1 font-bold">📞</span>
+              <span className="text-accent flex-shrink-0 mt-1 font-bold">CONTACT</span>
               <div>
                 <p className="text-sm text-primary-light">Phone</p>
                 <p className="text-white hover:text-accent transition-colors cursor-pointer">
@@ -132,7 +132,7 @@ const Footer = () => {
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <span className="text-accent flex-shrink-0 mt-1 font-bold">📍</span>
+              <span className="text-accent flex-shrink-0 mt-1 font-bold">LOCATION</span>
               <div>
                 <p className="text-sm text-primary-light">Location</p>
                 <p className="text-white">KFUPM, Saudi Arabia</p>

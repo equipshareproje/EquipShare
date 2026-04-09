@@ -126,7 +126,7 @@ const SignIn = () => {
               onChange={(e) => setUserType(e.target.value)}
               className="mr-2"
             />
-            <span className="text-sm font-medium text-text-primary">🔐 Admin</span>
+            <span className="text-sm font-medium text-text-primary">Admin</span>
           </label>
         </div>
 
@@ -218,7 +218,7 @@ const SignIn = () => {
 
         {/* Demo Credentials */}
         <div className="mt-8 p-4 bg-surface rounded-lg border border-border">
-          <p className="text-xs text-text-secondary font-medium mb-3">💡 Demo Credentials</p>
+          <p className="text-xs text-text-secondary font-medium mb-3">Demo Credentials</p>
           <div className="space-y-2">
             <div>
               <p className="text-xs font-semibold text-text-primary mb-1">Renter Account:</p>
@@ -228,7 +228,7 @@ const SignIn = () => {
               </p>
             </div>
             <div className="pt-2 border-t border-border">
-              <p className="text-xs font-semibold text-text-primary mb-1">🔐 Admin Account:</p>
+              <p className="text-xs font-semibold text-text-primary mb-1">Admin Account:</p>
               <p className="text-xs text-text-secondary">
                 Email: <span className="font-mono">admin@equipshare.com</span><br />
                 Password: <span className="font-mono">AdminPass123</span>
