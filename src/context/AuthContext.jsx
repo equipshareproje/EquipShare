@@ -8,45 +8,60 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    // Initialize demo users if no users exist
-    const existingUsers = localStorage.getItem('equipshare_users');
-    if (!existingUsers) {
-      const demoUsers = [
-        {
-          id: '1',
-          fullName: 'Demo User',
-          email: 'demo@example.com',
-          password: 'TestPass123',
-          phone: '+966 50 1234567',
-          role: 'renter', // 'admin', 'lender', or 'renter'
-          createdAt: new Date().toISOString(),
-          verified: true,
-          canRent: true,
-          canLend: true,
-          rating: 4.8,
-          reviews: 12,
-          rentalHistory: [],
-          listings: []
-        },
-        {
-          id: '99', // Admin ID
-          fullName: 'Platform Admin',
-          email: 'admin@equipshare.com',
-          password: 'AdminPass123',
-          phone: '+966 50 9999999',
-          role: 'admin',
-          createdAt: new Date().toISOString(),
-          verified: true,
-          canRent: false,
-          canLend: false,
-          rating: 0,
-          reviews: 0,
-          rentalHistory: [],
-          listings: []
-        }
-      ];
-      localStorage.setItem('equipshare_users', JSON.stringify(demoUsers));
+    // Initialize/ensure demo users exist
+    let users = [];
+    const existingUsersStr = localStorage.getItem('equipshare_users');
+    
+    if (existingUsersStr) {
+      try {
+        users = JSON.parse(existingUsersStr);
+      } catch (error) {
+        console.error('Failed to parse existing users:', error);
+        users = [];
+      }
     }
+
+    // Ensure demo renter user exists
+    if (!users.some(u => u.email === 'demo@example.com')) {
+      users.push({
+        id: '1',
+        fullName: 'Demo User',
+        email: 'demo@example.com',
+        password: 'TestPass123',
+        phone: '+966 50 1234567',
+        role: 'renter',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: true,
+        canLend: true,
+        rating: 4.8,
+        reviews: 12,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
+    // Ensure admin user exists
+    if (!users.some(u => u.email === 'admin@equipshare.com')) {
+      users.push({
+        id: '99',
+        fullName: 'Platform Admin',
+        email: 'admin@equipshare.com',
+        password: 'AdminPass123',
+        phone: '+966 50 9999999',
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: false,
+        canLend: false,
+        rating: 0,
+        reviews: 0,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
+    localStorage.setItem('equipshare_users', JSON.stringify(users));
 
     const storedUser = localStorage.getItem('equipshare_user');
     if (storedUser) {
