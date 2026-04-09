@@ -2,34 +2,163 @@
   {
     "id": 1,
     "listingId": 1,
+    "listingName": "Canon EOS 5D Mark IV",
     "renterId": 4,
+    "renterName": "Fatima Al-Qahtani",
     "lenderId": 1,
+    "lenderName": "Ahmed Al-Dosari",
     "startDate": "2026-04-10",
     "endDate": "2026-04-12",
+    "dailyRate": 150,
+    "days": 2,
     "totalCost": 330,
+    "serviceFee": 33,
     "status": "approved",
-    "createdAt": "2026-04-08"
+    "createdAt": "2026-04-08",
+    "preRentalHandshake": {
+      "submittedAt": "2026-04-10T09:00:00Z",
+      "photos": [
+        {
+          "id": 1,
+          "url": "https://via.placeholder.com/300x200?text=Pre-Rental+1",
+          "caption": "Front view - all controls intact",
+          "timestamp": "2026-04-10 09:15 AM"
+        },
+        {
+          "id": 2,
+          "url": "https://via.placeholder.com/300x200?text=Pre-Rental+2",
+          "caption": "Side view - no damage",
+          "timestamp": "2026-04-10 09:16 AM"
+        },
+        {
+          "id": 3,
+          "url": "https://via.placeholder.com/300x200?text=Pre-Rental+3",
+          "caption": "Back view - lens cap attached",
+          "timestamp": "2026-04-10 09:17 AM"
+        }
+      ]
+    },
+    "postRentalHandshake": null
   },
   {
     "id": 2,
     "listingId": 2,
+    "listingName": "GoPro Hero 11",
     "renterId": 5,
+    "renterName": "Omar Al-Rashid",
     "lenderId": 2,
+    "lenderName": "Sarah Al-Ali",
     "startDate": "2026-04-15",
     "endDate": "2026-04-17",
+    "dailyRate": 75,
+    "days": 2,
     "totalCost": 165,
+    "serviceFee": 15,
     "status": "pending",
-    "createdAt": "2026-04-08"
+    "createdAt": "2026-04-08",
+    "preRentalHandshake": null,
+    "postRentalHandshake": null
   },
   {
     "id": 3,
     "listingId": 3,
+    "listingName": "MacBook Pro 14",
     "renterId": 4,
+    "renterName": "Fatima Al-Qahtani",
     "lenderId": 3,
+    "lenderName": "Mohammad Al-Shammari",
+    "startDate": "2026-04-01",
+    "endDate": "2026-04-03",
+    "dailyRate": 120,
+    "days": 2,
+    "totalCost": 264,
+    "serviceFee": 24,
+    "status": "completed",
+    "createdAt": "2026-03-25",
+    "preRentalHandshake": {
+      "submittedAt": "2026-04-01T10:00:00Z",
+      "photos": [
+        {
+          "id": 1,
+          "url": "https://via.placeholder.com/300x200?text=MacBook+Pre+1",
+          "caption": "Front view - all keys working",
+          "timestamp": "2026-04-01 10:15 AM"
+        },
+        {
+          "id": 2,
+          "url": "https://via.placeholder.com/300x200?text=MacBook+Pre+2",
+          "caption": "Screen - no cracks",
+          "timestamp": "2026-04-01 10:16 AM"
+        },
+        {
+          "id": 3,
+          "url": "https://via.placeholder.com/300x200?text=MacBook+Pre+3",
+          "caption": "Battery at 100%",
+          "timestamp": "2026-04-01 10:17 AM"
+        }
+      ]
+    },
+    "postRentalHandshake": {
+      "submittedAt": "2026-04-03T16:00:00Z",
+      "photos": [
+        {
+          "id": 1,
+          "url": "https://via.placeholder.com/300x200?text=MacBook+Post+1",
+          "caption": "Returned in perfect condition",
+          "timestamp": "2026-04-03 04:15 PM"
+        },
+        {
+          "id": 2,
+          "url": "https://via.placeholder.com/300x200?text=MacBook+Post+2",
+          "caption": "Screen clean and functional",
+          "timestamp": "2026-04-03 04:16 PM"
+        },
+        {
+          "id": 3,
+          "url": "https://via.placeholder.com/300x200?text=MacBook+Post+3",
+          "caption": "Battery at 95% - excellent condition",
+          "timestamp": "2026-04-03 04:17 PM"
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "listingId": 5,
+    "listingName": "Sony A6700 Mirrorless",
+    "renterId": 1,
+    "renterName": "Demo User",
+    "lenderId": 1,
+    "lenderName": "Ahmed Al-Dosari",
+    "startDate": "2026-04-11",
+    "endDate": "2026-04-15",
+    "dailyRate": 110,
+    "days": 4,
+    "totalCost": 484,
+    "serviceFee": 44,
+    "status": "pending",
+    "createdAt": "2026-04-09",
+    "preRentalHandshake": null,
+    "postRentalHandshake": null
+  },
+  {
+    "id": 5,
+    "listingId": 6,
+    "listingName": "Professional Lighting Kit",
+    "renterId": 5,
+    "renterName": "Omar Al-Rashid",
+    "lenderId": 1,
+    "lenderName": "Ahmed Al-Dosari",
     "startDate": "2026-04-20",
     "endDate": "2026-04-22",
-    "totalCost": 264,
-    "status": "completed",
-    "createdAt": "2026-04-01"
+    "dailyRate": 85,
+    "days": 2,
+    "totalCost": 187,
+    "serviceFee": 17,
+    "status": "rejected",
+    "createdAt": "2026-04-07",
+    "rejectionReason": "Schedule conflict with another reservation",
+    "preRentalHandshake": null,
+    "postRentalHandshake": null
   }
 ]
