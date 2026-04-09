@@ -35,7 +35,7 @@ const Navbar = () => {
     { label: 'Home', href: '/' },
     { label: 'Marketplace', href: '/marketplace' },
     { label: 'Dashboard', href: '/dashboard' },
-    { label: 'About', href: '/about' },
+    { label: 'Circles', href: '/circles' },
   ];
 
   return (
@@ -72,6 +72,12 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            <Link
+              to="/create-listing"
+              className="text-text-secondary hover:text-primary font-medium transition-colors"
+            >
+              List Equipment
+            </Link>
           </div>
 
           {/* Auth Buttons / User Menu */}

@@ -1,30 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 import listings from '../data/listings.json';
 
 export default function Checkout() {
-  const { id } = useParams();
+  const { id: equipmentId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const equipment = listings.find(item => item.id === parseInt(id));
-
-  const [formData, setFormData] = useState({
-    startDate: '',
-    endDate: '',
-    fullName: user?.fullName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
+  
+  const equipment = listings.find(item => item.id === parseInt(equipmentId));
+  
+  const [approvedBooking, setApprovedBooking] = useState(null);
+  const [error, setError] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({
+    cardName: '',
     cardNumber: '',
     expiryDate: '',
-    cvc: '',
-    billingAddress: '',
+    cvv: '',
   });
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [errors, setErrors] = useState({});
+  // Load and validate approved booking on mount
+  useEffect(() => {
+    if (!user) {
+      navigate('/signin');
+      return;
+    }
+
+    if (!equipment) {
+      setError('Equipment not found');
+      return;
+    }
+
+    // Get booking requests from localStorage
+    const bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+    
+    // Find approved booking for this equipment and user
+    const booking = bookingRequests.find(
+      req => req.renterId == user.id && 
+             req.equipmentId == equipment.id && 
+             req.status === 'approved'
+    );
+
+    if (!booking) {
+      setError('No approved booking found. Please submit a booking request first.');
+      return;
+    }
+
+    setApprovedBooking(booking);
+  }, [user, equipment, navigate]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setPaymentForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const validatePaymentForm = () => {
+    if (!paymentForm.cardName.trim()) return 'Cardholder name is required';
+    if (!paymentForm.cardNumber.replace(/\s/g, '').match(/^\d{13,19}$/)) return 'Valid card number is required';
+    if (!paymentForm.expiryDate.match(/^\d{2}\/\d{2}$/)) return 'Expiry date must be MM/YY';
+    if (!paymentForm.cvv.match(/^\d{3,4}$/)) return 'Valid CVV is required';
+    return null;
+  };
+
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+    
+    const validationError = validatePaymentForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setError(null);
+    setIsProcessing(true);
+
+    // Simulate payment processing
+    setTimeout(() => {
+      // Update booking status to 'completed' in localStorage
+      const bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+      const bookingIndex = bookingRequests.findIndex(r => r.id === approvedBooking.id);
+      
+      if (bookingIndex !== -1) {
+        bookingRequests[bookingIndex].status = 'completed';
+        bookingRequests[bookingIndex].completedAt = new Date().toISOString().split('T')[0];
+        bookingRequests[bookingIndex].paymentMethod = 'Card';
+        bookingRequests[bookingIndex].cardLast4 = paymentForm.cardNumber.slice(-4);
+        localStorage.setItem('bookingRequests', JSON.stringify(bookingRequests));
+      }
+
+      setIsProcessing(false);
+      setPaymentSuccess(true);
+    }, 2000);
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#F4F7F8] flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <p className="text-lg text-[#4A6572] mb-4">🔐 Please sign in to checkout</p>
+          <Button onClick={() => navigate('/signin')} variant="primary">
+            Go to Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!equipment) {
     return (
@@ -39,187 +122,105 @@ export default function Checkout() {
     );
   }
 
-  if (!user) {
+  if (error && !approvedBooking) {
     return (
-      <div className="min-h-screen bg-[#F4F7F8] flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <p className="text-lg text-[#4A6572] mb-4">Please sign in to continue</p>
-          <Button onClick={() => navigate('/signin')} variant="primary">
-            Go to Sign In
-          </Button>
+      <div className="min-h-screen bg-[#F4F7F8]">
+        <div className="container mx-auto px-4 max-w-2xl py-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-[#00879E] hover:text-[#003E51] font-medium text-sm mb-8"
+          >
+            ← Back
+          </button>
+
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <div className="text-6xl mb-4">❌</div>
+            <h1 className="text-3xl font-bold text-[#003E51] mb-2">Booking Not Approved</h1>
+            <p className="text-[#4A6572] mb-8 text-lg">{error}</p>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+              <h3 className="font-semibold text-blue-900 mb-2">ℹ️ How to proceed:</h3>
+              <ol className="text-sm text-blue-800 space-y-1 text-left">
+                <li>1. Navigate to the equipment detail page</li>
+                <li>2. Select your rental dates</li>
+                <li>3. Click "Book Now" to submit a booking request</li>
+                <li>4. Wait for the lender to approve your request</li>
+                <li>5. Once approved, you'll be able to complete checkout</li>
+              </ol>
+            </div>
+
+            <Button onClick={() => navigate('/marketplace')} variant="primary">
+              Browse Equipment
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Calculate cost
-  const startDate = new Date(formData.startDate);
-  const endDate = new Date(formData.endDate);
-  const days = formData.startDate && formData.endDate 
-    ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) 
-    : 0;
-
-  const subtotal = equipment.dailyRate * days;
-  const serviceFee = subtotal * 0.1;
-  const total = subtotal + serviceFee;
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.startDate) newErrors.startDate = 'Start date is required';
-    if (!formData.endDate) newErrors.endDate = 'End date is required';
-    if (formData.startDate && formData.endDate && new Date(formData.startDate) >= new Date(formData.endDate)) {
-      newErrors.endDate = 'End date must be after start date';
-    }
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
-    if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Card number is required';
-    if (!/^\d{16}$/.test(formData.cardNumber.replace(/\s/g, ''))) {
-      newErrors.cardNumber = 'Card number must be 16 digits';
-    }
-    if (!formData.expiryDate.trim()) newErrors.expiryDate = 'Expiry date is required';
-    if (!/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
-      newErrors.expiryDate = 'Format: MM/YY';
-    }
-    if (!formData.cvc.trim()) newErrors.cvc = 'CVC is required';
-    if (!/^\d{3,4}$/.test(formData.cvc)) newErrors.cvc = 'CVC must be 3-4 digits';
-    if (!formData.billingAddress.trim()) newErrors.billingAddress = 'Billing address is required';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    // Mock payment processing
-    setOrderPlaced(true);
-  };
-
-  if (orderPlaced) {
+  if (paymentSuccess && approvedBooking) {
     return (
       <div className="min-h-screen bg-[#F4F7F8]">
-        {/* Header */}
-        <div className="bg-[#003E51] text-white py-8">
-          <div className="container mx-auto px-4 max-w-7xl">
-            <h1 className="text-3xl font-bold mb-2">✅ Order Confirmed</h1>
-            <p className="text-gray-200">Thank you for your booking!</p>
-          </div>
-        </div>
+        <div className="container mx-auto px-4 max-w-2xl py-8">
+          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+            <div className="text-6xl mb-4">🎉</div>
+            <h1 className="text-3xl font-bold text-[#003E51] mb-2">Payment Successful!</h1>
+            <p className="text-[#4A6572] mb-4">Your booking is confirmed and payment has been processed.</p>
 
-        <div className="container mx-auto px-4 max-w-3xl py-12">
-          <div className="bg-white rounded-lg shadow-md p-8 mb-6">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🎉</div>
-              <h2 className="text-2xl font-bold text-[#003E51] mb-2">Booking Confirmed!</h2>
-              <p className="text-[#4A6572]">Order #ORD-{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
-            </div>
-
-            <div className="bg-[#F4F7F8] rounded-lg p-6 mb-6">
-              <h3 className="font-bold text-[#003E51] mb-4">📦 Booking Details</h3>
-              
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                  <p className="text-sm text-[#4A6572]">Equipment</p>
-                  <p className="font-semibold text-[#003E51]">{equipment.name}</p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8 text-left">
+              <h3 className="font-semibold text-[#003E51] mb-4">Booking Confirmation</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-[#4A6572]">Booking ID</span>
+                  <span className="font-semibold text-[#003E51]">{approvedBooking.id}</span>
                 </div>
-                <div>
-                  <p className="text-sm text-[#4A6572]">Category</p>
-                  <p className="font-semibold text-[#003E51]">{equipment.category}</p>
+                <div className="flex justify-between">
+                  <span className="text-[#4A6572]">Equipment</span>
+                  <span className="font-semibold text-[#003E51]">{approvedBooking.equipmentName}</span>
                 </div>
-                <div>
-                  <p className="text-sm text-[#4A6572]">Check-in</p>
-                  <p className="font-semibold text-[#003E51]">
-                    {new Date(formData.startDate).toLocaleDateString()}
-                  </p>
+                <div className="flex justify-between">
+                  <span className="text-[#4A6572]">Rental Dates</span>
+                  <span className="font-semibold text-[#003E51]">
+                    {new Date(approvedBooking.startDate).toLocaleDateString()} - {new Date(approvedBooking.endDate).toLocaleDateString()}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-sm text-[#4A6572]">Check-out</p>
-                  <p className="font-semibold text-[#003E51]">
-                    {new Date(formData.endDate).toLocaleDateString()}
-                  </p>
+                <div className="flex justify-between">
+                  <span className="text-[#4A6572]">Duration</span>
+                  <span className="font-semibold text-[#003E51]">{approvedBooking.days} days</span>
                 </div>
-                <div>
-                  <p className="text-sm text-[#4A6572]">Number of Days</p>
-                  <p className="font-semibold text-[#003E51]">{days} day{days !== 1 ? 's' : ''}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-[#4A6572]">Location</p>
-                  <p className="font-semibold text-[#003E51]">📍 {equipment.location}</p>
-                </div>
-              </div>
-
-              <div className="border-t border-[#D0DDE2] pt-4">
-                <div className="flex justify-between mb-2">
-                  <span className="text-[#4A6572]">Subtotal ({days} days × {equipment.dailyRate} SAR)</span>
-                  <span className="font-semibold text-[#003E51]">{subtotal} SAR</span>
-                </div>
-                <div className="flex justify-between mb-4">
-                  <span className="text-[#4A6572]">Service Fee (10%)</span>
-                  <span className="font-semibold text-[#003E51]">{serviceFee.toFixed(2)} SAR</span>
-                </div>
-                <div className="flex justify-between text-lg">
-                  <span className="font-bold text-[#003E51]">Total</span>
-                  <span className="font-bold text-[#003E51]">{total.toFixed(2)} SAR</span>
+                <div className="flex justify-between pt-3 border-t border-green-200">
+                  <span className="font-semibold text-[#003E51]">Total Amount Paid</span>
+                  <span className="font-bold text-[#00879E] text-lg">{approvedBooking.totalCost.toFixed(2)} SAR</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 border-l-4 border-[#00879E] p-4 rounded mb-6">
-              <p className="text-sm text-[#0A1F29]">
-                <span className="font-semibold">Next Steps:</span> You'll receive a confirmation email with pickup details and the lender's contact information. Please arrive on time for pickup on {new Date(formData.startDate).toLocaleDateString()}.
-              </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 text-left text-sm">
+              <p className="text-blue-900 font-semibold mb-2">📋 Next Steps:</p>
+              <ul className="text-blue-800 space-y-1 list-disc list-inside">
+                <li>Check your email for booking confirmation</li>
+                <li>Arrange pickup with the lender</li>
+                <li>Take pre-rental photos during handover</li>
+                <li>Enjoy your rental!</li>
+              </ul>
             </div>
 
             <div className="flex gap-4">
               <Button 
-                onClick={() => navigate('/marketplace')}
-                variant="secondary"
-                className="flex-1"
-              >
-                Continue Shopping
-              </Button>
-              <Button 
-                onClick={() => navigate('/renter-dashboard')}
+                onClick={() => navigate('/dashboard')} 
                 variant="primary"
                 className="flex-1"
               >
                 View My Bookings
               </Button>
+              <Button 
+                onClick={() => navigate('/marketplace')} 
+                variant="secondary"
+                className="flex-1 border border-[#D0DDE2] text-[#003E51] bg-white hover:bg-[#F4F7F8]"
+              >
+                Continue Shopping
+              </Button>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="font-bold text-[#003E51] mb-4">📞 Need Help?</h3>
-            <p className="text-[#4A6572] mb-4">
-              If you have any questions about your booking, please contact our support team.
-            </p>
-            <p className="text-[#4A6572]">
-              📧 <span className="font-semibold">support@equipshare.sa</span>
-            </p>
-            <p className="text-[#4A6572]">
-              📱 <span className="font-semibold">+966 13 860 8000</span>
-            </p>
           </div>
         </div>
       </div>
@@ -228,254 +229,229 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-[#F4F7F8]">
-      {/* Header */}
-      <div className="bg-[#003E51] text-white py-8">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-3xl font-bold mb-2">💳 Checkout</h1>
-          <p className="text-gray-200">Complete your booking</p>
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-[#D0DDE2]">
+        <div className="container mx-auto px-4 max-w-7xl py-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-[#00879E] hover:text-[#003E51] font-medium text-sm"
+          >
+            ← Back
+          </button>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 max-w-6xl py-8">
+      <div className="container mx-auto px-4 max-w-7xl py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Checkout Form */}
+          {/* Main Content */}
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Rental Dates */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-bold text-[#003E51] mb-4">📅 Rental Dates</h3>
-                
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      name="startDate"
-                      value={formData.startDate}
-                      onChange={handleChange}
-                      min={equipment.availability.startDate}
-                      max={equipment.availability.endDate}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                        errors.startDate ? 'border-red-500' : 'border-[#D0DDE2]'
-                      }`}
-                    />
-                    {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleChange}
-                      min={equipment.availability.startDate}
-                      max={equipment.availability.endDate}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                        errors.endDate ? 'border-red-500' : 'border-[#D0DDE2]'
-                      }`}
-                    />
-                    {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
-                  </div>
-                </div>
-
-                <p className="text-sm text-[#4A6572]">
-                  Available: {new Date(equipment.availability.startDate).toLocaleDateString()} to {new Date(equipment.availability.endDate).toLocaleDateString()}
-                </p>
-              </div>
-
-              {/* Personal Info */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-bold text-[#003E51] mb-4">👤 Personal Information</h3>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">Full Name</label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                        errors.fullName ? 'border-red-500' : 'border-[#D0DDE2]'
-                      }`}
-                    />
-                    {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                        errors.phone ? 'border-red-500' : 'border-[#D0DDE2]'
-                      }`}
-                    />
-                    {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-                  </div>
-                </div>
-
+            {/* Booking Status */}
+            <div className="bg-green-50 border border-green-200 rounded-lg shadow-md p-6 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="text-3xl">✅</div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#0A1F29] mb-2">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                      errors.email ? 'border-red-500' : 'border-[#D0DDE2]'
-                    }`}
-                  />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  <h3 className="font-bold text-green-900">Booking Approved!</h3>
+                  <p className="text-sm text-green-800">Your booking request has been approved by the lender. Complete payment to confirm.</p>
                 </div>
               </div>
+            </div>
 
-              {/* Billing Address */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-bold text-[#003E51] mb-4">📍 Billing Address</h3>
+            {/* Payment Form */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-2xl font-bold text-[#003E51] mb-6">💳 Payment Details</h2>
 
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-800 font-medium">Error: {error}</p>
+                </div>
+              )}
+
+              <form onSubmit={handlePaymentSubmit} className="space-y-6">
+                {/* Cardholder Name */}
                 <div>
-                  <label className="block text-sm font-semibold text-[#0A1F29] mb-2">Address</label>
-                  <textarea
-                    name="billingAddress"
-                    value={formData.billingAddress}
-                    onChange={handleChange}
-                    rows="3"
-                    placeholder="Street address, city, postal code"
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                      errors.billingAddress ? 'border-red-500' : 'border-[#D0DDE2]'
-                    }`}
-                  />
-                  {errors.billingAddress && <p className="text-red-500 text-sm mt-1">{errors.billingAddress}</p>}
-                </div>
-              </div>
-
-              {/* Payment Info */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-bold text-[#003E51] mb-4">💳 Payment Information</h3>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-[#0A1F29] mb-2">Card Number</label>
+                  <label htmlFor="cardName" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                    Cardholder Name
+                  </label>
                   <input
                     type="text"
-                    name="cardNumber"
-                    value={formData.cardNumber}
-                    onChange={handleChange}
-                    placeholder="1234 5678 9012 3456"
-                    maxLength="19"
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                      errors.cardNumber ? 'border-red-500' : 'border-[#D0DDE2]'
-                    }`}
+                    id="cardName"
+                    name="cardName"
+                    value={paymentForm.cardName}
+                    onChange={handleInputChange}
+                    placeholder="Ahmed Al-Mansouri"
+                    className="w-full px-4 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                    disabled={isProcessing}
                   />
-                  {errors.cardNumber && <p className="text-red-500 text-sm mt-1">{errors.cardNumber}</p>}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Card Number */}
+                <div>
+                  <label htmlFor="cardNumber" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                    Card Number
+                  </label>
+                  <input
+                    type="text"
+                    id="cardNumber"
+                    name="cardNumber"
+                    value={paymentForm.cardNumber}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                      setPaymentForm(prev => ({ ...prev, cardNumber: value }));
+                    }}
+                    placeholder="4242 4242 4242 4242"
+                    maxLength="19"
+                    className="w-full px-4 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                    disabled={isProcessing}
+                  />
+                  <p className="text-xs text-[#4A6572] mt-2">💡 Test card: 4242 4242 4242 4242</p>
+                </div>
+
+                {/* Expiry & CVV */}
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">Expiry Date</label>
+                    <label htmlFor="expiryDate" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                      Expiry Date
+                    </label>
                     <input
                       type="text"
+                      id="expiryDate"
                       name="expiryDate"
-                      value={formData.expiryDate}
-                      onChange={handleChange}
+                      value={paymentForm.expiryDate}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 4) {
+                          const formatted = value.length >= 2 ? `${value.slice(0, 2)}/${value.slice(2)}` : value;
+                          setPaymentForm(prev => ({ ...prev, expiryDate: formatted }));
+                        }
+                      }}
                       placeholder="MM/YY"
                       maxLength="5"
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                        errors.expiryDate ? 'border-red-500' : 'border-[#D0DDE2]'
-                      }`}
+                      className="w-full px-4 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                      disabled={isProcessing}
                     />
-                    {errors.expiryDate && <p className="text-red-500 text-sm mt-1">{errors.expiryDate}</p>}
                   </div>
-
                   <div>
-                    <label className="block text-sm font-semibold text-[#0A1F29] mb-2">CVC</label>
+                    <label htmlFor="cvv" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                      CVV
+                    </label>
                     <input
                       type="text"
-                      name="cvc"
-                      value={formData.cvc}
-                      onChange={handleChange}
+                      id="cvv"
+                      name="cvv"
+                      value={paymentForm.cvv}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                        setPaymentForm(prev => ({ ...prev, cvv: value }));
+                      }}
                       placeholder="123"
                       maxLength="4"
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
-                        errors.cvc ? 'border-red-500' : 'border-[#D0DDE2]'
-                      }`}
+                      className="w-full px-4 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                      disabled={isProcessing}
                     />
-                    {errors.cvc && <p className="text-red-500 text-sm mt-1">{errors.cvc}</p>}
                   </div>
                 </div>
 
-                <p className="text-xs text-[#4A6572]">💳 This is a mock payment form for demo purposes</p>
-              </div>
+                {/* Terms */}
+                <div className="bg-[#F4F7F8] rounded-lg p-4">
+                  <p className="text-sm text-[#4A6572] mb-3">
+                    By completing this payment, you agree to the EquipShare Terms of Service and Rental Agreement.
+                  </p>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      defaultChecked
+                      className="w-4 h-4 rounded border-[#D0DDE2]"
+                      disabled={isProcessing}
+                    />
+                    <span className="text-sm text-[#0A1F29]">I agree to the terms and conditions</span>
+                  </label>
+                </div>
 
-              {/* Submit Button */}
-              <Button 
-                type="submit"
-                variant="primary"
-                className="w-full py-3 text-lg"
-              >
-                Complete Booking
-              </Button>
-            </form>
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full bg-[#003E51] hover:bg-[#002A38] disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition"
+                >
+                  {isProcessing ? 'Processing Payment...' : `Pay ${approvedBooking.totalCost.toFixed(2)} SAR`}
+                </button>
+              </form>
+
+              <p className="text-xs text-center text-[#4A6572] mt-4">
+                🔒 Your payment is secure and encrypted with industry-standard SSL encryption.
+              </p>
+            </div>
           </div>
 
-          {/* Right: Order Summary */}
-          <div>
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h3 className="text-lg font-bold text-[#003E51] mb-4">📦 Order Summary</h3>
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-bold text-[#003E51] mb-6">📋 Booking Summary</h3>
 
-              {/* Equipment Card */}
-              <div className="mb-6 pb-6 border-b border-[#D0DDE2]">
-                <img
-                  src={equipment.image}
-                  alt={equipment.name}
-                  className="w-full h-32 object-cover rounded-lg mb-3"
-                />
-                <p className="font-semibold text-[#003E51]">{equipment.name}</p>
-                <p className="text-sm text-[#4A6572]">{equipment.category}</p>
-                <p className="text-sm text-[#4A6572]">📍 {equipment.location}</p>
-              </div>
+              <div className="space-y-4">
+                {/* Equipment */}
+                <div>
+                  <p className="text-sm text-[#4A6572] mb-1">Equipment</p>
+                  <p className="font-semibold text-[#003E51]">{approvedBooking.equipmentName}</p>
+                </div>
 
-              {/* Cost Breakdown */}
-              <div className="space-y-2 mb-6 pb-6 border-b border-[#D0DDE2]">
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#4A6572]">Daily Rate</span>
-                  <span className="font-semibold text-[#003E51]">{equipment.dailyRate} SAR</span>
+                {/* Dates */}
+                <div>
+                  <p className="text-sm text-[#4A6572] mb-1">Rental Dates</p>
+                  <p className="font-semibold text-[#003E51]">
+                    {new Date(approvedBooking.startDate).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-[#4A6572]">
+                    to {new Date(approvedBooking.endDate).toLocaleDateString()}
+                  </p>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#4A6572]">Number of Days</span>
-                  <span className="font-semibold text-[#003E51]">{days}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#4A6572]">Subtotal</span>
-                  <span className="font-semibold text-[#003E51]">{subtotal.toFixed(2)} SAR</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#4A6572]">Service Fee (10%)</span>
-                  <span className="font-semibold text-[#003E51]">{serviceFee.toFixed(2)} SAR</span>
-                </div>
-              </div>
 
-              {/* Total */}
-              <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-[#003E51]">Total Amount</span>
+                {/* Duration */}
+                <div>
+                  <p className="text-sm text-[#4A6572]">Duration</p>
+                  <p className="font-semibold text-[#003E51]">
+                    {approvedBooking.days} day{approvedBooking.days > 1 ? 's' : ''}
+                  </p>
+                </div>
+
+                {/* Pricing Breakdown */}
+                <div className="border-t border-[#D0DDE2] pt-4 mt-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-[#4A6572]">Daily Rate</span>
+                    <span className="font-semibold text-[#003E51]">{approvedBooking.dailyRate} SAR</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-[#4A6572]">Subtotal ({approvedBooking.days} days)</span>
+                    <span className="font-semibold text-[#003E51]">{approvedBooking.subtotal} SAR</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4A6572]">Service Fee (10%)</span>
+                    <span className="font-semibold text-[#003E51]">{approvedBooking.serviceFee.toFixed(2)} SAR</span>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="border-t border-[#D0DDE2] pt-4 mt-4 flex justify-between items-center">
+                  <span className="font-bold text-[#003E51]">Total</span>
                   <span className="text-2xl font-bold text-[#003E51]">
-                    {total.toFixed(2)} SAR
+                    {approvedBooking.totalCost.toFixed(2)} SAR
                   </span>
                 </div>
               </div>
 
-              {/* Info */}
-              <div className="bg-blue-50 border-l-4 border-[#00879E] p-3 rounded text-xs text-[#4A6572]">
-                <p className="mb-2">✓ Secure checkout with SSL encryption</p>
-                <p>✓ Confirmation email will be sent immediately</p>
+              {/* Payment Status */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-6 text-center">
+                <p className="text-xs font-semibold text-green-900">✅ BOOKING APPROVED</p>
+                <p className="text-xs text-green-800 mt-1">Ready for payment</p>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-[#D0DDE2] text-sm text-[#4A6572]">
+                <p className="mb-3">💳 Accepted payment methods:</p>
+                <div className="flex gap-2">
+                  <span className="text-lg">💳</span>
+                  <span className="text-lg">🏦</span>
+                  <span className="text-lg">📱</span>
+                </div>
               </div>
             </div>
           </div>

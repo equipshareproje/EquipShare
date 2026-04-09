@@ -62,12 +62,25 @@ export default function EditListing() {
         blockedDates: foundListing.blockedDates || [],
       });
 
-      // Set photo previews
+      // Set photo previews safely
       if (foundListing.photos && foundListing.photos.length > 0) {
-        const previews = foundListing.photos.map((photo, index) => ({
-          url: typeof photo === 'string' ? photo : URL.createObjectURL(photo),
-          name: `Photo ${index + 1}`,
-        }));
+        const previews = foundListing.photos.map((photo, index) => {
+          // Handle different photo formats safely
+          let photoUrl = '';
+          if (typeof photo === 'string') {
+            // Already a string (data URL or path)
+            photoUrl = photo;
+          } else if (photo instanceof File || photo instanceof Blob) {
+            // File or Blob object
+            photoUrl = URL.createObjectURL(photo);
+          }
+          
+          return {
+            url: photoUrl,
+            name: `Photo ${index + 1}`,
+          };
+        }).filter(preview => preview.url); // Filter out any invalid previews
+        
         setPhotoPreview(previews);
       }
     }
@@ -187,7 +200,27 @@ export default function EditListing() {
     return newErrors;
   };
 
-  const handleUpdateListing = () => {
+  const convertPhotosToDataUrls = async (files) => {
+    return Promise.all(
+      files.map(file => {
+        return new Promise((resolve) => {
+          if (typeof file === 'string') {
+            // Already a data URL or path string
+            resolve(file);
+          } else if (file instanceof File) {
+            // Convert File to data URL
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+          } else {
+            resolve(null);
+          }
+        });
+      })
+    );
+  };
+
+  const handleUpdateListing = async () => {
     const formErrors = validateForm();
 
     if (Object.keys(formErrors).length > 0) {
@@ -195,12 +228,16 @@ export default function EditListing() {
       return;
     }
 
+    // Convert photos to data URLs before storing
+    const photoDataUrls = await convertPhotosToDataUrls(formData.photos);
+
     const allListings = JSON.parse(localStorage.getItem('myListings') || '[]');
     const updatedListings = allListings.map(l =>
       l.id === parseInt(listingId)
         ? {
             ...l,
             ...formData,
+            photos: photoDataUrls,
             updatedAt: new Date().toISOString(),
           }
         : l

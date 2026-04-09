@@ -29,6 +29,8 @@ export default function Dashboard() {
   const [visualHandshakeBooking, setVisualHandshakeBooking] = useState(null); // For visual handshake modal
   const [handshakeType, setHandshakeType] = useState('pre-rental'); // 'pre-rental' or 'post-rental'
   const [lenderBookingsWithHandshakes, setLenderBookingsWithHandshakes] = useState([]);
+  const [viewingRenterProfile, setViewingRenterProfile] = useState(null); // For renter profile modal
+  const [selectedPendingRequest, setSelectedPendingRequest] = useState(null); // For pending request details
 
   // Mock rental history (as renter - items user has rented)
   const rentalHistory = [
@@ -209,31 +211,37 @@ export default function Dashboard() {
   };
 
   const handleApproveBooking = () => {
-    if (approvingBooking) {
-      // Mock: update booking status to 'active' and charge payment
-      const booking = lenderBookings.find(b => b.id === approvingBooking.id);
-      if (booking) {
-        booking.status = 'active';
-        booking.approvalDate = new Date().toISOString().split('T')[0];
-        booking.approvedByLender = true;
+    if (selectedPendingRequest) {
+      const bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+      const requestIndex = bookingRequests.findIndex(r => r.id === selectedPendingRequest.id);
+      
+      if (requestIndex !== -1) {
+        bookingRequests[requestIndex].status = 'approved';
+        bookingRequests[requestIndex].approvedAt = new Date().toISOString().split('T')[0];
+        bookingRequests[requestIndex].approvedByLenderId = user.id;
+        localStorage.setItem('bookingRequests', JSON.stringify(bookingRequests));
+        
+        setSelectedPendingRequest(null);
+        alert('✅ Booking request approved! Payment hold initiated. Renter will be notified and can proceed to checkout.');
       }
-      setApprovingBooking(null);
-      alert('✅ Booking request approved! Payment will be charged and renter notified.');
     }
   };
 
   const handleRejectBooking = () => {
-    if (rejectingBooking) {
-      // Mock: update booking status to 'rejected' and release payment hold
-      const booking = lenderBookings.find(b => b.id === rejectingBooking.id);
-      if (booking) {
-        booking.status = 'rejected';
-        booking.rejectionReason = rejectionReason;
-        booking.rejectionDate = new Date().toISOString().split('T')[0];
+    if (selectedPendingRequest) {
+      const bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+      const requestIndex = bookingRequests.findIndex(r => r.id === selectedPendingRequest.id);
+      
+      if (requestIndex !== -1) {
+        bookingRequests[requestIndex].status = 'rejected';
+        bookingRequests[requestIndex].rejectionReason = rejectionReason;
+        bookingRequests[requestIndex].rejectedAt = new Date().toISOString().split('T')[0];
+        localStorage.setItem('bookingRequests', JSON.stringify(bookingRequests));
+        
+        setSelectedPendingRequest(null);
+        setRejectionReason('');
+        alert('❌ Booking request rejected. Payment hold released. Renter has been notified.');
       }
-      setRejectingBooking(null);
-      setRejectionReason('');
-      alert('❌ Booking request rejected. Payment hold released and renter notified.');
     }
   };
 
@@ -243,23 +251,48 @@ export default function Dashboard() {
   };
 
   const handleCompleteHandshake = (handshakeData) => {
-    // Find the booking and add the handshake photos
-    const bookingIndex = lenderBookings.findIndex(b => b.id === handshakeData.bookingId);
-    if (bookingIndex !== -1) {
-      if (handshakeData.type === 'pre-rental') {
-        lenderBookings[bookingIndex].preRentalHandshake = {
-          photos: handshakeData.photos,
-          submittedAt: handshakeData.submittedAt,
-        };
-      } else {
-        lenderBookings[bookingIndex].postRentalHandshake = {
-          photos: handshakeData.photos,
-          submittedAt: handshakeData.submittedAt,
-        };
+    // Find the booking in the appropriate list
+    let booking = null;
+    let isRenterReceipt = handshakeData.type === 'renter-receipt';
+    
+    if (isRenterReceipt) {
+      // Find in rental history (renter's bookings)
+      booking = rentalHistory.find(b => b.id === handshakeData.bookingId);
+    } else {
+      // Find in lender bookings
+      const bookingIndex = lenderBookings.findIndex(b => b.id === handshakeData.bookingId);
+      if (bookingIndex !== -1) {
+        if (handshakeData.type === 'pre-rental') {
+          lenderBookings[bookingIndex].preRentalHandshake = {
+            photos: handshakeData.photos,
+            submittedAt: handshakeData.submittedAt,
+          };
+        } else {
+          lenderBookings[bookingIndex].postRentalHandshake = {
+            photos: handshakeData.photos,
+            submittedAt: handshakeData.submittedAt,
+          };
+        }
       }
     }
+    
+    // Store renter receipt confirmation if applicable
+    if (isRenterReceipt && booking) {
+      booking.renterReceiptConfirmation = {
+        photos: handshakeData.photos,
+        submittedAt: handshakeData.submittedAt,
+      };
+    }
+    
     setVisualHandshakeBooking(null);
-    alert(`✅ ${handshakeData.type === 'pre-rental' ? 'Pre-rental' : 'Post-rental'} handover photos submitted successfully!`);
+    
+    const typeMessages = {
+      'pre-rental': 'Pre-rental',
+      'post-rental': 'Post-rental',
+      'renter-receipt': 'Receipt confirmation'
+    };
+    
+    alert(`✅ ${typeMessages[handshakeData.type]} handover photos submitted successfully!`);
   };
 
   const formatDate = (dateStr) => {
@@ -396,6 +429,17 @@ export default function Dashboard() {
                                 Details
                               </button>
                             )}
+                            {rental.status === 'active' && (
+                              <button
+                                onClick={() => {
+                                  setVisualHandshakeBooking(rental);
+                                  setHandshakeType('renter-receipt');
+                                }}
+                                className="text-[#00879E] hover:underline font-medium"
+                              >
+                                📸 Confirm Receipt
+                              </button>
+                            )}
                             {rental.status === 'completed' && (
                               <button
                                 onClick={() => setReviewingRental(rental)}
@@ -439,14 +483,122 @@ export default function Dashboard() {
               <div>
                 <h3 className="text-lg font-bold text-[#003E51]">My Listings</h3>
                 <p className="text-sm text-[#4A6572]">Manage your equipment listings and bookings</p>
+                <button
+                  onClick={() => navigate('/my-listings')}
+                  className="text-[#00879E] hover:text-[#003E51] text-sm font-medium mt-2 underline"
+                >
+                  → View all your listings
+                </button>
               </div>
-              <button
-                onClick={() => navigate('/create-listing')}
-                className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
-              >
-                + Add New Listing
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => navigate('/earnings')}
+                  className="bg-[#00879E] hover:bg-[#005570] text-white font-medium py-2 px-6 rounded-lg transition"
+                >
+                  💰 Earnings Dashboard
+                </button>
+                <button
+                  onClick={() => navigate('/create-listing')}
+                  className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
+                >
+                  + Add New Listing
+                </button>
+              </div>
             </div>
+
+            {/* Pending Booking Requests Section */}
+            {(() => {
+              const bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+              const pendingRequests = bookingRequests.filter(
+                req => req.lenderId == user.id && req.status === 'pending'
+              );
+
+              return pendingRequests.length > 0 ? (
+                <div className="border-b border-[#D0DDE2] p-6">
+                  <div className="mb-4">
+                    <h3 className="text-lg font-bold text-[#003E51] mb-1">⏳ Pending Booking Requests</h3>
+                    <p className="text-sm text-[#4A6572]">
+                      {pendingRequests.length} booking request{pendingRequests.length > 1 ? 's' : ''} awaiting your approval
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {pendingRequests.map((request) => (
+                      <div
+                        key={request.id}
+                        className="border border-[#D0DDE2] rounded-lg p-4 bg-[#F4F7F8] hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <img
+                                src={`https://via.placeholder.com/40?text=${(request.renterName || 'U').charAt(0)}`}
+                                alt={request.renterName || 'Renter'}
+                                className="w-10 h-10 rounded-full"
+                              />
+                              <div>
+                                <h4 className="font-semibold text-[#003E51]">{request.renterName || 'Renter'}</h4>
+                                <p className="text-xs text-[#4A6572]">Booking ID: {request.id}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-3 text-sm">
+                              <div>
+                                <p className="text-[#4A6572]">Equipment</p>
+                                <p className="font-medium text-[#003E51]">{request.equipmentName}</p>
+                              </div>
+                              <div>
+                                <p className="text-[#4A6572]">Dates</p>
+                                <p className="font-medium text-[#003E51]">
+                                  {new Date(request.startDate).toLocaleDateString()} -{' '}
+                                  {new Date(request.endDate).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[#4A6572]">Duration</p>
+                                <p className="font-medium text-[#003E51]">{request.days} day{request.days > 1 ? 's' : ''}</p>
+                              </div>
+                              <div>
+                                <p className="text-[#4A6572]">Total Cost</p>
+                                <p className="font-medium text-[#003E51]">{request.totalCost.toFixed(2)} SAR</p>
+                              </div>
+                            </div>
+
+                            <div className="border-t border-[#D0DDE2] pt-3 mt-3">
+                              <button
+                                onClick={() => setViewingRenterProfile(request.renterName)}
+                                className="text-[#00879E] hover:text-[#003E51] text-sm font-medium"
+                              >
+                                👤 View Renter Profile & Details →
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setSelectedPendingRequest(request)}
+                              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition"
+                            >
+                              ✅ Approve
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedPendingRequest(request);
+                                setRejectingBooking(true);
+                              }}
+                              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition"
+                            >
+                              ❌ Reject
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-100 border-b border-[#D0DDE2]">
@@ -1050,6 +1202,213 @@ export default function Dashboard() {
                 ✕ Reject Request
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Pending Request Modal */}
+      {selectedPendingRequest && !rejectingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-[#003E51] mb-4">Approve Booking Request?</h2>
+            <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6 space-y-3">
+              <div>
+                <p className="text-sm text-[#4A6572]">Renter</p>
+                <p className="font-semibold text-[#003E51]">{selectedPendingRequest.renterName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-[#4A6572]">Equipment</p>
+                <p className="font-semibold text-[#003E51]">{selectedPendingRequest.equipmentName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-[#4A6572]">Rental Dates</p>
+                <p className="font-semibold text-[#003E51]">
+                  {new Date(selectedPendingRequest.startDate).toLocaleDateString()} - {new Date(selectedPendingRequest.endDate).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-[#4A6572]">Total Amount</p>
+                <p className="font-semibold text-[#00879E] text-lg">{selectedPendingRequest.totalCost.toFixed(2)} SAR</p>
+              </div>
+            </div>
+
+            <p className="text-[#4A6572] mb-6">
+              By approving, EquipShare will lock the dates and initiate payment hold. The renter will be notified and can proceed to checkout.
+            </p>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => setSelectedPendingRequest(null)}
+                className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApproveBooking}
+                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
+              >
+                ✅ Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Pending Request Modal */}
+      {rejectingBooking && selectedPendingRequest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-[#003E51] mb-4">Reject Booking Request</h2>
+            <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6">
+              <div>
+                <p className="text-sm text-[#4A6572]">Renter</p>
+                <p className="font-semibold text-[#003E51]">{selectedPendingRequest.renterName}</p>
+              </div>
+              <div className="mt-3">
+                <p className="text-sm text-[#4A6572]">Equipment</p>
+                <p className="font-semibold text-[#003E51]">{selectedPendingRequest.equipmentName}</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label htmlFor="rejectionReason" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                Rejection Reason (Optional)
+              </label>
+              <textarea
+                id="rejectionReason"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Explain why you're rejecting this booking request..."
+                className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                rows="4"
+              />
+              <p className="text-xs text-[#4A6572] mt-2">The renter will be notified of the rejection and payment hold will be released.</p>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => {
+                  setRejectingBooking(false);
+                  setSelectedPendingRequest(null);
+                  setRejectionReason('');
+                }}
+                className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectBooking}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium"
+              >
+                ❌ Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Renter Profile Modal */}
+      {viewingRenterProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-[#003E51]">Renter Profile</h2>
+              <button
+                onClick={() => setViewingRenterProfile(null)}
+                className="text-2xl text-[#4A6572] hover:text-[#0A1F29]"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Mock Renter Data */}
+            <div className="space-y-6">
+              {/* Profile Header */}
+              <div className="flex items-center gap-4 pb-4 border-b border-[#D0DDE2]">
+                <img
+                  src={`https://via.placeholder.com/60?text=${viewingRenterProfile.charAt(0)}`}
+                  alt={viewingRenterProfile}
+                  className="w-16 h-16 rounded-full"
+                />
+                <div>
+                  <h3 className="text-lg font-semibold text-[#003E51]">{viewingRenterProfile}</h3>
+                  <p className="text-sm text-[#4A6572]">Member since Jan 2024</p>
+                  <p className="text-[#00879E] font-semibold">⭐ 4.7 rating (23 reviews)</p>
+                </div>
+              </div>
+
+              {/* Trust Rating */}
+              <div>
+                <h4 className="font-semibold text-[#003E51] mb-2">🏆 Trust Rating</h4>
+                <div className="bg-[#F4F7F8] rounded-lg p-3 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#4A6572]">Communication</span>
+                    <span className="font-semibold text-[#003E51]">Excellent</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#4A6572]">Reliability</span>
+                    <span className="font-semibold text-[#003E51]">Very Reliable</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#4A6572]">Payment Timeliness</span>
+                    <span className="font-semibold text-[#003E51]">Always On Time</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rental History Summary */}
+              <div>
+                <h4 className="font-semibold text-[#003E51] mb-2">📋 Rental History</h4>
+                <div className="bg-[#F4F7F8] rounded-lg p-3 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#4A6572]">Total Rentals</span>
+                    <span className="font-semibold text-[#003E51]">12 items</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4A6572]">Completed Successfully</span>
+                    <span className="font-semibold text-green-600">11 (92%)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4A6572]">Disputes</span>
+                    <span className="font-semibold text-[#003E51]">0</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trusted Circle Status */}
+              <div>
+                <h4 className="font-semibold text-[#003E51] mb-2">👥 Trusted Circle Status</h4>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-sm font-semibold text-green-700">✅ Member of 2 Circles</p>
+                  <ul className="text-xs text-green-600 mt-2 space-y-1">
+                    <li>• Tech Hub 245</li>
+                    <li>• University Circle 1863</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Recent Reviews */}
+              <div>
+                <h4 className="font-semibold text-[#003E51] mb-2">⭐ Recent Reviews</h4>
+                <div className="space-y-2">
+                  <div className="text-sm border-b border-[#D0DDE2] pb-2">
+                    <p className="font-medium text-[#0A1F29]">Great renter! Very responsible.</p>
+                    <p className="text-xs text-[#4A6572]">From: Lender Sarah • 2 weeks ago</p>
+                  </div>
+                  <div className="text-sm pb-2">
+                    <p className="font-medium text-[#0A1F29]">Excellent communication and punctual return.</p>
+                    <p className="text-xs text-[#4A6572]">From: Lender Ahmed • 1 month ago</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setViewingRenterProfile(null)}
+              className="w-full mt-6 px-4 py-2 bg-[#003E51] hover:bg-[#002A38] text-white rounded-lg font-medium"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
