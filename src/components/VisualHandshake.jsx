@@ -9,10 +9,21 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
 
   const minPhotos = 3;
   const isComplete = uploadedPhotos.length >= minPhotos;
-  const handshakeTitle = handshakeType === 'pre-rental' ? 'Pre-Rental Handover' : 'Post-Rental Return';
-  const handshakeDescription = handshakeType === 'pre-rental' 
-    ? 'Document the equipment condition before pickup' 
-    : 'Confirm equipment return condition';
+  
+  const handshakeTitleMap = {
+    'pre-rental': 'Pre-Rental Handover',
+    'post-rental': 'Post-Rental Return',
+    'renter-receipt': 'Receipt Confirmation'
+  };
+  
+  const handshakeDescriptionMap = {
+    'pre-rental': 'Document the equipment condition before pickup',
+    'post-rental': 'Confirm equipment return condition',
+    'renter-receipt': 'Confirm you received the equipment in good condition'
+  };
+  
+  const handshakeTitle = handshakeTitleMap[handshakeType] || 'Equipment Handover';
+  const handshakeDescription = handshakeDescriptionMap[handshakeType] || 'Document equipment condition';
 
   // Mock file input handler - simulates camera/photo upload
   const handleAddPhoto = () => {
@@ -67,7 +78,9 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-900">
               📷 <strong>Please upload a minimum of 3 photos</strong> showing all sides and angles of the equipment. 
-              Date and time will be automatically recorded with each photo.
+              {handshakeType === 'renter-receipt' 
+                ? ' This confirms you received it in good condition.' 
+                : ' Date and time will be automatically recorded with each photo.'}
             </p>
           </div>
 
@@ -217,7 +230,9 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
                   : 'bg-gray-300 text-gray-600 cursor-not-allowed'
               }`}
             >
-              ✓ Submit {uploadedPhotos.length >= minPhotos ? 'Photos' : 'Handover'}
+              {handshakeType === 'renter-receipt' 
+                ? `✓ Confirm Receipt${uploadedPhotos.length >= minPhotos ? '' : ' Photos'}` 
+                : `✓ Submit${uploadedPhotos.length >= minPhotos ? ' Photos' : ' Handover'}`}
             </button>
           </div>
         </div>

@@ -9,20 +9,19 @@ export default function Marketplace() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     category: 'All',
-    priceRange: [20, 350],
-    location: 'All',
-    verified: false,
+    priceRange: [20, 1000],
+    trustedCircles: false,
+    sort: 'Newest',
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Get unique categories and locations from listings
+  // Get unique categories from listings
   const categories = ['All', ...new Set(listings.map(item => item.category))];
-  const locations = ['All', ...new Set(listings.map(item => item.location))];
 
   // Filter listings based on search and filters
   const filteredListings = useMemo(() => {
-    return listings.filter(item => {
+    let result = listings.filter(item => {
       // Search term filter
       const searchMatch = searchTerm === '' || 
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -36,14 +35,22 @@ export default function Marketplace() {
       const priceMatch = item.dailyRate >= filters.priceRange[0] && 
         item.dailyRate <= filters.priceRange[1];
 
-      // Location filter
-      const locationMatch = filters.location === 'All' || item.location === filters.location;
+      // Trusted Circles filter
+      const trustedCirclesMatch = !filters.trustedCircles || item.trustedCircles;
 
-      // Verified filter
-      const verifiedMatch = !filters.verified || item.verified;
-
-      return searchMatch && categoryMatch && priceMatch && locationMatch && verifiedMatch;
+      return searchMatch && categoryMatch && priceMatch && trustedCirclesMatch;
     });
+
+    // Sort results
+    if (filters.sort === 'Price: Low to High') {
+      result.sort((a, b) => a.dailyRate - b.dailyRate);
+    } else if (filters.sort === 'Price: High to Low') {
+      result.sort((a, b) => b.dailyRate - a.dailyRate);
+    } else if (filters.sort === 'Newest') {
+      result.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+    }
+
+    return result;
   }, [searchTerm, filters]);
 
   // Pagination
@@ -70,9 +77,9 @@ export default function Marketplace() {
     setSearchTerm('');
     setFilters({
       category: 'All',
-      priceRange: [20, 350],
-      location: 'All',
-      verified: false,
+      priceRange: [20, 1000],
+      trustedCircles: false,
+      sort: 'Newest',
     });
     setCurrentPage(1);
   };
@@ -131,70 +138,64 @@ export default function Marketplace() {
               </select>
             </div>
 
-            {/* Price Range Filter */}
+            {/* Sort Filter */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                💰 Price Range (SAR/day)
-              </label>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min="20"
-                    max="350"
-                    value={filters.priceRange[0]}
-                    onChange={(e) => {
-                      const newMin = Math.min(Number(e.target.value), filters.priceRange[1]);
-                      handleFilterChange('priceRange', [newMin, filters.priceRange[1]]);
-                    }}
-                    className="flex-1"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min="20"
-                    max="350"
-                    value={filters.priceRange[1]}
-                    onChange={(e) => {
-                      const newMax = Math.max(Number(e.target.value), filters.priceRange[0]);
-                      handleFilterChange('priceRange', [filters.priceRange[0], newMax]);
-                    }}
-                    className="flex-1"
-                  />
-                </div>
-                <p className="text-sm text-[#4A6572]">
-                  {filters.priceRange[0]} - {filters.priceRange[1]} SAR
-                </p>
-              </div>
-            </div>
-
-            {/* Location Filter */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                📍 Location
+                Sort By
               </label>
               <select
-                value={filters.location}
-                onChange={(e) => handleFilterChange('location', e.target.value)}
+                value={filters.sort}
+                onChange={(e) => handleFilterChange('sort', e.target.value)}
                 className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
               >
-                {locations.map(loc => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
+                <option value="Newest">Newest</option>
+                <option value="Price: Low to High">Price: Low to High</option>
+                <option value="Price: High to Low">Price: High to Low</option>
               </select>
             </div>
 
-            {/* Verified Badge Filter */}
+            {/* Price Range Filter */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
+                💰 Price Range
+              </label>
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="10"
+                  value={filters.priceRange[0]}
+                  onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value), filters.priceRange[1]])}
+                  className="w-full"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="10"
+                  value={filters.priceRange[1]}
+                  onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], parseInt(e.target.value)])}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-[#4A6572] bg-[#F4F7F8] p-2 rounded">
+                  <span>{filters.priceRange[0]} SAR</span>
+                  <span>-</span>
+                  <span>{filters.priceRange[1]} SAR</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trusted Circles Filter */}
             <div className="mb-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={filters.verified}
-                  onChange={(e) => handleFilterChange('verified', e.target.checked)}
+                  checked={filters.trustedCircles}
+                  onChange={(e) => handleFilterChange('trustedCircles', e.target.checked)}
                   className="w-4 h-4 rounded border-[#D0DDE2]"
                 />
-                <span className="text-sm font-medium text-[#0A1F29]">✅ Verified Only</span>
+                <span className="text-sm font-medium text-[#0A1F29]">🤝 Trusted Circles Only</span>
               </label>
             </div>
           </div>

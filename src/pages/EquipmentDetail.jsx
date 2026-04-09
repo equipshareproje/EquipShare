@@ -94,7 +94,37 @@ export default function EquipmentDetail() {
       navigate('/signin');
       return;
     }
-    navigate(`/checkout/${equipment.id}`);
+
+    // Create a booking request
+    const bookingRequest = {
+      id: `BR-${Date.now()}`, // Unique booking request ID
+      equipmentId: equipment.id,
+      equipmentName: equipment.name,
+      equipmentImage: equipment.image,
+      equipmentCategory: equipment.category,
+      renterId: user.id,
+      renterName: user.name || `User ${user.id}`,
+      renterEmail: user.email,
+      lenderId: equipment.lenderId,
+      startDate,
+      endDate,
+      days: bookingDays,
+      dailyRate: equipment.dailyRate,
+      subtotal: totalCost,
+      serviceFee,
+      totalCost: finalCost,
+      status: 'pending', // 'pending' | 'approved' | 'rejected' | 'completed'
+      createdAt: new Date().toISOString(),
+      requestedAt: new Date().toISOString().split('T')[0],
+    };
+
+    // Store booking request in localStorage
+    const bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+    bookingRequests.push(bookingRequest);
+    localStorage.setItem('bookingRequests', JSON.stringify(bookingRequests));
+
+    alert(`✅ Booking request submitted!\n\n📋 Request ID: ${bookingRequest.id}\n\nThe lender will review your request shortly. Check your dashboard for updates.`);
+    navigate('/dashboard');
   };
 
   return (

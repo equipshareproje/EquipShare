@@ -182,12 +182,16 @@ export default function CreateListing() {
     return newErrors;
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
+    // Convert photos to data URLs before storing
+    const photoDataUrls = await convertPhotosToDataUrls(formData.photos);
+    
     // Save to localStorage as draft
     const drafts = JSON.parse(localStorage.getItem('listingDrafts') || '[]');
     const draft = {
       id: Date.now(),
       ...formData,
+      photos: photoDataUrls,
       savedAt: new Date().toLocaleString(),
       status: 'draft',
     };
@@ -200,7 +204,27 @@ export default function CreateListing() {
     }, 2000);
   };
 
-  const handlePublishListing = () => {
+  const convertPhotosToDataUrls = async (files) => {
+    return Promise.all(
+      files.map(file => {
+        return new Promise((resolve) => {
+          if (typeof file === 'string') {
+            // Already a data URL or path string
+            resolve(file);
+          } else if (file instanceof File) {
+            // Convert File to data URL
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+          } else {
+            resolve(null);
+          }
+        });
+      })
+    );
+  };
+
+  const handlePublishListing = async () => {
     const formErrors = validateForm();
 
     if (Object.keys(formErrors).length > 0) {
@@ -208,11 +232,15 @@ export default function CreateListing() {
       return;
     }
 
+    // Convert photos to data URLs before storing
+    const photoDataUrls = await convertPhotosToDataUrls(formData.photos);
+
     // Save to localStorage (mock backend)
     const listings = JSON.parse(localStorage.getItem('myListings') || '[]');
     const newListing = {
       id: Date.now(),
       ...formData,
+      photos: photoDataUrls,
       lenderId: user?.id || 1,
       createdAt: new Date().toISOString(),
       status: 'active',
@@ -476,7 +504,7 @@ export default function CreateListing() {
               onClick={() => setShowCalendarModal(true)}
               className="w-full px-4 py-3 border-2 border-[#003E51] text-[#003E51] font-semibold rounded-lg hover:bg-[#F4F7F8] transition"
             >
-              📅 Mark Blocked Dates
+              Mark Blocked Dates
             </button>
 
             {/* Blocked Dates Display */}
@@ -512,7 +540,7 @@ export default function CreateListing() {
             </Button>
             <Button
               onClick={handlePublishListing}
-              variant="primary"
+              variant="secondary"
               className="flex-1"
             >
               Publish Listing
