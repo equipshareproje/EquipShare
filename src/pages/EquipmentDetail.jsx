@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
+import DateRangeCalendar from '../components/DateRangeCalendar';
 import listings from '../data/listings.json';
 
 export default function EquipmentDetail() {
@@ -258,44 +259,15 @@ export default function EquipmentDetail() {
                   </span>
                 </div>
 
-                {/* Available Dates Info */}
-                <div className="mb-4 p-3 bg-white rounded-lg">
-                  <p className="text-xs font-semibold text-[#003E51] mb-2">📅 Available Dates</p>
-                  <p className="text-xs text-[#4A6572]">
-                    {new Date(equipment.availability.startDate).toLocaleDateString()} -{' '}
-                    {new Date(equipment.availability.endDate).toLocaleDateString()}
-                  </p>
-                </div>
-
-                {/* Start Date */}
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                    Start Date <span className="text-red-600">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    min={minDate}
-                    max={maxDate}
-                    className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
-                  />
-                </div>
-
-                {/* End Date */}
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                    End Date <span className="text-red-600">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    min={startDate || minDate}
-                    max={maxDate}
-                    className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
-                  />
-                </div>
+                {/* Calendar with Available Dates */}
+                <DateRangeCalendar
+                  startDate={startDate}
+                  endDate={endDate}
+                  onStartDateChange={setStartDate}
+                  onEndDateChange={setEndDate}
+                  minDate={minDate}
+                  maxDate={maxDate}
+                />
 
                 <div className="space-y-2 pb-4 border-b border-[#D0DDE2]">
                   {startDate && endDate && (

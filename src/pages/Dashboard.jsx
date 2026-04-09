@@ -22,6 +22,9 @@ export default function Dashboard() {
     comment: '',
   });
   const [expandedDetails, setExpandedDetails] = useState(null); // Track which row's details are expanded
+  const [approvingBooking, setApprovingBooking] = useState(null); // For approval modal
+  const [rejectingBooking, setRejectingBooking] = useState(null); // For rejection modal
+  const [rejectionReason, setRejectionReason] = useState(''); // For rejection reason
 
   // Mock rental history (as renter - items user has rented)
   const rentalHistory = [
@@ -88,39 +91,60 @@ export default function Dashboard() {
       equipmentId: 10,
       equipmentName: 'Pressure Washer',
       renterName: 'John Smith',
+      renterId: 5,
       renterRating: 4.6,
+      renterAvatar: 'https://via.placeholder.com/60?text=JSM',
+      renterVerified: true,
+      renterMemberSince: 'Nov 2024',
+      renterTrustedCircle: 'KFUPM Students',
       startDate: '2026-03-05',
       endDate: '2026-03-08',
       status: 'completed',
       bookingRef: 'BOOK-2026-0301-1782',
       pickupLocation: '123 Main St, Downtown',
       totalCost: 155.25,
+      renterPreviousRentals: 8,
+      renterReviewCount: 8,
     },
     {
       id: 102,
       equipmentId: 11,
       equipmentName: 'Camera Kit',
       renterName: 'Jane Doe',
+      renterId: 6,
       renterRating: 4.9,
+      renterAvatar: 'https://via.placeholder.com/60?text=JDoe',
+      renterVerified: true,
+      renterMemberSince: 'Jan 2025',
+      renterTrustedCircle: 'KFUPM Students',
       startDate: '2026-03-01',
       endDate: '2026-03-03',
       status: 'active',
       bookingRef: 'BOOK-2026-0201-5521',
       pickupLocation: '456 Tech Ave, Campus',
       totalCost: 299.90,
+      renterPreviousRentals: 15,
+      renterReviewCount: 15,
     },
     {
       id: 103,
       equipmentId: 12,
       equipmentName: 'Tent & Camping Gear',
       renterName: 'Ahmed Hassan',
+      renterId: 7,
       renterRating: 4.3,
+      renterAvatar: 'https://via.placeholder.com/60?text=AHasan',
+      renterVerified: false,
+      renterMemberSince: 'Mar 2026',
+      renterTrustedCircle: null,
       startDate: '2026-04-10',
       endDate: '2026-04-15',
       status: 'pending',
       bookingRef: 'BOOK-2026-0410-3394',
       pickupLocation: '789 Student Center, Building A',
       totalCost: 440.00,
+      renterPreviousRentals: 2,
+      renterReviewCount: 2,
     },
   ];
 
@@ -169,6 +193,35 @@ export default function Dashboard() {
     setReviewingLenderBooking(null);
     setLenderReviewForm({ rating: 5, renterBehavior: '', itemCare: '', comment: '' });
     alert('Renter review submitted! 🎉');
+  };
+
+  const handleApproveBooking = () => {
+    if (approvingBooking) {
+      // Mock: update booking status to 'active' and charge payment
+      const booking = lenderBookings.find(b => b.id === approvingBooking.id);
+      if (booking) {
+        booking.status = 'active';
+        booking.approvalDate = new Date().toISOString().split('T')[0];
+        booking.approvedByLender = true;
+      }
+      setApprovingBooking(null);
+      alert('✅ Booking request approved! Payment will be charged and renter notified.');
+    }
+  };
+
+  const handleRejectBooking = () => {
+    if (rejectingBooking) {
+      // Mock: update booking status to 'rejected' and release payment hold
+      const booking = lenderBookings.find(b => b.id === rejectingBooking.id);
+      if (booking) {
+        booking.status = 'rejected';
+        booking.rejectionReason = rejectionReason;
+        booking.rejectionDate = new Date().toISOString().split('T')[0];
+      }
+      setRejectingBooking(null);
+      setRejectionReason('');
+      alert('❌ Booking request rejected. Payment hold released and renter notified.');
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -438,10 +491,16 @@ export default function Dashboard() {
                             )}
                             {booking.status === 'pending' && (
                               <>
-                                <button className="text-green-600 hover:underline font-medium">
+                                <button
+                                  onClick={() => setApprovingBooking(booking)}
+                                  className="text-green-600 hover:underline font-medium"
+                                >
                                   Approve
                                 </button>
-                                <button className="text-red-600 hover:underline font-medium">
+                                <button
+                                  onClick={() => setRejectingBooking(booking)}
+                                  className="text-red-600 hover:underline font-medium"
+                                >
                                   Reject
                                 </button>
                               </>
@@ -701,6 +760,189 @@ export default function Dashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Approval Modal - Show Renter Profile & Booking Details */}
+      {approvingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
+            <h2 className="text-2xl font-bold text-[#003E51] mb-6">Approve Booking Request</h2>
+
+            {/* Renter Profile Card */}
+            <div className="bg-gradient-to-r from-[#003E51] to-[#002A38] rounded-lg p-4 text-white mb-6">
+              <div className="flex items-center gap-4 mb-4">
+                <img
+                  src={approvingBooking.renterAvatar}
+                  alt={approvingBooking.renterName}
+                  className="w-16 h-16 rounded-full border-2 border-white"
+                />
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold">{approvingBooking.renterName}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-yellow-300">⭐ {approvingBooking.renterRating}</span>
+                    <span className="text-sm opacity-90">({approvingBooking.renterReviewCount} reviews)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verification Status */}
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  {approvingBooking.renterVerified ? (
+                    <>
+                      <span className="text-green-300">✅</span>
+                      <span>Verified User</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-yellow-300">⚠️</span>
+                      <span>Unverified</span>
+                    </>
+                  )}
+                </div>
+                <p>📅 Member since {approvingBooking.renterMemberSince}</p>
+                {approvingBooking.renterTrustedCircle && (
+                  <p>🤝 {approvingBooking.renterTrustedCircle}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Rental History Summary */}
+            <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-[#003E51] mb-3">Rental History</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#003E51]">{approvingBooking.renterPreviousRentals}</p>
+                  <p className="text-sm text-[#4A6572]">Previous Rentals</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">✅</p>
+                  <p className="text-sm text-[#4A6572]">All Completed</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Booking Details */}
+            <div className="border border-[#D0DDE2] rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-[#003E51] mb-3">Booking Details</h4>
+              <div className="space-y-2 text-sm">
+                <p><span className="font-medium text-[#0A1F29]">Equipment:</span> {approvingBooking.equipmentName}</p>
+                <p><span className="font-medium text-[#0A1F29]">Dates:</span> {approvingBooking.startDate} to {approvingBooking.endDate}</p>
+                <p><span className="font-medium text-[#0A1F29]">Total Cost:</span> ${approvingBooking.totalCost.toFixed(2)}</p>
+                <p><span className="font-medium text-[#0A1F29]">Reference:</span> {approvingBooking.bookingRef}</p>
+              </div>
+            </div>
+
+            {/* Trust Indicator */}
+            {approvingBooking.renterRating >= 4.7 && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6 flex items-center gap-2">
+                <span className="text-green-600">✅</span>
+                <span className="text-sm text-green-700"><strong>High Trust Renter:</strong> Excellent track record</span>
+              </div>
+            )}
+
+            {!approvingBooking.renterVerified && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6 flex items-center gap-2">
+                <span className="text-yellow-600">⚠️</span>
+                <span className="text-sm text-yellow-700"><strong>Note:</strong> Renter account not yet verified</span>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4 border-t border-[#D0DDE2]">
+              <button
+                onClick={() => setApprovingBooking(null)}
+                className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApproveBooking}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
+              >
+                ✓ Approve Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Modal - Optional Reason */}
+      {rejectingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Reject Booking Request</h2>
+
+            {/* Quick Info */}
+            <div className="bg-gray-100 rounded p-3 mb-4 text-sm">
+              <p className="font-medium text-[#0A1F29]">Renter: {rejectingBooking.renterName}</p>
+              <p className="text-[#4A6572]">{rejectingBooking.equipmentName} • {rejectingBooking.startDate} to {rejectingBooking.endDate}</p>
+            </div>
+
+            <p className="text-[#4A6572] mb-4 text-sm">
+              The payment hold of <strong>${rejectingBooking.totalCost.toFixed(2)}</strong> will be released, and the renter will be notified.
+            </p>
+
+            {/* Rejection Reason */}
+            <div className="mb-6">
+              <label htmlFor="rejectionReason" className="block text-sm font-medium text-[#0A1F29] mb-2">
+                Reason for Rejection (Optional)
+              </label>
+              <textarea
+                id="rejectionReason"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="E.g., Equipment not available on those dates, prefer verified renters, etc."
+                className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                rows="4"
+              />
+            </div>
+
+            {/* Predefined Reasons */}
+            <div className="mb-6">
+              <p className="text-xs font-semibold text-[#4A6572] mb-2">Quick reasons:</p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setRejectionReason('Equipment not available on these dates')}
+                  className="w-full text-left px-3 py-2 border border-[#D0DDE2] rounded text-sm hover:bg-gray-50 transition"
+                >
+                  Equipment not available on these dates
+                </button>
+                <button
+                  onClick={() => setRejectionReason('Prefer verified renters only')}
+                  className="w-full text-left px-3 py-2 border border-[#D0DDE2] rounded text-sm hover:bg-gray-50 transition"
+                >
+                  Prefer verified renters only
+                </button>
+                <button
+                  onClick={() => setRejectionReason('Other commitment')}
+                  className="w-full text-left px-3 py-2 border border-[#D0DDE2] rounded text-sm hover:bg-gray-50 transition"
+                >
+                  Other commitment
+                </button>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setRejectingBooking(null);
+                  setRejectionReason('');
+                }}
+                className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectBooking}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
+              >
+                ✕ Reject Request
+              </button>
+            </div>
           </div>
         </div>
       )}
