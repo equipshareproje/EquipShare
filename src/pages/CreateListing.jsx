@@ -14,12 +14,16 @@ export default function CreateListing() {
     description: '',
     photos: [],
     availableToCircles: [],
-    availableForRent: true,
+    availabilityStartDate: '',
+    availabilityEndDate: '',
+    blockedDates: [],
   });
 
   const [photoPreview, setPhotoPreview] = useState([]);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
 
   const categories = [
     'Photography',
@@ -92,6 +96,54 @@ export default function CreateListing() {
     setFormData({ ...formData, photos: newPhotos });
   };
 
+  const toggleBlockedDate = (dateString) => {
+    const newBlockedDates = formData.blockedDates.includes(dateString)
+      ? formData.blockedDates.filter(d => d !== dateString)
+      : [...formData.blockedDates, dateString];
+    setFormData({ ...formData, blockedDates: newBlockedDates });
+  };
+
+  const getDaysInMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const generateCalendarDays = () => {
+    const days = [];
+    const daysInMonth = getDaysInMonth(calendarMonth);
+    const firstDay = getFirstDayOfMonth(calendarMonth);
+
+    // Empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+
+    // Days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), i));
+    }
+
+    return days;
+  };
+
+  const formatDateForStorage = (date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  const isDateBlocked = (date) => {
+    return formData.blockedDates.includes(formatDateForStorage(date));
+  };
+
+  const isDateInRange = (date) => {
+    if (!formData.availabilityStartDate || !formData.availabilityEndDate) return false;
+    const start = new Date(formData.availabilityStartDate);
+    const end = new Date(formData.availabilityEndDate);
+    return date >= start && date <= end;
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -109,6 +161,22 @@ export default function CreateListing() {
 
     if (photoPreview.length === 0) {
       newErrors.photos = 'Please upload at least one photo';
+    }
+
+    if (!formData.availabilityStartDate) {
+      newErrors.availabilityStartDate = 'Please set when equipment becomes available';
+    }
+
+    if (!formData.availabilityEndDate) {
+      newErrors.availabilityEndDate = 'Please set when availability ends';
+    }
+
+    if (formData.availabilityStartDate && formData.availabilityEndDate) {
+      const start = new Date(formData.availabilityStartDate);
+      const end = new Date(formData.availabilityEndDate);
+      if (start > end) {
+        newErrors.availabilityEndDate = 'End date must be after start date';
+      }
     }
 
     return newErrors;
@@ -356,17 +424,81 @@ export default function CreateListing() {
             />
           </div>
 
-          {/* Available for Rent Checkbox */}
+          {/* Availability Calendar */}
           <div className="mb-8">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.availableForRent}
-                onChange={(e) => setFormData({ ...formData, availableForRent: e.target.checked })}
-                className="w-5 h-5 accent-[#003E51] cursor-pointer"
-              />
-              <span className="text-[#003E51] font-semibold">Available for rent</span>
+            <label className="block text-sm font-bold text-[#003E51] mb-3">
+              Availability Schedule <span className="text-red-600">*</span>
             </label>
+            <p className="text-xs text-[#4A6572] mb-3">Set when your equipment is available for rent and mark any blocked dates</p>
+
+            {/* Date Range Pickers */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-semibold text-[#4A6572] mb-2">Available From</label>
+                <input
+                  type="date"
+                  value={formData.availabilityStartDate}
+                  onChange={(e) => {
+                    setFormData({ ...formData, availabilityStartDate: e.target.value });
+                    if (errors.availabilityStartDate) setErrors({ ...errors, availabilityStartDate: '' });
+                  }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
+                    errors.availabilityStartDate ? 'border-red-600' : 'border-[#D0DDE2]'
+                  }`}
+                />
+                {errors.availabilityStartDate && (
+                  <p className="text-red-600 text-xs mt-1">{errors.availabilityStartDate}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#4A6572] mb-2">Available Until</label>
+                <input
+                  type="date"
+                  value={formData.availabilityEndDate}
+                  onChange={(e) => {
+                    setFormData({ ...formData, availabilityEndDate: e.target.value });
+                    if (errors.availabilityEndDate) setErrors({ ...errors, availabilityEndDate: '' });
+                  }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${
+                    errors.availabilityEndDate ? 'border-red-600' : 'border-[#D0DDE2]'
+                  }`}
+                />
+                {errors.availabilityEndDate && (
+                  <p className="text-red-600 text-xs mt-1">{errors.availabilityEndDate}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Calendar Button */}
+            <button
+              type="button"
+              onClick={() => setShowCalendarModal(true)}
+              className="w-full px-4 py-3 border-2 border-[#003E51] text-[#003E51] font-semibold rounded-lg hover:bg-[#F4F7F8] transition"
+            >
+              📅 Mark Blocked Dates
+            </button>
+
+            {/* Blocked Dates Display */}
+            {formData.blockedDates.length > 0 && (
+              <div className="mt-4 p-3 bg-[#F4F7F8] rounded-lg border border-[#D0DDE2]">
+                <p className="text-xs font-semibold text-[#0A1F29] mb-2">🚫 Blocked Dates ({formData.blockedDates.length}):</p>
+                <div className="flex flex-wrap gap-2">
+                  {formData.blockedDates.sort().map(date => (
+                    <span key={date} className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-xs border border-[#D0DDE2]">
+                      {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      <button
+                        type="button"
+                        onClick={() => toggleBlockedDate(date)}
+                        className="text-red-600 hover:text-red-800 font-bold"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
@@ -388,6 +520,130 @@ export default function CreateListing() {
           </div>
         </div>
       </div>
+
+      {/* Calendar Modal for Blocked Dates */}
+      {showCalendarModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-[#003E51]">📅 Mark Blocked Dates</h2>
+              <button
+                onClick={() => setShowCalendarModal(false)}
+                className="text-[#4A6572] hover:text-[#0A1F29] text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Month Navigation */}
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
+                className="px-4 py-2 bg-[#F4F7F8] rounded-lg hover:bg-[#D0DDE2] transition font-semibold text-[#003E51]"
+              >
+                ← Prev
+              </button>
+              <h3 className="text-lg font-bold text-[#0A1F29]">
+                {calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}
+              </h3>
+              <button
+                onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
+                className="px-4 py-2 bg-[#F4F7F8] rounded-lg hover:bg-[#D0DDE2] transition font-semibold text-[#003E51]"
+              >
+                Next →
+              </button>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="">
+              {/* Days of week header */}
+              <div className="grid grid-cols-7 gap-2 mb-2">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="text-center font-semibold text-[#4A6572] text-sm py-2">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar Days */}
+              <div className="grid grid-cols-7 gap-2">
+                {generateCalendarDays().map((date, index) => {
+                  if (!date) {
+                    return <div key={`empty-${index}`} className="aspect-square" />;
+                  }
+
+                  const dateString = formatDateForStorage(date);
+                  const isBlocked = isDateBlocked(date);
+                  const isInRange = isDateInRange(date);
+                  const isToday = new Date().toDateString() === date.toDateString();
+
+                  return (
+                    <button
+                      key={dateString}
+                      onClick={() => toggleBlockedDate(dateString)}
+                      className={`
+                        aspect-square rounded-lg font-semibold text-sm flex items-center justify-center transition
+                        ${isBlocked
+                          ? 'bg-red-600 text-white border-2 border-red-700'
+                          : isInRange
+                          ? 'bg-[#00879E] text-white border-2 border-[#00879E]'
+                          : isToday
+                          ? 'bg-yellow-100 text-[#0A1F29] border-2 border-yellow-400'
+                          : 'bg-[#F4F7F8] text-[#0A1F29] border-2 border-[#D0DDE2] hover:bg-[#D0DDE2]'
+                        }
+                      `}
+                      title={isBlocked ? 'Click to remove block' : 'Click to block date'}
+                    >
+                      {date.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="mt-6 p-4 bg-[#F4F7F8] rounded-lg">
+              <p className="text-xs font-semibold text-[#0A1F29] mb-3">Legend:</p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-[#00879E] rounded border-2 border-[#00879E]" />
+                  <span className="text-[#4A6572]">Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-red-600 rounded border-2 border-red-700" />
+                  <span className="text-[#4A6572]">Blocked</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-yellow-100 rounded border-2 border-yellow-400" />
+                  <span className="text-[#4A6572]">Today</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-[#F4F7F8] rounded border-2 border-[#D0DDE2]" />
+                  <span className="text-[#4A6572]">Not in range</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setFormData({ ...formData, blockedDates: [] });
+                }}
+                className="flex-1 px-4 py-3 bg-[#F4F7F8] text-[#0A1F29] font-semibold rounded-lg hover:bg-[#D0DDE2] transition"
+              >
+                Clear All Blocks
+              </button>
+              <button
+                onClick={() => setShowCalendarModal(false)}
+                className="flex-1 px-4 py-3 bg-[#003E51] text-white font-semibold rounded-lg hover:bg-[#002A38] transition"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
