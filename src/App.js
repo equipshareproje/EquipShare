@@ -14,6 +14,8 @@ import PublicProfile from './pages/PublicProfile';
 import CreateListing from './pages/CreateListing';
 import AdminDashboard from './pages/AdminDashboard';
 import EarningsDashboard from './pages/EarningsDashboard';
+import MyListings from './pages/MyListings';
+import EditListing from './pages/EditListing';
 import './index.css';
 
 function App() {
@@ -35,6 +37,8 @@ function App() {
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/earnings" element={<EarningsDashboard />} />
+              <Route path="/my-listings" element={<MyListings />} />
+              <Route path="/edit-listing/:listingId" element={<EditListing />} />
               {/* Other routes will be added here */}
             </Routes>
           </main>
