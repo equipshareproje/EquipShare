@@ -330,7 +330,7 @@ export default function PublicProfile() {
                     </div>
                     <div>
                       <p className="text-[#4A6572]">Location</p>
-                      <p className="font-semibold text-[#003E51]">📍 {userProfile.location}</p>
+                      <p className="font-semibold text-[#003E51]">LOCATION: {userProfile.location}</p>
                     </div>
                   </div>
                 </div>
@@ -406,7 +406,7 @@ export default function PublicProfile() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-lg text-[#4A6572] mb-2">😌 No reviews yet</p>
+                  <p className="text-lg text-[#4A6572] mb-2">No reviews yet</p>
                   <p className="text-sm text-[#4A6572]">
                     This user hasn't received any reviews. Be the first!
                   </p>
@@ -419,7 +419,7 @@ export default function PublicProfile() {
           <div className="lg:col-span-1">
             {/* Trust Indicators */}
             <div className="bg-[#F4F7F8] rounded-lg p-6">
-              <h4 className="font-bold text-[#003E51] mb-4">🛡️ Trust Indicators</h4>
+              <h4 className="font-bold text-[#003E51] mb-4">Trust Indicators</h4>
               <div className="space-y-3">
                 {userProfile.verified && (
                   <div className="flex items-start gap-2">
@@ -447,7 +447,7 @@ export default function PublicProfile() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-[#1A7F5A]">📋</span>
+                  <span className="text-[#1A7F5A]">VERIFIED</span>
                   <div>
                     <p className="font-semibold text-sm text-[#003E51]">
                       Active Member

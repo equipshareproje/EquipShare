@@ -483,12 +483,12 @@ export default function EditListing() {
               onClick={() => setShowCalendarModal(true)}
               className="w-full px-4 py-3 border-2 border-[#003E51] text-[#003E51] font-semibold rounded-lg hover:bg-[#F4F7F8] transition"
             >
-              📅 Mark Blocked Dates
+              Mark Blocked Dates
             </button>
 
             {formData.blockedDates.length > 0 && (
               <div className="mt-4 p-3 bg-[#F4F7F8] rounded-lg border border-[#D0DDE2]">
-                <p className="text-xs font-semibold text-[#0A1F29] mb-2">🚫 Blocked Dates ({formData.blockedDates.length}):</p>
+                <p className="text-xs font-semibold text-[#0A1F29] mb-2">Blocked Dates ({formData.blockedDates.length}):</p>
                 <div className="flex flex-wrap gap-2">
                   {formData.blockedDates.sort().map(date => (
                     <span key={date} className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-xs border border-[#D0DDE2]">
@@ -532,7 +532,7 @@ export default function EditListing() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-[#003E51]">📅 Mark Blocked Dates</h2>
+              <h2 className="text-2xl font-bold text-[#003E51]">Mark Blocked Dates</h2>
               <button
                 onClick={() => setShowCalendarModal(false)}
                 className="text-[#4A6572] hover:text-[#0A1F29] text-2xl"

@@ -19,7 +19,7 @@ export default function EquipmentDetail() {
     return (
       <div className="min-h-screen bg-[#F4F7F8] flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <p className="text-lg text-[#4A6572] mb-4">😕 Equipment not found</p>
+          <p className="text-lg text-[#4A6572] mb-4">Equipment not found</p>
           <Button onClick={() => navigate('/marketplace')} variant="primary">
             Back to Marketplace
           </Button>
@@ -123,7 +123,7 @@ export default function EquipmentDetail() {
     bookingRequests.push(bookingRequest);
     localStorage.setItem('bookingRequests', JSON.stringify(bookingRequests));
 
-    alert(`✅ Booking request submitted!\n\n📋 Request ID: ${bookingRequest.id}\n\nThe lender will review your request shortly. Check your dashboard for updates.`);
+    alert(`Booking request submitted!\n\nRequest ID: ${bookingRequest.id}\n\nThe lender will review your request shortly. Check your dashboard for updates.`);
     navigate('/dashboard');
   };
 
@@ -153,7 +153,7 @@ export default function EquipmentDetail() {
                 className="w-full h-96 object-cover"
               />
               <div className="p-4 bg-gray-100">
-                <p className="text-sm text-[#4A6572]">📷 Photo gallery with additional images coming soon</p>
+                <p className="text-sm text-[#4A6572]">Photo gallery with additional images coming soon</p>
               </div>
             </div>
 
@@ -166,19 +166,19 @@ export default function EquipmentDetail() {
               <div className="flex items-center gap-4 mb-4 pb-4 border-b border-[#D0DDE2]">
                 <div className="flex items-center gap-1">
                   <span className="text-2xl font-bold text-[#003E51]">{equipment.rating}</span>
-                  <div className="text-yellow-400">⭐⭐⭐⭐⭐</div>
+                  <div className="text-yellow-400">★★★★★</div>
                 </div>
                 <span className="text-[#4A6572]">({equipment.reviews} reviews)</span>
                 {equipment.verified && (
                   <span className="ml-auto inline-block text-sm font-semibold text-[#1A7F5A] bg-green-100 px-3 py-1 rounded">
-                    ✅ Verified Equipment
+                    VERIFIED EQUIPMENT
                   </span>
                 )}
               </div>
 
               {/* Description */}
               <div className="mb-6">
-                <h3 className="text-lg font-bold text-[#003E51] mb-2">📝 Description</h3>
+                <h3 className="text-lg font-bold text-[#003E51] mb-2">Description</h3>
                 <p className="text-[#4A6572] leading-relaxed">{equipment.description}</p>
               </div>
 
@@ -190,7 +190,7 @@ export default function EquipmentDetail() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-[#0A1F29] mb-1">Location</h4>
-                  <p className="text-[#4A6572]">📍 {equipment.location}</p>
+                  <p className="text-[#4A6572]">LOCATION: {equipment.location}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-[#0A1F29] mb-1">Daily Rate</h4>
@@ -199,14 +199,14 @@ export default function EquipmentDetail() {
                 <div>
                   <h4 className="text-sm font-semibold text-[#0A1F29] mb-1">Availability</h4>
                   <p className="text-[#4A6572]">
-                    {equipment.available ? '✓ Available' : '✗ Not Available'}
+                    {equipment.available ? 'Available' : 'Not Available'}
                   </p>
                 </div>
               </div>
 
               {/* Availability Dates */}
               <div>
-                <h4 className="text-sm font-semibold text-[#0A1F29] mb-2">📅 Rental Period</h4>
+                <h4 className="text-sm font-semibold text-[#0A1F29] mb-2">Rental Period</h4>
                 <p className="text-[#4A6572]">
                   From {new Date(equipment.availability.startDate).toLocaleDateString()} to{' '}
                   {new Date(equipment.availability.endDate).toLocaleDateString()}
@@ -219,7 +219,7 @@ export default function EquipmentDetail() {
               onClick={() => navigate(`/user/${lender.id}`)}
               className="bg-white rounded-lg shadow-md p-6 mb-6 hover:shadow-lg hover:bg-[#F4F7F8] cursor-pointer transition-all"
             >
-              <h3 className="text-lg font-bold text-[#003E51] mb-4">👤 About the Lender</h3>
+              <h3 className="text-lg font-bold text-[#003E51] mb-4">About the Lender</h3>
               <div className="flex items-start gap-4">
                 <img
                   src={lender.avatar}
@@ -231,13 +231,13 @@ export default function EquipmentDetail() {
                     {lender.name}
                   </h4>
                   <div className="text-sm text-[#4A6572] mb-3">
-                    <p>⭐ {lender.rating} rating • {lender.reviewCount} reviews</p>
-                    <p>⏱️ Responds ~{lender.responseTime}</p>
-                    <p>📅 Member since {lender.memberSince}</p>
+                    <p>{lender.rating} rating • {lender.reviewCount} reviews</p>
+                    <p>Responds ~{lender.responseTime}</p>
+                    <p>Member since {lender.memberSince}</p>
                   </div>
                   {lender.verified && (
                     <span className="inline-block text-xs font-semibold text-[#1A7F5A] bg-green-100 px-2 py-1 rounded">
-                      ✅ Verified Lender
+                      VERIFIED LENDER
                     </span>
                   )}
                 </div>
@@ -251,7 +251,7 @@ export default function EquipmentDetail() {
 
             {/* Reviews Section */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-bold text-[#003E51] mb-4">⭐ Reviews</h3>
+              <h3 className="text-lg font-bold text-[#003E51] mb-4">Reviews</h3>
               <div className="space-y-4">
                 {reviews.map(review => (
                   <div key={review.id} className="pb-4 border-b border-[#D0DDE2] last:border-b-0">
@@ -266,7 +266,7 @@ export default function EquipmentDetail() {
                         <p className="text-sm text-[#4A6572]">{review.date}</p>
                       </div>
                       <span className="text-yellow-400">
-                        {'⭐'.repeat(review.rating)}
+                        {'★'.repeat(review.rating)}
                       </span>
                     </div>
                     <p className="text-[#4A6572]">{review.comment}</p>
@@ -279,7 +279,7 @@ export default function EquipmentDetail() {
           {/* Booking Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 mb-6 bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-bold text-[#003E51] mb-4">💰 Booking Summary</h3>
+              <h3 className="text-lg font-bold text-[#003E51] mb-4">Booking Summary</h3>
 
               <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6">
                 <div className="flex justify-between items-center mb-3">
@@ -338,14 +338,14 @@ export default function EquipmentDetail() {
                   className="w-full"
                   disabled={!equipment.available || !startDate || !endDate}
                 >
-                  {!equipment.available && '❌ Not Available'}
-                  {equipment.available && (!startDate || !endDate) && '📅 Select Dates to Book'}
-                  {equipment.available && startDate && endDate && '📅 Book Now'}
+                  {!equipment.available && 'Not Available'}
+                  {equipment.available && (!startDate || !endDate) && 'Select Dates to Book'}
+                  {equipment.available && startDate && endDate && 'Book Now'}
                 </Button>
               ) : null}
 
               <div className="mt-6 pt-6 border-t border-[#D0DDE2] text-sm text-[#4A6572]">
-                <p>💳 Secure payment with Stripe</p>
+                <p>Secure payment with Stripe</p>
               </div>
             </div>
           </div>

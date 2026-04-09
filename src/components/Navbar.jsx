@@ -77,7 +77,7 @@ const Navbar = () => {
                 to="/admin"
                 className="text-text-secondary hover:text-error font-medium transition-colors"
               >
-                🔐 Admin Panel
+                Admin Panel
               </Link>
             )}
             {user?.role !== 'admin' && (
@@ -151,7 +151,7 @@ const Navbar = () => {
                   className="text-text-secondary hover:text-error font-medium px-2 py-2 hover:bg-surface rounded transition-colors"
                   onClick={handleNavClick}
                 >
-                  🔐 Admin Panel
+                  Admin Panel
                 </Link>
               )}
               {user?.role !== 'admin' && (

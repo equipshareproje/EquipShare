@@ -67,7 +67,7 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
       <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-[#003E51] to-[#002A38] text-white p-6 sticky top-0">
-          <h2 className="text-2xl font-bold mb-2">📸 {handshakeTitle}</h2>
+          <h2 className="text-2xl font-bold mb-2">{handshakeTitle}</h2>
           <p className="text-gray-200">{handshakeDescription}</p>
           <p className="text-sm mt-2">Equipment: <strong>{booking.equipmentName}</strong></p>
         </div>
@@ -77,7 +77,7 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
           {/* Instructions */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-900">
-              📷 <strong>Please upload a minimum of 3 photos</strong> showing all sides and angles of the equipment. 
+              <strong>Please upload a minimum of 3 photos</strong> showing all sides and angles of the equipment. 
               {handshakeType === 'renter-receipt' 
                 ? ' This confirms you received it in good condition.' 
                 : ' Date and time will be automatically recorded with each photo.'}
@@ -88,7 +88,7 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
           <div className="mb-6">
             <h3 className="font-bold text-[#003E51] mb-3">Add Photos</h3>
             <div className="border-2 border-dashed border-[#D0DDE2] rounded-lg p-8 text-center mb-4 bg-[#F4F7F8]">
-              <p className="text-[#4A6572] mb-4">📱 Click below to add a photo</p>
+              <p className="text-[#4A6572] mb-4">Click below to add a photo</p>
               <button
                 onClick={() => {
                   setShowCaptionInput(true);
@@ -163,7 +163,7 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
                         {photo.caption}
                       </p>
                       <p className="text-xs text-[#4A6572] flex items-center gap-1">
-                        <span>🕐</span>
+                        <span>TIME</span>
                         {photo.timestamp}
                       </p>
                     </div>

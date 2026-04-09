@@ -89,7 +89,7 @@ export default function Marketplace() {
       {/* Header */}
       <div className="bg-[#003E51] text-white py-8">
         <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-3xl font-bold mb-2">🔧 Marketplace</h1>
+          <h1 className="text-3xl font-bold mb-2">Marketplace</h1>
           <p className="text-gray-200">Find and rent equipment from KFUPM community</p>
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function Marketplace() {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="🔍 Search by name, category, or description..."
+              placeholder="Search by name, category, or description..."
               value={searchTerm}
               onChange={handleSearchChange}
               className="flex-1 px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
@@ -120,7 +120,7 @@ export default function Marketplace() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filter Sidebar */}
           <div className="bg-white rounded-lg shadow-md p-6 h-fit">
-            <h3 className="text-lg font-bold text-[#003E51] mb-4">🔎 Filters</h3>
+            <h3 className="text-lg font-bold text-[#003E51] mb-4">Filters</h3>
 
             {/* Category Filter */}
             <div className="mb-6">
@@ -157,7 +157,7 @@ export default function Marketplace() {
             {/* Price Range Filter */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-[#0A1F29] mb-2">
-                💰 Price Range
+                Price Range
               </label>
               <div className="space-y-2">
                 <input
@@ -250,7 +250,7 @@ export default function Marketplace() {
                             </p>
                             <p className="text-xs text-[#4A6572]">per day</p>
                           </div>
-                          <p className="text-xs text-[#4A6572]">📍 {item.location}</p>
+                          <p className="text-xs text-[#4A6572]">LOCATION: {item.location}</p>
                         </div>
 
                         {/* Availability Status */}
@@ -305,7 +305,7 @@ export default function Marketplace() {
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                <p className="text-lg text-[#4A6572] mb-2">😕 No equipment found</p>
+                <p className="text-lg text-[#4A6572] mb-2">No equipment found</p>
                 <p className="text-sm text-[#4A6572] mb-4">Try adjusting your filters or search terms</p>
                 <Button onClick={resetFilters} variant="primary">
                   Reset Filters

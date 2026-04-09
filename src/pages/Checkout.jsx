@@ -100,7 +100,7 @@ export default function Checkout() {
     return (
       <div className="min-h-screen bg-[#F4F7F8] flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <p className="text-lg text-[#4A6572] mb-4">🔐 Please sign in to checkout</p>
+          <p className="text-lg text-[#4A6572] mb-4">Please sign in to checkout</p>
           <Button onClick={() => navigate('/signin')} variant="primary">
             Go to Sign In
           </Button>
@@ -113,7 +113,7 @@ export default function Checkout() {
     return (
       <div className="min-h-screen bg-[#F4F7F8] flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <p className="text-lg text-[#4A6572] mb-4">😕 Equipment not found</p>
+          <p className="text-lg text-[#4A6572] mb-4">Equipment not found</p>
           <Button onClick={() => navigate('/marketplace')} variant="primary">
             Back to Marketplace
           </Button>
@@ -134,12 +134,12 @@ export default function Checkout() {
           </button>
 
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <div className="text-6xl mb-4">❌</div>
+            <div className="text-6xl mb-4">ERROR</div>
             <h1 className="text-3xl font-bold text-[#003E51] mb-2">Booking Not Approved</h1>
             <p className="text-[#4A6572] mb-8 text-lg">{error}</p>
             
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-              <h3 className="font-semibold text-blue-900 mb-2">ℹ️ How to proceed:</h3>
+              <h3 className="font-semibold text-blue-900 mb-2">How to proceed:</h3>
               <ol className="text-sm text-blue-800 space-y-1 text-left">
                 <li>1. Navigate to the equipment detail page</li>
                 <li>2. Select your rental dates</li>
@@ -163,7 +163,7 @@ export default function Checkout() {
       <div className="min-h-screen bg-[#F4F7F8]">
         <div className="container mx-auto px-4 max-w-2xl py-8">
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="text-6xl mb-4">🎉</div>
+            <div className="text-6xl mb-4">COMPLETE</div>
             <h1 className="text-3xl font-bold text-[#003E51] mb-2">Payment Successful!</h1>
             <p className="text-[#4A6572] mb-4">Your booking is confirmed and payment has been processed.</p>
 
@@ -196,7 +196,7 @@ export default function Checkout() {
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 text-left text-sm">
-              <p className="text-blue-900 font-semibold mb-2">📋 Next Steps:</p>
+              <p className="text-blue-900 font-semibold mb-2">Next Steps:</p>
               <ul className="text-blue-800 space-y-1 list-disc list-inside">
                 <li>Check your email for booking confirmation</li>
                 <li>Arrange pickup with the lender</li>
@@ -248,7 +248,7 @@ export default function Checkout() {
             {/* Booking Status */}
             <div className="bg-green-50 border border-green-200 rounded-lg shadow-md p-6 mb-6">
               <div className="flex items-center gap-3">
-                <div className="text-3xl">✅</div>
+                <div className="text-3xl">SUCCESS</div>
                 <div>
                   <h3 className="font-bold text-green-900">Booking Approved!</h3>
                   <p className="text-sm text-green-800">Your booking request has been approved by the lender. Complete payment to confirm.</p>
@@ -258,7 +258,7 @@ export default function Checkout() {
 
             {/* Payment Form */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-2xl font-bold text-[#003E51] mb-6">💳 Payment Details</h2>
+              <h2 className="text-2xl font-bold text-[#003E51] mb-6">Payment Details</h2>
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -303,7 +303,7 @@ export default function Checkout() {
                     className="w-full px-4 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
                     disabled={isProcessing}
                   />
-                  <p className="text-xs text-[#4A6572] mt-2">💡 Test card: 4242 4242 4242 4242</p>
+                  <p className="text-xs text-[#4A6572] mt-2">Test card: 4242 4242 4242 4242</p>
                 </div>
 
                 {/* Expiry & CVV */}
@@ -378,7 +378,7 @@ export default function Checkout() {
               </form>
 
               <p className="text-xs text-center text-[#4A6572] mt-4">
-                🔒 Your payment is secure and encrypted with industry-standard SSL encryption.
+                Your payment is secure and encrypted with industry-standard SSL encryption.
               </p>
             </div>
           </div>
@@ -386,7 +386,7 @@ export default function Checkout() {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-bold text-[#003E51] mb-6">📋 Booking Summary</h3>
+              <h3 className="text-lg font-bold text-[#003E51] mb-6">Booking Summary</h3>
 
               <div className="space-y-4">
                 {/* Equipment */}
@@ -446,11 +446,11 @@ export default function Checkout() {
               </div>
 
               <div className="mt-6 pt-6 border-t border-[#D0DDE2] text-sm text-[#4A6572]">
-                <p className="mb-3">💳 Accepted payment methods:</p>
+                <p className="mb-3">Accepted payment methods:</p>
                 <div className="flex gap-2">
-                  <span className="text-lg">💳</span>
-                  <span className="text-lg">🏦</span>
-                  <span className="text-lg">📱</span>
+                  <span className="text-lg">CARD</span>
+                  <span className="text-lg">BANK</span>
+                  <span className="text-lg">MOBILE</span>
                 </div>
               </div>
             </div>

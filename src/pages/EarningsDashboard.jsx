@@ -164,7 +164,7 @@ const EarningsDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#0A1F29] mb-2">💰 Earnings Dashboard</h1>
+          <h1 className="text-4xl font-bold text-[#0A1F29] mb-2">Earnings Dashboard</h1>
           <p className="text-[#4A6572] text-lg">Track your rental income and manage payouts</p>
         </div>
 
@@ -208,7 +208,7 @@ const EarningsDashboard = () => {
 
         {/* Monthly Earnings Chart */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-bold text-[#0A1F29] mb-6">📊 Monthly Revenue</h2>
+          <h2 className="text-xl font-bold text-[#0A1F29] mb-6">Monthly Revenue</h2>
           
           <div className="flex items-end justify-between h-64 gap-2 px-4">
             {months.map(month => {
@@ -236,7 +236,7 @@ const EarningsDashboard = () => {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-bold text-[#0A1F29] mb-4">🔍 Filter Transactions</h2>
+          <h2 className="text-xl font-bold text-[#0A1F29] mb-4">Filter Transactions</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Date Range Start */}
@@ -282,7 +282,7 @@ const EarningsDashboard = () => {
         {/* Transaction History Table */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="p-6 border-b border-[#D0DDE2]">
-            <h2 className="text-xl font-bold text-[#0A1F29]">📋 Transaction History</h2>
+            <h2 className="text-xl font-bold text-[#0A1F29]">Transaction History</h2>
             <p className="text-sm text-[#4A6572] mt-1">Showing {filteredTransactions.length} transaction(s)</p>
           </div>
 
@@ -368,7 +368,7 @@ const EarningsDashboard = () => {
       {showPayoutModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold text-[#0A1F29] mb-2">💳 Request Payout</h2>
+            <h2 className="text-2xl font-bold text-[#0A1F29] mb-2">Request Payout</h2>
             <p className="text-[#4A6572] mb-6">Transfer your available earnings to your registered account</p>
 
             {/* Info Box */}

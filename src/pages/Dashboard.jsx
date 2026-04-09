@@ -190,7 +190,7 @@ export default function Dashboard() {
     }
     setReviewingRental(null);
     setReviewForm({ rating: 5, condition: '', reliability: '', comment: '' });
-    alert('Review submitted! 🎉');
+    alert('Review submitted!');
   };
 
   const handleLenderReviewSubmit = (e) => {
@@ -207,7 +207,7 @@ export default function Dashboard() {
     }
     setReviewingLenderBooking(null);
     setLenderReviewForm({ rating: 5, renterBehavior: '', itemCare: '', comment: '' });
-    alert('Renter review submitted! 🎉');
+    alert('Renter review submitted!');
   };
 
   const handleApproveBooking = () => {
@@ -314,7 +314,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="bg-[#003E51] text-white py-8">
         <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-3xl font-bold mb-2">📋 My Rentals</h1>
+          <h1 className="text-3xl font-bold mb-2">My Rentals</h1>
           <p className="text-gray-200">Manage your rentals and bookings</p>
         </div>
       </div>
@@ -437,7 +437,7 @@ export default function Dashboard() {
                                 }}
                                 className="text-[#00879E] hover:underline font-medium"
                               >
-                                📸 Confirm Receipt
+                                Confirm Receipt
                               </button>
                             )}
                             {rental.status === 'completed' && (
@@ -495,7 +495,7 @@ export default function Dashboard() {
                   onClick={() => navigate('/earnings')}
                   className="bg-[#00879E] hover:bg-[#005570] text-white font-medium py-2 px-6 rounded-lg transition"
                 >
-                  💰 Earnings Dashboard
+                  Earnings Dashboard
                 </button>
                 <button
                   onClick={() => navigate('/create-listing')}
@@ -569,7 +569,7 @@ export default function Dashboard() {
                                 onClick={() => setViewingRenterProfile(request.renterName)}
                                 className="text-[#00879E] hover:text-[#003E51] text-sm font-medium"
                               >
-                                👤 View Renter Profile & Details →
+                                View Renter Profile & Details →
                               </button>
                             </div>
                           </div>
@@ -686,7 +686,7 @@ export default function Dashboard() {
                                     onClick={() => handleStartHandover(booking, 'pre-rental')}
                                     className="text-blue-600 hover:underline font-medium"
                                   >
-                                    📸 Start Handover
+                                    Start Handover
                                   </button>
                                 )}
                                 {booking.preRentalHandshake && !booking.postRentalHandshake && (
@@ -694,7 +694,7 @@ export default function Dashboard() {
                                     onClick={() => handleStartHandover(booking, 'post-rental')}
                                     className="text-orange-600 hover:underline font-medium"
                                   >
-                                    📸 Return Handover
+                                    Return Handover
                                   </button>
                                 )}
                                 {booking.preRentalHandshake && booking.postRentalHandshake && (
@@ -741,7 +741,7 @@ export default function Dashboard() {
                               {booking.preRentalHandshake && (
                                 <div className="border-t pt-4">
                                   <p className="text-sm font-medium text-[#003E51] mb-2">
-                                    📸 Pre-Rental Handover Photos
+                                    Pre-Rental Handover Photos
                                   </p>
                                   <p className="text-xs text-[#4A6572] mb-3">
                                     Submitted: {booking.preRentalHandshake.submittedAt}
@@ -752,7 +752,7 @@ export default function Dashboard() {
                                         <p className="text-xs font-medium text-[#0A1F29] truncate mb-1">
                                           {photo.caption}
                                         </p>
-                                        <p className="text-xs text-[#4A6572]">🕐 {photo.timestamp}</p>
+                                        <p className="text-xs text-[#4A6572]">{photo.timestamp}</p>
                                       </div>
                                     ))}
                                   </div>
@@ -763,7 +763,7 @@ export default function Dashboard() {
                               {booking.postRentalHandshake && (
                                 <div className="border-t pt-4">
                                   <p className="text-sm font-medium text-[#003E51] mb-2">
-                                    📸 Post-Rental Return Photos
+                                    Post-Rental Return Photos
                                   </p>
                                   <p className="text-xs text-[#4A6572] mb-3">
                                     Submitted: {booking.postRentalHandshake.submittedAt}
@@ -774,7 +774,7 @@ export default function Dashboard() {
                                         <p className="text-xs font-medium text-[#0A1F29] truncate mb-1">
                                           {photo.caption}
                                         </p>
-                                        <p className="text-xs text-[#4A6572]">🕐 {photo.timestamp}</p>
+                                        <p className="text-xs text-[#4A6572]">{photo.timestamp}</p>
                                       </div>
                                     ))}
                                   </div>
@@ -1061,7 +1061,7 @@ export default function Dashboard() {
                     </>
                   )}
                 </div>
-                <p>📅 Member since {approvingBooking.renterMemberSince}</p>
+                <p>Member since {approvingBooking.renterMemberSince}</p>
                 {approvingBooking.renterTrustedCircle && (
                   <p>🤝 {approvingBooking.renterTrustedCircle}</p>
                 )}
@@ -1339,7 +1339,7 @@ export default function Dashboard() {
 
               {/* Trust Rating */}
               <div>
-                <h4 className="font-semibold text-[#003E51] mb-2">🏆 Trust Rating</h4>
+                <h4 className="font-semibold text-[#003E51] mb-2">Trust Rating</h4>
                 <div className="bg-[#F4F7F8] rounded-lg p-3 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-[#4A6572]">Communication</span>
@@ -1358,7 +1358,7 @@ export default function Dashboard() {
 
               {/* Rental History Summary */}
               <div>
-                <h4 className="font-semibold text-[#003E51] mb-2">📋 Rental History</h4>
+                <h4 className="font-semibold text-[#003E51] mb-2">Rental History</h4>
                 <div className="bg-[#F4F7F8] rounded-lg p-3 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-[#4A6572]">Total Rentals</span>
@@ -1377,7 +1377,7 @@ export default function Dashboard() {
 
               {/* Trusted Circle Status */}
               <div>
-                <h4 className="font-semibold text-[#003E51] mb-2">👥 Trusted Circle Status</h4>
+                <h4 className="font-semibold text-[#003E51] mb-2">Trusted Circle Status</h4>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                   <p className="text-sm font-semibold text-green-700">✅ Member of 2 Circles</p>
                   <ul className="text-xs text-green-600 mt-2 space-y-1">
