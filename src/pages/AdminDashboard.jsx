@@ -429,7 +429,7 @@ export default function AdminDashboard() {
                 : 'text-[#4A6572] hover:text-[#003E51]'
             }`}
           >
-            FR-A1: Verifications ({pendingVerifications.length})
+            Verifications ({pendingVerifications.length})
           </button>
           <button
             onClick={() => setActiveTab('circles')}
@@ -439,7 +439,7 @@ export default function AdminDashboard() {
                 : 'text-[#4A6572] hover:text-[#003E51]'
             }`}
           >
-            FR-A2: Circles ({trustedCircles.filter(c => c.active).length})
+            Circles ({trustedCircles.filter(c => c.active).length})
           </button>
           <button
             onClick={() => setActiveTab('disputes')}
@@ -449,7 +449,7 @@ export default function AdminDashboard() {
                 : 'text-[#4A6572] hover:text-[#003E51]'
             }`}
           >
-            FR-A3: Disputes ({disputes.filter(d => d.status === 'open').length})
+            Disputes ({disputes.filter(d => d.status === 'open').length})
           </button>
           <button
             onClick={() => setActiveTab('moderation')}
@@ -459,7 +459,7 @@ export default function AdminDashboard() {
                 : 'text-[#4A6572] hover:text-[#003E51]'
             }`}
           >
-            FR-A4: Moderation ({flaggedListings.length})
+            Moderation ({flaggedListings.length})
           </button>
         </div>
 
@@ -516,7 +516,7 @@ export default function AdminDashboard() {
         {activeTab === 'verifications' && (
           <div className="space-y-4">
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-[#003E51] mb-1">FR-A1: User Identity Verification</h2>
+              <h2 className="text-2xl font-bold text-[#003E51] mb-1">User Identity Verification</h2>
               <p className="text-[#4A6572]">Review and approve pending user identity documents</p>
             </div>
             {pendingVerifications.length === 0 ? (
@@ -574,7 +574,7 @@ export default function AdminDashboard() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="bg-white rounded-lg shadow-md p-6 flex-1 mr-4">
-                <h2 className="text-2xl font-bold text-[#003E51]">FR-A2: Trusted Circle Management</h2>
+                <h2 className="text-2xl font-bold text-[#003E51]">Trusted Circle Management</h2>
                 <p className="text-[#4A6572]">Create and manage community verification groups</p>
               </div>
               <button
@@ -678,13 +678,13 @@ export default function AdminDashboard() {
         {activeTab === 'disputes' && (
           <div className="space-y-4">
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-[#003E51] mb-1">FR-A3: Dispute Mediation</h2>
+              <h2 className="text-2xl font-bold text-[#003E51] mb-1">Dispute Mediation</h2>
               <p className="text-[#4A6572]">Review and resolve disputes with Visual Handshake photo evidence</p>
             </div>
 
             {disputes.filter(d => d.status === 'open').length === 0 ? (
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                <p className="text-green-700 font-medium">✅ No open disputes! Platform is healthy.</p>
+                <p className="text-green-700 font-medium">No open disputes! Platform is healthy.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -699,7 +699,7 @@ export default function AdminDashboard() {
                               <p className="text-sm text-[#4A6572]">{dispute.bookingRef}</p>
                             </div>
                             <span className="text-xs font-semibold bg-red-100 text-red-700 px-3 py-1 rounded">
-                              ⏱️ {dispute.daysOpen} days open
+                               {dispute.daysOpen} days open
                             </span>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -883,13 +883,13 @@ export default function AdminDashboard() {
         {activeTab === 'moderation' && (
           <div className="space-y-4">
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-[#003E51] mb-1">FR-A4: Content Moderation</h2>
+              <h2 className="text-2xl font-bold text-[#003E51] mb-1">Content Moderation</h2>
               <p className="text-[#4A6572]">Review flagged listings and take moderation actions</p>
             </div>
 
             {flaggedListings.length === 0 ? (
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                <p className="text-green-700 font-medium">✅ All listings approved! No flagged content.</p>
+                <p className="text-green-700 font-medium">All listings approved! No flagged content.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -935,7 +935,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-300 rounded">
-                      <p className="text-xs font-medium text-blue-800 mb-2">ℹ️ Listing ID: {listing.listingId}</p>
+                      <p className="text-xs font-medium text-blue-800 mb-2"> Listing ID: {listing.listingId}</p>
                       <p className="text-sm text-blue-900">Preview this listing to verify the content before taking action.</p>
                     </div>
 
@@ -956,7 +956,7 @@ export default function AdminDashboard() {
                         onClick={() => handleModerationAction(listing.listingId, 'warn')}
                         className="px-4 py-2 border border-yellow-300 text-yellow-700 rounded-lg font-medium hover:bg-yellow-50 text-sm transition"
                       >
-                        ⚠️ Issue Warning
+                        Issue Warning
                       </button>
                       <button
                         onClick={() => handleModerationAction(listing.listingId, 'remove')}
