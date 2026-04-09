@@ -344,6 +344,18 @@ export default function Dashboard() {
         {/* As Lender Tab */}
         {activeTab === 'lender' && (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="border-b border-[#D0DDE2] p-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-[#003E51]">My Listings</h3>
+                <p className="text-sm text-[#4A6572]">Manage your equipment listings and bookings</p>
+              </div>
+              <button
+                onClick={() => navigate('/create-listing')}
+                className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
+              >
+                + Add New Listing
+              </button>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-100 border-b border-[#D0DDE2]">
