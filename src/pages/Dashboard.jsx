@@ -370,11 +370,41 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rentalHistory.map((rental, index) => (
+                  {(() => {
+                    // Get pending bookings from localStorage
+                    const bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+                    const pendingBookings = bookingRequests.filter(
+                      req => parseInt(req.renterId) === parseInt(user.id) && req.status === 'pending'
+                    );
+
+                    // Convert pending bookings to rental format
+                    const pendingRentals = pendingBookings.map(booking => ({
+                      id: booking.id,
+                      equipmentId: booking.equipmentId,
+                      equipmentName: booking.equipmentName,
+                      category: booking.equipmentCategory,
+                      lenderName: `Lender ${booking.lenderId}`,
+                      lenderRating: 4.8,
+                      startDate: booking.startDate,
+                      endDate: booking.endDate,
+                      dailyRate: booking.dailyRate,
+                      days: booking.days,
+                      totalCost: booking.totalCost,
+                      status: 'pending',
+                      reviewed: false,
+                      image: booking.equipmentImage || 'https://via.placeholder.com/80?text=Equipment',
+                      bookingRef: booking.id,
+                      pickupLocation: 'TBD',
+                    }));
+
+                    // Combine both lists
+                    const allRentals = [...pendingRentals, ...rentalHistory];
+
+                    return allRentals.map((rental, index) => (
                     <React.Fragment key={rental.id}>
                       <tr
                         className={`border-b border-[#D0DDE2] hover:bg-gray-50 transition ${
-                          index === rentalHistory.length - 1 ? 'border-b-0' : ''
+                          index === allRentals.length - 1 ? 'border-b-0' : ''
                         }`}
                       >
                         <td className="px-6 py-4 text-[#0A1F29]">
@@ -409,7 +439,7 @@ export default function Dashboard() {
                         </td>
                         <td className="px-6 py-4">
                           <span className={getStatusBadge(rental.status)}>
-                            {rental.status.charAt(0).toUpperCase() + rental.status.slice(1)}
+                            {rental.status === 'pending' ? 'Pending' : rental.status.charAt(0).toUpperCase() + rental.status.slice(1)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm">
@@ -469,7 +499,8 @@ export default function Dashboard() {
                         </tr>
                       )}
                     </React.Fragment>
-                  ))}
+                  ));
+                  })()}
                 </tbody>
               </table>
             </div>
