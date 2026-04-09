@@ -12,6 +12,7 @@ import Checkout from './pages/Checkout';
 import Dashboard from './pages/Dashboard';
 import PublicProfile from './pages/PublicProfile';
 import CreateListing from './pages/CreateListing';
+import AdminDashboard from './pages/AdminDashboard';
 import './index.css';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/user/:userId" element={<PublicProfile />} />
               <Route path="/create-listing" element={<CreateListing />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               {/* Other routes will be added here */}
             </Routes>
           </main>
