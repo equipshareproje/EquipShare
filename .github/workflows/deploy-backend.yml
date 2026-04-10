@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
+      image_sha: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
     steps:
       - name: Checkout repository
@@ -59,6 +59,7 @@ jobs:
           images: ${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=
+            type=raw,value=${{ github.sha }}
             type=raw,value=latest
 
       - name: Build and push Docker image
@@ -106,7 +107,7 @@ jobs:
         run: |
           jq -n \
             --arg appName      "${{ env.APP_NAME }}" \
-            --arg image        "${{ env.IMAGE_NAME }}:latest" \
+            --arg image        "${{ needs.build.outputs.image_sha }}" \
             --arg jwt          "$_JWT" \
             --arg mongodb      "$_MONGODB" \
             --arg frontend     "$_FRONTEND" \
