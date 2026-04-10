@@ -39,6 +39,9 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Health check — fast response, no DB dependency (required for Container Apps)
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
 // Routes
 registerModules(app);
 

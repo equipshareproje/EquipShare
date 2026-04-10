@@ -11,11 +11,12 @@ export const connectDB = async (): Promise<void> => {
     await mongoose.connect(env.MONGODB_URI, {
       tls: true,
       directConnection: false,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 30000,  // 30s — Cosmos DB cold start can be slow
     });
     logger.info("MongoDB connected");
   } catch (err) {
     logger.error("MongoDB connection error:", err);
-    process.exit(1);
+    // Do NOT exit — let Mongoose retry and let the HTTP server keep responding
+    throw err;
   }
 };
