@@ -18,7 +18,7 @@ const Card = ({
       className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer border border-border"
     >
       {/* Image Container */}
-      <div className="relative h-48 bg-surface overflow-hidden">
+      <div className="relative h-52 bg-surface overflow-hidden">
         <img
           src={image}
           alt={name}
