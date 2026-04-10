@@ -64,8 +64,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: EquipShareBk                          # source code build context
-          file: EquipShareBk/infra/Dockerfile            # Dockerfile grouped under infra/
+          context: EquipShareBk # source code build context
+          file: EquipShareBk/infra/Dockerfile # Dockerfile grouped under infra/
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
