@@ -10,7 +10,14 @@ export default function ScrollToTop() {
       isFirstMount.current = false;
       return;
     }
-    window.scrollTo(0, 0);
+
+    if (window.scrollY > 0) {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth',
+      });
+    }
   }, [pathname]);
 
   return null;
