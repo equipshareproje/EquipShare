@@ -28,10 +28,10 @@ Open any browser and go to: **http://localhost:3003**
 ## System Requirements
 
 ### Browser Support
-- ✅ Chrome (latest 2 versions)
-- ✅ Firefox (latest 2 versions)
-- ✅ Safari (latest 2 versions)
-- ✅ Edge (latest 2 versions)
+- Chrome (latest 2 versions)
+- Firefox (latest 2 versions)
+- Safari (latest 2 versions)
+- Edge (latest 2 versions)
 
 ### Technology Stack
 - **Frontend**: React 19.2.4 with Hooks
@@ -46,7 +46,7 @@ Open any browser and go to: **http://localhost:3003**
 
 ### 12 Functional Requirements (100% Complete)
 
-#### Lender Features (4/4) ✅
+#### Lender Features (4/4)
 - **FR-L1**: Equipment Listing Creation
   - Upload minimum 2 photos
   - Set category, description, price, availability
@@ -68,7 +68,7 @@ Open any browser and go to: **http://localhost:3003**
   - Transaction history with date/listing filters
   - Request payout to registered payment account
 
-#### Renter Features (4/4) ✅
+#### Renter Features (4/4)
 - **FR-R1**: User Registration & Account Creation
   - Sign up with email, phone, password (strength validation)
   - Email verification flow
@@ -92,7 +92,7 @@ Open any browser and go to: **http://localhost:3003**
   - Write comments about equipment condition and lender reliability
   - Reviews visible on lender profile and listing page
 
-#### Admin Features (4/4) ✅
+#### Admin Features (4/4)
 - **FR-A1**: User Identity Verification
   - Review pending identity documents (National ID, Student ID)
   - View applicant name, email, submission date
@@ -111,9 +111,9 @@ Open any browser and go to: **http://localhost:3003**
   - Review visual handshake evidence (pre/post rental photos)
   - See communication log between parties
   - Preview financial impact for each ruling:
-    - ✅ **Renter Responsible**: Renter pays damage fee
-    - ✅ **Lender Responsible**: Renter receives full refund
-    - ✅ **Split Decision**: Both pay 50/50
+    - **Renter Responsible**: Renter pays damage fee
+    - **Lender Responsible**: Renter receives full refund
+    - **Split Decision**: Both pay 50/50
   - Submit ruling → System executes charges/refunds + notifications
 
 - **FR-A4**: Content Moderation
@@ -146,19 +146,19 @@ ADMIN:
 ### Equipment Listings (15+ Items)
 ```
 PHOTOGRAPHY
-- Canon EOS 5D Mark IV - $150/day ✅ Available
-- Sony A6700 Mirrorless - $110/day ✅ Available
-- Professional Lighting Kit - $85/day ✅ Available
+- Canon EOS 5D Mark IV - $150/day Available
+- Sony A6700 Mirrorless - $110/day Available
+- Professional Lighting Kit - $85/day Available
 
 ACTION CAMERAS
-- GoPro Hero 11 - $75/day ✅ Available
+- GoPro Hero 11 - $75/day Available
 
 AUDIO
-- Sony WH-1000XM5 Headphones - $30/day ✅ Available
+- Sony WH-1000XM5 Headphones - $30/day Available
 
 COMPUTERS
-- MacBook Pro 14 - $120/day ✅ Available
-- iPad Pro 12.9 - $60/day ✅ Available
+- MacBook Pro 14 - $120/day Available
+- iPad Pro 12.9 - $60/day Available
 
 DRONES
 - DJI Air 3S - $200/day ❌ Currently Unavailable (Apr 15-30)
@@ -299,11 +299,11 @@ DRONES
 - **Enter Key**: Submit forms
 
 ### Accessibility
-- ✅ WCAG 2.1 Level AA compliant
-- ✅ Keyboard navigation throughout
-- ✅ Screen reader labels on all inputs
-- ✅ Color contrast sufficient for visibility
-- ✅ Images have descriptive alt text
+- WCAG 2.1 Level AA compliant
+- Keyboard navigation throughout
+- Screen reader labels on all inputs
+- Color contrast sufficient for visibility
+- Images have descriptive alt text
 
 ---
 

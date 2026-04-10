@@ -132,32 +132,21 @@ src/
 
 | Name | Role | Responsibilities |
 |------|------|------------------|
-| Alshaya | Developer | Full-stack development, feature implementation, bug fixes |
-
----
-
-## Color System (KFUPM Brand)
-
-- **Primary**: #003E51 (Petrol)
-- **Accent**: #00879E (Teal)
-- **Success**: #1A7F5A (Green)
-- **Warning**: #D97706 (Amber)
-- **Error**: #DC2626 (Red)
+| Ibrahim Alshaya | Developer | Full-stack development, feature implementation, bug fixes |
+| Moath Haimur | Backend Development | API design and integration |
+| Naif Alenizi | UI Designer | UI design and bug fixes |
 
 ---
 
 ## Testing
 
-Comprehensive testing guides available:
-- `QUICK_START.txt` - Quick reference card
-- `DEMO_SETUP.md` - Complete setup guide
-- `TESTING_GUIDE.md` - Full test checklist (1000+ lines)
+For comprehensive testing documentation, see `DEMO_SETUP.md`
 
 ---
 
 ## Features Status
 
-✅ All 12 functional requirements implemented
+All 12 functional requirements implemented
 - FR-L1: Equipment Listing Creation
 - FR-L2: Booking Request Approval
 - FR-L3: Visual Handshake
