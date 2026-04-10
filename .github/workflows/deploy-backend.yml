@@ -97,6 +97,7 @@ jobs:
       - name: Build Bicep parameters file
         env:
           _JWT: ${{ secrets.JWT_ACCESS_SECRET }}
+          _MONGODB: ${{ secrets.MONGODB_URI }}
           _SMTP_U: ${{ secrets.SMTP_USER }}
           _SMTP_P: ${{ secrets.SMTP_PASS }}
           _STORAGE: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
@@ -108,6 +109,7 @@ jobs:
             --arg appName      "${{ env.APP_NAME }}" \
             --arg image        "${{ env.IMAGE_NAME }}:latest" \
             --arg jwt          "$_JWT" \
+            --arg mongodb      "$_MONGODB" \
             --arg frontend     "$_FRONTEND" \
             --arg smtpUser     "$_SMTP_U" \
             --arg smtpPass     "$_SMTP_P" \
@@ -121,6 +123,7 @@ jobs:
                 "appName":                       { "value": $appName   },
                 "containerImage":                { "value": $image     },
                 "jwtAccessSecret":               { "value": $jwt       },
+                "mongodbUri":                    { "value": $mongodb   },
                 "frontendUrl":                   { "value": $frontend  },
                 "smtpUser":                      { "value": $smtpUser  },
                 "smtpPass":                      { "value": $smtpPass  },

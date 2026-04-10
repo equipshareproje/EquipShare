@@ -49,6 +49,10 @@ param stripeSecretKey string = ''
 @description('GITHUB_TOKEN from the workflow — used to pull the private ghcr.io image (no separate PAT needed)')
 param ghcrToken string = ''
 
+@secure()
+@description('MongoDB connection URI (e.g. from Azure Cosmos DB for MongoDB)')
+param mongodbUri string
+
 // ── Non-secret config ─────────────────────────────────────────────────────────
 
 @description('SMTP host')
@@ -69,58 +73,8 @@ param azureStorageContainerName string = 'listings'
 @description('Platform service fee rate (0.0 – 1.0)')
 param platformServiceFeeRate string = '0.1'
 
-// ── Cosmos DB for MongoDB API (free tier) ─────────────────────────────────────
-resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
-  name: '${appName}-mongo'
-  location: location
-  kind: 'MongoDB'
-  properties: {
-    databaseAccountOfferType: 'Standard'
-    enableFreeTier: true              // Free: 400 RU/s + 5 GB — 1 per subscription
-    apiProperties: {
-      serverVersion: '6.0'
-    }
-    locations: [
-      {
-        locationName: location
-        failoverPriority: 0
-        isZoneRedundant: false
-      }
-    ]
-    capabilities: [
-      { name: 'EnableMongo' }
-    ]
-    backupPolicy: {
-      type: 'Periodic'
-      periodicModeProperties: {
-        backupIntervalInMinutes: 240
-        backupRetentionIntervalInHours: 8
-        backupStorageRedundancy: 'Local'
-      }
-    }
-    // Disable public network access is NOT set so the Container App can connect
-    publicNetworkAccess: 'Enabled'
-  }
-}
-
-// Create the application database inside Cosmos DB
-resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/mongodbDatabases@2023-04-15' = {
-  parent: cosmosAccount
-  name: 'equipshare'
-  properties: {
-    resource: { id: 'equipshare' }
-    options: { throughput: 400 }    // Covered by the free tier allocation
-  }
-}
-
-// Build the MongoDB connection URI with the database name embedded
-// Raw Cosmos DB connection string format:
-//   mongodb://{account}:{key}@{account}.mongo.cosmos.azure.com:10255/?ssl=true&...
-// We insert the database name before '?':
-var rawMongoUri = cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
-var mongoUri = replace(rawMongoUri, '/?', '/equipshare?')
-
 // ── Container Apps Environment (consumption – free tier) ─────────────────────
+// NOTE: Cosmos DB is provisioned separately; MONGODB_URI is supplied as a secret.
 resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: '${appName}-env'
   location: location
@@ -141,7 +95,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
       // All sensitive values stored as Container App secrets
       secrets: [
-        { name: 'mongodb-uri',        value: mongoUri }
+        { name: 'mongodb-uri',        value: mongodbUri }
         { name: 'jwt-access-secret',  value: jwtAccessSecret }
         { name: 'smtp-user',          value: smtpUser }
         { name: 'smtp-pass',          value: smtpPass }
@@ -214,5 +168,4 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
 
 // ── Outputs ───────────────────────────────────────────────────────────────────
 output containerAppUrl  string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
-output cosmosDbAccount  string = cosmosAccount.name
 output containerAppName string = containerApp.name
