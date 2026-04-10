@@ -12,6 +12,9 @@ import { notFound } from "./shared/middleware/notFound";
 
 const app = express();
 
+// Trust the Azure Container Apps / reverse-proxy forwarded headers
+app.set("trust proxy", 1);
+
 // API docs — registered before helmet so CSP doesn't block Scalar's CDN
 const spec = generateOpenApiSpec();
 app.get("/api/docs/spec.json", (_req, res) => res.json(spec));
@@ -40,7 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Health check — fast response, no DB dependency (required for Container Apps)
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
 // Routes
 registerModules(app);
