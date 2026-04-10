@@ -3,12 +3,15 @@ import { env } from "@config/env";
 import { IPaymentService, CreatePaymentHoldResult } from "./IPaymentService";
 
 export class StripePaymentService implements IPaymentService {
-  private stripe: InstanceType<typeof Stripe>;
+  private _stripe: InstanceType<typeof Stripe> | null = null;
 
-  constructor() {
-    this.stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: "2026-03-25.dahlia",
-    });
+  private get stripe(): InstanceType<typeof Stripe> {
+    if (!this._stripe) {
+      this._stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+        apiVersion: "2026-03-25.dahlia",
+      });
+    }
+    return this._stripe;
   }
 
   async createHold(options: {
