@@ -60,6 +60,12 @@ export const findByVerificationToken = (tokenHash: string) =>
 export const deleteUserById = (userId: string) =>
   UserModel.findByIdAndDelete(userId);
 
+export const addCircle = (userId: string, circleId: string) =>
+  UserModel.findByIdAndUpdate(userId, { $addToSet: { trustedCircle: circleId } });
+
+export const removeCircle = (userId: string, circleId: string) =>
+  UserModel.findByIdAndUpdate(userId, { $pull: { trustedCircle: circleId } });
+
 export const setVerified = (userId: string) =>
   UserModel.findByIdAndUpdate(userId, {
     verified: true,
