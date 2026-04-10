@@ -87,6 +87,13 @@ export interface ListingRemovedEmailPayload {
   reason: string;
 }
 
+export interface PayoutRequestedEmailPayload {
+  to: string;
+  lenderName: string;
+  amount: number; // SAR
+  payoutId: string;
+}
+
 export interface IEmailService {
   sendVerificationEmail(payload: VerificationEmailPayload): Promise<void>;
   sendBookingRequestEmail(payload: BookingRequestEmailPayload): Promise<void>;
@@ -99,4 +106,5 @@ export interface IEmailService {
   sendReportReceivedEmail(payload: ReportReceivedEmailPayload): Promise<void>;
   sendListingWarningEmail(payload: ListingWarningEmailPayload): Promise<void>;
   sendListingRemovedEmail(payload: ListingRemovedEmailPayload): Promise<void>;
+  sendPayoutRequestedEmail(payload: PayoutRequestedEmailPayload): Promise<void>;
 }

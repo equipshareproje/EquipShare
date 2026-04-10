@@ -58,7 +58,7 @@ export const getListing = async (id: string) => {
   return listing;
 };
 
-export interface MarketplaceFilters extends Omit<ListingFilters, 'ownerIds'> {
+export interface MarketplaceFilters extends Omit<ListingFilters, "ownerIds"> {
   availableFrom?: Date;
   availableTo?: Date;
   trustedCircleOnly?: boolean;
@@ -92,7 +92,12 @@ export const getMarketplace = async (filters: MarketplaceFilters) => {
       if (repoFilters.ownerIds.length === 0) {
         return {
           listings: [],
-          meta: { total: 0, page: filters.page, limit: filters.limit, totalPages: 0 },
+          meta: {
+            total: 0,
+            page: filters.page,
+            limit: filters.limit,
+            totalPages: 0,
+          },
         };
       }
     }

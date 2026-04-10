@@ -153,14 +153,11 @@ registry.registerPath({
       availableTo: z.string().optional().openapi({
         example: "2026-06-05T00:00:00.000Z",
       }),
-      trustedCircleOnly: z
-        .enum(["true", "false"])
-        .optional()
-        .openapi({
-          description:
-            "When true (and token present), returns only listings from lenders in your Trusted Circles",
-          example: "false",
-        }),
+      trustedCircleOnly: z.enum(["true", "false"]).optional().openapi({
+        description:
+          "When true (and token present), returns only listings from lenders in your Trusted Circles",
+        example: "false",
+      }),
       page: z.coerce.number().default(1).openapi({ example: 1 }),
       limit: z.coerce.number().default(12).openapi({ example: 12 }),
     }),

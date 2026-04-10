@@ -73,7 +73,9 @@ export const findMarketplace = async (
     query.blockedDates = { $not: { $elemMatch: { $in: dates } } };
   }
   if (filters.ownerIds && filters.ownerIds.length > 0) {
-    query.ownerId = { $in: filters.ownerIds.map((id) => new Types.ObjectId(id)) };
+    query.ownerId = {
+      $in: filters.ownerIds.map((id) => new Types.ObjectId(id)),
+    };
   }
 
   const skip = (filters.page - 1) * filters.limit;

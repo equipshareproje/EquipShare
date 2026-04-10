@@ -9,6 +9,7 @@ import "./booking.docs";
 import "./review.docs";
 import "./dispute.docs";
 import "./report.docs";
+import "./earnings.docs";
 
 // ── Generate spec ──────────────────────────────────────────────────────────
 

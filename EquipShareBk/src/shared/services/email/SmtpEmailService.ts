@@ -13,6 +13,7 @@ import {
   ReportReceivedEmailPayload,
   ListingWarningEmailPayload,
   ListingRemovedEmailPayload,
+  PayoutRequestedEmailPayload,
 } from "./IEmailService";
 
 export class SmtpEmailService implements IEmailService {
@@ -297,6 +298,41 @@ export class SmtpEmailService implements IEmailService {
           <p><strong>Reason:</strong> ${reason}</p>
           <p>If you believe this decision was made in error, please contact our support team.</p>
           <p style="color:#555;font-size:13px;">EquipShare reserves the right to remove content that endangers the community or violates our terms of service.</p>
+        </body>`,
+    });
+  }
+
+  async sendPayoutRequestedEmail({
+    to,
+    lenderName,
+    amount,
+    payoutId,
+  }: PayoutRequestedEmailPayload): Promise<void> {
+    await this.transporter.sendMail({
+      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
+      to,
+      subject: `Payout Request Received — SAR ${amount.toFixed(2)}`,
+      html: `
+        <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <h2 style="color:#16a34a;">Payout Request Received</h2>
+          <p>Hi ${lenderName},</p>
+          <p>We've received your payout request for <strong>SAR ${amount.toFixed(2)}</strong>.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <tr>
+              <td style="padding:8px;background:#f5f5f5;font-weight:bold;">Reference ID</td>
+              <td style="padding:8px;">#${payoutId}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px;background:#f5f5f5;font-weight:bold;">Amount</td>
+              <td style="padding:8px;">SAR ${amount.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px;background:#f5f5f5;font-weight:bold;">Status</td>
+              <td style="padding:8px;">Pending</td>
+            </tr>
+          </table>
+          <p style="color:#555;">Our team will process your payout within 3–5 business days. You will be notified once it's completed.</p>
+          <p style="color:#888;font-size:12px;">If you did not request this payout, please contact support immediately.</p>
         </body>`,
     });
   }
