@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 
 const UserProfile = () => {
-  const navigate = useNavigate();
   const { user, updateUser } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
