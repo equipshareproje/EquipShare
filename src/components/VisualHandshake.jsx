@@ -1,36 +1,45 @@
 import React, { useState } from 'react';
 import Button from './Button';
 
-export default function VisualHandshake({ booking, onClose, onComplete, handshakeType = 'pre-rental' }) {
+export default function VisualHandshake({
+  booking,
+  onClose,
+  onComplete,
+  handshakeType = 'pre-rental'
+}) {
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
-  const [fileInput, setFileInput] = useState(null);
   const [currentCaption, setCurrentCaption] = useState('');
   const [showCaptionInput, setShowCaptionInput] = useState(false);
 
   const minPhotos = 3;
+  const maxPhotos = 6;
   const isComplete = uploadedPhotos.length >= minPhotos;
-  
+  const canAddMorePhotos = uploadedPhotos.length < maxPhotos;
+
   const handshakeTitleMap = {
     'pre-rental': 'Pre-Rental Handover',
     'post-rental': 'Post-Rental Return',
     'renter-receipt': 'Receipt Confirmation'
   };
-  
+
   const handshakeDescriptionMap = {
     'pre-rental': 'Document the equipment condition before pickup',
     'post-rental': 'Confirm equipment return condition',
     'renter-receipt': 'Confirm you received the equipment in good condition'
   };
-  
-  const handshakeTitle = handshakeTitleMap[handshakeType] || 'Equipment Handover';
-  const handshakeDescription = handshakeDescriptionMap[handshakeType] || 'Document equipment condition';
 
-  // Mock file input handler - simulates camera/photo upload
+  const handshakeTitle = handshakeTitleMap[handshakeType] || 'Equipment Handover';
+  const handshakeDescription =
+    handshakeDescriptionMap[handshakeType] || 'Document equipment condition';
+
   const handleAddPhoto = () => {
-    // Simulate image upload - create a mock URL
+    if (!canAddMorePhotos) return;
+
+    const nextPhotoNumber = uploadedPhotos.length + 1;
+
     const mockPhoto = {
-      id: uploadedPhotos.length + 1,
-      url: `https://via.placeholder.com/400x300?text=Photo+${uploadedPhotos.length + 1}`,
+      id: nextPhotoNumber,
+      url: `https://via.placeholder.com/400x300?text=Photo+${nextPhotoNumber}`,
       timestamp: new Date().toLocaleString('en-US', {
         year: 'numeric',
         month: '2-digit',
@@ -40,15 +49,16 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
         second: '2-digit',
         hour12: true
       }),
-      caption: currentCaption || `Photo ${uploadedPhotos.length + 1}`,
+      caption: currentCaption.trim() || `Photo ${nextPhotoNumber}`,
     };
+
     setUploadedPhotos([...uploadedPhotos, mockPhoto]);
     setCurrentCaption('');
     setShowCaptionInput(false);
   };
 
   const handleRemovePhoto = (photoId) => {
-    setUploadedPhotos(uploadedPhotos.filter(p => p.id !== photoId));
+    setUploadedPhotos(uploadedPhotos.filter((p) => p.id !== photoId));
   };
 
   const handleSubmitHandshake = () => {
@@ -69,7 +79,9 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
         <div className="bg-gradient-to-r from-[#003E51] to-[#002A38] text-white p-6 sticky top-0">
           <h2 className="text-2xl font-bold mb-2">{handshakeTitle}</h2>
           <p className="text-gray-200">{handshakeDescription}</p>
-          <p className="text-sm mt-2">Equipment: <strong>{booking.equipmentName}</strong></p>
+          <p className="text-sm mt-2">
+            Equipment: <strong>{booking.equipmentName}</strong>
+          </p>
         </div>
 
         {/* Main Content */}
@@ -77,10 +89,13 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
           {/* Instructions */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-900">
-              <strong>Please upload a minimum of 3 photos</strong> showing all sides and angles of the equipment. 
-              {handshakeType === 'renter-receipt' 
-                ? ' This confirms you received it in good condition.' 
+              <strong>Please upload a minimum of 3 photos</strong> showing all sides and angles of the equipment.
+              {handshakeType === 'renter-receipt'
+                ? ' This confirms you received it in good condition.'
                 : ' Date and time will be automatically recorded with each photo.'}
+            </p>
+            <p className="text-xs text-blue-800 mt-2">
+              You can upload up to {maxPhotos} photos for this step.
             </p>
           </div>
 
@@ -88,14 +103,22 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
           <div className="mb-6">
             <h3 className="font-bold text-[#003E51] mb-3">Add Photos</h3>
             <div className="border-2 border-dashed border-[#D0DDE2] rounded-lg p-8 text-center mb-4 bg-[#F4F7F8]">
-              <p className="text-[#4A6572] mb-4">Click below to add a photo</p>
+              <p className="text-[#4A6572] mb-4">
+                Click below to add a photo
+              </p>
               <button
+                type="button"
                 onClick={() => {
-                  setShowCaptionInput(true);
+                  if (canAddMorePhotos) setShowCaptionInput(true);
                 }}
-                className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
+                disabled={!canAddMorePhotos}
+                className={`font-medium py-2 px-6 rounded-lg transition ${
+                  canAddMorePhotos
+                    ? 'bg-[#003E51] hover:bg-[#002A38] text-white'
+                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                }`}
               >
-                + Add Photo
+                {canAddMorePhotos ? '+ Add Photo' : 'Photo Limit Reached'}
               </button>
               <p className="text-xs text-[#4A6572] mt-3">
                 Photos automatically timestamped
@@ -117,6 +140,7 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
                 />
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={() => {
                       setShowCaptionInput(false);
                       setCurrentCaption('');
@@ -126,6 +150,7 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
                     Cancel
                   </button>
                   <button
+                    type="button"
                     onClick={handleAddPhoto}
                     className="flex-1 px-3 py-2 bg-[#003E51] text-white rounded-lg font-medium hover:bg-[#002A38] transition text-sm"
                   >
@@ -140,11 +165,14 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
           {uploadedPhotos.length > 0 && (
             <div className="mb-6">
               <h3 className="font-bold text-[#003E51] mb-3">
-                Uploaded Photos ({uploadedPhotos.length}/{minPhotos})
+                Uploaded Photos ({uploadedPhotos.length}/{minPhotos} minimum)
               </h3>
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
                 {uploadedPhotos.map((photo) => (
-                  <div key={photo.id} className="border border-[#D0DDE2] rounded-lg overflow-hidden bg-white hover:shadow-md transition">
+                  <div
+                    key={photo.id}
+                    className="border border-[#D0DDE2] rounded-lg overflow-hidden bg-white hover:shadow-md transition"
+                  >
                     <div className="relative">
                       <img
                         src={photo.url}
@@ -152,6 +180,7 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
                         className="w-full h-32 object-cover"
                       />
                       <button
+                        type="button"
                         onClick={() => handleRemovePhoto(photo.id)}
                         className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold transition"
                       >
@@ -181,21 +210,25 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
                   className={`h-full transition-all ${
                     isComplete ? 'bg-green-500' : 'bg-[#00879E]'
                   }`}
-                  style={{ width: `${Math.min((uploadedPhotos.length / minPhotos) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min((uploadedPhotos.length / minPhotos) * 100, 100)}%`
+                  }}
                 />
               </div>
               <span className="text-sm font-medium text-[#0A1F29]">
                 {uploadedPhotos.length}/{minPhotos}
               </span>
             </div>
+
             {!isComplete && (
               <p className="text-sm text-[#4A6572]">
-                ⚠️ Need {minPhotos - uploadedPhotos.length} more photo(s) to proceed
+                Need {minPhotos - uploadedPhotos.length} more photo(s) to proceed
               </p>
             )}
+
             {isComplete && (
               <p className="text-sm text-green-600 font-medium">
-                ✅ Ready to submit!
+                Ready to submit
               </p>
             )}
           </div>
@@ -216,12 +249,14 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
           {/* Action Buttons */}
           <div className="flex gap-3 border-t border-[#D0DDE2] pt-6">
             <button
+              type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50 transition"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmitHandshake}
               disabled={!isComplete}
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
@@ -230,9 +265,9 @@ export default function VisualHandshake({ booking, onClose, onComplete, handshak
                   : 'bg-gray-300 text-gray-600 cursor-not-allowed'
               }`}
             >
-              {handshakeType === 'renter-receipt' 
-                ? `✓ Confirm Receipt${uploadedPhotos.length >= minPhotos ? '' : ' Photos'}` 
-                : `✓ Submit${uploadedPhotos.length >= minPhotos ? ' Photos' : ' Handover'}`}
+              {handshakeType === 'renter-receipt'
+                ? `Confirm Receipt${uploadedPhotos.length >= minPhotos ? '' : ' Photos'}`
+                : `Submit${uploadedPhotos.length >= minPhotos ? ' Photos' : ' Handover'}`}
             </button>
           </div>
         </div>
