@@ -132,9 +132,9 @@ src/
 
 | Name | Role | Responsibilities |
 |------|------|------------------|
-| Ibrahim Alshaya | Developer | Full-stack development, feature implementation, bug fixes |
-| Moath Haimur | Backend Development | API design and integration |
-| Naif Alenizi | UI Designer | UI design and bug fixes |
+| Ibrahim Alshaya | FullStack Development |  feature implementation and integration |
+| Moath Haimur | Backend Development | API and Database design |
+| Naif Alenizi | Frontend Development | UI design and bug fixes |
 
 ---
 
