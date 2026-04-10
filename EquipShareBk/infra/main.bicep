@@ -45,6 +45,10 @@ param azureStorageConnectionString string = ''
 @description('Stripe secret key (sk_live_... or sk_test_...)')
 param stripeSecretKey string = ''
 
+@secure()
+@description('GitHub PAT with read:packages scope — used to pull the private ghcr.io image')
+param ghcrToken string = ''
+
 // ── Non-secret config ─────────────────────────────────────────────────────────
 
 @description('SMTP host')
@@ -143,6 +147,15 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         { name: 'smtp-pass',          value: smtpPass }
         { name: 'azure-storage-conn', value: azureStorageConnectionString }
         { name: 'stripe-secret-key',  value: stripeSecretKey }
+        { name: 'ghcr-token',         value: ghcrToken }
+      ]
+      // Registry credentials so Container App can pull the private ghcr.io image
+      registries: [
+        {
+          server:            'ghcr.io'
+          username:          'ibshaya'
+          passwordSecretRef: 'ghcr-token'
+        }
       ]
     }
     template: {

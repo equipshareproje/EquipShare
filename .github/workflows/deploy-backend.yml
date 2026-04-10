@@ -102,6 +102,7 @@ jobs:
           _STORAGE: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
           _STRIPE: ${{ secrets.STRIPE_SECRET_KEY }}
           _FRONTEND: ${{ secrets.FRONTEND_URL }}
+          _GHCR: ${{ secrets.GHCR_TOKEN }}
         run: |
           jq -n \
             --arg appName      "${{ env.APP_NAME }}" \
@@ -112,6 +113,7 @@ jobs:
             --arg smtpPass     "$_SMTP_P" \
             --arg storage      "$_STORAGE" \
             --arg stripe       "$_STRIPE" \
+            --arg ghcrToken    "$_GHCR" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               "contentVersion": "1.0.0.0",
@@ -123,7 +125,8 @@ jobs:
                 "smtpUser":                      { "value": $smtpUser  },
                 "smtpPass":                      { "value": $smtpPass  },
                 "azureStorageConnectionString":  { "value": $storage   },
-                "stripeSecretKey":               { "value": $stripe    }
+                "stripeSecretKey":               { "value": $stripe    },
+                "ghcrToken":                     { "value": $ghcrToken }
               }
             }' > /tmp/params.json
 
