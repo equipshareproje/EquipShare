@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 
-export default function DateRangeCalendar({ startDate, endDate, onStartDateChange, onEndDateChange, minDate, maxDate }) {
+export default function DateRangeCalendar({
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
+  minDate,
+  maxDate,
+}) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Get first day of month and number of days
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDay = new Date(year, month, 1);
@@ -11,75 +17,116 @@ export default function DateRangeCalendar({ startDate, endDate, onStartDateChang
   const daysInMonth = lastDay.getDate();
   const startingDayOfWeek = firstDay.getDay();
 
-  // Convert date strings to Date objects for comparison (in local timezone)
   const parseDate = (dateStr) => {
     if (!dateStr) return null;
-    // Parse the date string directly as local date to avoid UTC timezone issues
-    const [year, month, day] = dateStr.split('-').map(Number);
-    return new Date(year, month - 1, day);
+    const [parsedYear, parsedMonth, parsedDay] = dateStr.split('-').map(Number);
+    return new Date(parsedYear, parsedMonth - 1, parsedDay);
   };
 
+  const normalizeDate = (date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
   const isDateInRange = (date, start, end) => {
-    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const d = normalizeDate(date);
     const s = parseDate(start);
     const e = parseDate(end);
+
     if (!s || !e) return false;
     return d >= s && d <= e;
   };
 
   const isDateDisabled = (date) => {
-    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const d = normalizeDate(date);
     const min = parseDate(minDate);
     const max = parseDate(maxDate);
+
     return (min && d < min) || (max && d > max);
   };
 
   const formatDateForInput = (date) => {
-    // Format as YYYY-MM-DD using local timezone
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const formattedYear = date.getFullYear();
+    const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const formattedDay = String(date.getDate()).padStart(2, '0');
+    return `${formattedYear}-${formattedMonth}-${formattedDay}`;
+  };
+
+  const formatDisplayDate = (dateStr) => {
+    const parsed = parseDate(dateStr);
+    return parsed ? parsed.toLocaleDateString() : '';
+  };
+
+  const isToday = (date) => {
+    const today = new Date();
+    return normalizeDate(date).toDateString() === normalizeDate(today).toDateString();
   };
 
   const handleDateClick = (day) => {
     const clickedDate = new Date(year, month, day);
+
     if (isDateDisabled(clickedDate)) return;
 
     const clickedDateStr = formatDateForInput(clickedDate);
 
     if (!startDate || (startDate && endDate)) {
-      // Set start date
       onStartDateChange(clickedDateStr);
       onEndDateChange('');
     } else if (startDate && !endDate) {
       const start = parseDate(startDate);
+
       if (clickedDate < start) {
-        // If clicked date is before start, make it the new start
         onStartDateChange(clickedDateStr);
       } else if (clickedDate.toDateString() === start.toDateString()) {
-        // Same date, do nothing
         return;
       } else {
-        // Set end date
         onEndDateChange(clickedDateStr);
       }
     }
   };
 
+  const previousMonthDate = new Date(year, month - 1, 1);
+  const nextMonthDate = new Date(year, month + 1, 1);
+
+  const min = parseDate(minDate);
+  const max = parseDate(maxDate);
+
+  const isPrevMonthDisabled =
+    min &&
+    previousMonthDate.getFullYear() === min.getFullYear() &&
+    previousMonthDate.getMonth() < min.getMonth() &&
+    previousMonthDate.getFullYear() <= min.getFullYear();
+
+  const isNextMonthDisabled =
+    max &&
+    nextMonthDate.getFullYear() === max.getFullYear() &&
+    nextMonthDate.getMonth() > max.getMonth() &&
+    nextMonthDate.getFullYear() >= max.getFullYear();
+
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
+    if (isPrevMonthDisabled) return;
+    setCurrentDate(previousMonthDate);
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
+    if (isNextMonthDisabled) return;
+    setCurrentDate(nextMonthDate);
   };
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
 
-  // Generate calendar days
   const calendarDays = [];
   for (let i = 0; i < startingDayOfWeek; i++) {
     calendarDays.push(null);
@@ -95,35 +142,51 @@ export default function DateRangeCalendar({ startDate, endDate, onStartDateChang
       </label>
 
       <div className="bg-white border border-[#D0DDE2] rounded-lg p-4">
-        {/* Month/Year Header */}
         <div className="flex items-center justify-between mb-4">
           <button
+            type="button"
             onClick={handlePrevMonth}
-            className="p-2 hover:bg-[#F4F7F8] rounded transition-colors"
+            disabled={isPrevMonthDisabled}
+            aria-label="Previous month"
+            className={`p-2 rounded transition-colors ${
+              isPrevMonthDisabled
+                ? 'opacity-40 cursor-not-allowed'
+                : 'hover:bg-[#F4F7F8]'
+            }`}
           >
             ←
           </button>
+
           <h3 className="text-lg font-bold text-[#003E51]">
             {monthNames[month]} {year}
           </h3>
+
           <button
+            type="button"
             onClick={handleNextMonth}
-            className="p-2 hover:bg-[#F4F7F8] rounded transition-colors"
+            disabled={isNextMonthDisabled}
+            aria-label="Next month"
+            className={`p-2 rounded transition-colors ${
+              isNextMonthDisabled
+                ? 'opacity-40 cursor-not-allowed'
+                : 'hover:bg-[#F4F7F8]'
+            }`}
           >
             →
           </button>
         </div>
 
-        {/* Day headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {days.map(day => (
-            <div key={day} className="text-center text-xs font-bold text-[#4A6572] py-2">
+          {days.map((day) => (
+            <div
+              key={day}
+              className="text-center text-xs font-bold text-[#4A6572] py-2"
+            >
               {day}
             </div>
           ))}
         </div>
 
-        {/* Calendar days */}
         <div className="grid grid-cols-7 gap-1">
           {calendarDays.map((day, idx) => {
             if (day === null) {
@@ -132,25 +195,29 @@ export default function DateRangeCalendar({ startDate, endDate, onStartDateChang
 
             const date = new Date(year, month, day);
             const dateStr = formatDateForInput(date);
-            const isDisabled = isDateDisabled(date);
-            const isStart = dateStr === startDate;
-            const isEnd = dateStr === endDate;
-            const isInRange = isDateInRange(date, startDate, endDate);
+            const disabled = isDateDisabled(date);
+            const start = dateStr === startDate;
+            const end = dateStr === endDate;
+            const inRange = isDateInRange(date, startDate, endDate);
+            const today = isToday(date);
 
             return (
               <button
                 key={day}
+                type="button"
                 onClick={() => handleDateClick(day)}
-                disabled={isDisabled}
+                disabled={disabled}
+                aria-label={`Select ${date.toDateString()}`}
                 className={`
                   aspect-square rounded text-sm font-semibold flex items-center justify-center
-                  transition-all duration-150 cursor-pointer
-                  ${isDisabled ? 'bg-red-100 text-red-400 cursor-not-allowed opacity-50' : ''}
-                  ${!isDisabled && !isStart && !isEnd && !isInRange ? 'bg-[#F4F7F8] text-[#0A1F29] hover:bg-[#E0E8ED]' : ''}
-                  ${isStart || isEnd ? 'bg-[#003E51] text-white ring-2 ring-[#003E51]' : ''}
-                  ${isInRange && !isStart && !isEnd ? 'bg-[#A8D5E2] text-[#003E51]' : ''}
+                  transition-all duration-150 cursor-pointer border
+                  ${disabled ? 'bg-red-100 text-red-400 cursor-not-allowed opacity-50 border-red-200' : 'border-transparent'}
+                  ${!disabled && !start && !end && !inRange ? 'bg-[#F4F7F8] text-[#0A1F29] hover:bg-[#E0E8ED]' : ''}
+                  ${start || end ? 'bg-[#003E51] text-white ring-2 ring-[#003E51] border-[#003E51]' : ''}
+                  ${inRange && !start && !end ? 'bg-[#A8D5E2] text-[#003E51] border-[#A8D5E2]' : ''}
+                  ${today && !start && !end && !inRange && !disabled ? 'ring-1 ring-[#00879E]' : ''}
                 `}
-                title={isDisabled ? 'Not available' : ''}
+                title={disabled ? 'Not available' : today ? 'Today' : ''}
               >
                 {day}
               </button>
@@ -158,8 +225,7 @@ export default function DateRangeCalendar({ startDate, endDate, onStartDateChang
           })}
         </div>
 
-        {/* Legend */}
-        <div className="mt-4 pt-4 border-t border-[#D0DDE2] flex items-center gap-4 text-xs">
+        <div className="mt-4 pt-4 border-t border-[#D0DDE2] flex items-center gap-4 text-xs flex-wrap">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-[#003E51] rounded"></div>
             <span className="text-[#4A6572]">Selected</span>
@@ -172,21 +238,28 @@ export default function DateRangeCalendar({ startDate, endDate, onStartDateChang
             <div className="w-4 h-4 bg-red-100 rounded"></div>
             <span className="text-[#4A6572]">Unavailable</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-white border border-[#00879E] rounded"></div>
+            <span className="text-[#4A6572]">Today</span>
+          </div>
         </div>
 
-        {/* Selected dates display */}
         {(startDate || endDate) && (
           <div className="mt-4 pt-4 border-t border-[#D0DDE2]">
-            <div className="text-xs font-semibold text-[#0A1F29] mb-2">Selected Period:</div>
-            <div className="text-sm text-[#4A6572]">
+            <div className="text-xs font-semibold text-[#0A1F29] mb-2">
+              Selected Period:
+            </div>
+            <div className="text-sm text-[#4A6572] space-y-1">
               {startDate && (
                 <p>
-                  <span className="font-semibold">From:</span> {new Date(startDate).toLocaleDateString()}
+                  <span className="font-semibold">From:</span>{' '}
+                  {formatDisplayDate(startDate)}
                 </p>
               )}
               {endDate && (
                 <p>
-                  <span className="font-semibold">To:</span> {new Date(endDate).toLocaleDateString()}
+                  <span className="font-semibold">To:</span>{' '}
+                  {formatDisplayDate(endDate)}
                 </p>
               )}
             </div>
