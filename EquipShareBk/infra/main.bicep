@@ -46,10 +46,6 @@ param azureStorageConnectionString string = ''
 param stripeSecretKey string = ''
 
 @secure()
-@description('GITHUB_TOKEN from the workflow — used to pull the private ghcr.io image (no separate PAT needed)')
-param ghcrToken string = ''
-
-@secure()
 @description('MongoDB connection URI (e.g. from Azure Cosmos DB for MongoDB)')
 param mongodbUri string
 
@@ -101,16 +97,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         { name: 'smtp-pass',          value: smtpPass }
         { name: 'azure-storage-conn', value: azureStorageConnectionString }
         { name: 'stripe-secret-key',  value: stripeSecretKey }
-        { name: 'ghcr-token',         value: ghcrToken }
       ]
-      // Registry credentials so Container App can pull the private ghcr.io image
-      registries: [
-        {
-          server:            'ghcr.io'
-          username:          'ibshaya'
-          passwordSecretRef: 'ghcr-token'
-        }
-      ]
+      // Image is public on GHCR — no registry credentials needed
     }
     template: {
       containers: [
