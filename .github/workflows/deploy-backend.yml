@@ -16,20 +16,20 @@ on:
   push:
     branches: [back-end]
     paths:
-      - 'EquipShareBk/**'
-      - '.github/workflows/deploy-backend.yml'
+      - "EquipShareBk/**"
+      - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
 
 # ── Global environment ────────────────────────────────────────────────────────
 env:
-  AZURE_RG:   rg-equipshare
-  LOCATION:   eastus
-  APP_NAME:   equipshare
-  IMAGE_NAME: ghcr.io/ibshaya/equipshare   # Must be lowercase
+  AZURE_RG: rg-equipshare
+  LOCATION: eastus
+  APP_NAME: equipshare
+  IMAGE_NAME: ghcr.io/ibshaya/equipshare # Must be lowercase
 
 permissions:
   contents: read
-  packages: write   # Required to push to ghcr.io
+  packages: write # Required to push to ghcr.io
 
 jobs:
   # ╭──────────────────────────────────────────╮
@@ -64,9 +64,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: EquipShareBk        # Dockerfile lives in the EquipShareBk subfolder
+          context: EquipShareBk                          # source code build context
+          file: EquipShareBk/infra/Dockerfile            # Dockerfile grouped under infra/
           push: true
-          tags:   ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
   # ╭──────────────────────────────────────────╮
@@ -95,11 +96,11 @@ jobs:
       # This handles special characters (=, @, /) in connection strings.
       - name: Build Bicep parameters file
         env:
-          _JWT:     ${{ secrets.JWT_ACCESS_SECRET }}
-          _SMTP_U:  ${{ secrets.SMTP_USER }}
-          _SMTP_P:  ${{ secrets.SMTP_PASS }}
+          _JWT: ${{ secrets.JWT_ACCESS_SECRET }}
+          _SMTP_U: ${{ secrets.SMTP_USER }}
+          _SMTP_P: ${{ secrets.SMTP_PASS }}
           _STORAGE: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          _STRIPE:  ${{ secrets.STRIPE_SECRET_KEY }}
+          _STRIPE: ${{ secrets.STRIPE_SECRET_KEY }}
           _FRONTEND: ${{ secrets.FRONTEND_URL }}
         run: |
           jq -n \
