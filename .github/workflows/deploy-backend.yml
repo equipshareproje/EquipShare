@@ -25,7 +25,7 @@ env:
   AZURE_RG: rg-equipshare
   LOCATION: eastus
   APP_NAME: equipshare
-  IMAGE_NAME: ghcr.io/ibshaya/equipshare # Must be lowercase
+  IMAGE_NAME: ghcr.io/equipshareproje/equipshare # Must be lowercase
 
 permissions:
   contents: read
