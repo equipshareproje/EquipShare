@@ -1,8 +1,26 @@
 [
   {
-    "id": 1,
-    "name": "Ahmed Al-Dosari",
+    "id": "1",
+    "fullName": "Demo User",
+    "email": "demo@example.com",
+    "password": "TestPass123",
+    "phone": "+966 50 1234567",
+    "avatar": "https://via.placeholder.com/150?text=Demo",
+    "role": "renter",
+    "verified": true,
+    "joinDate": "2026-01-15",
+    "rating": 4.8,
+    "reviews": 12,
+    "bio": "Demo user for testing EquipShare platform.",
+    "trustedCircle": [],
+    "canRent": true,
+    "canLend": true
+  },
+  {
+    "id": "2",
+    "fullName": "Ahmed Al-Dosari",
     "email": "ahmed.dosari@kfupm.edu.sa",
+    "password": "LenderPass123",
     "phone": "+966501234567",
     "avatar": "https://via.placeholder.com/150?text=Ahmed",
     "role": "lender",
@@ -11,12 +29,15 @@
     "rating": 4.8,
     "reviews": 23,
     "bio": "Photography and tech enthusiast. KFUPM student with passion for sharing equipment.",
-    "trustedCircle": ["sarah.ali@kfupm.edu.sa"]
+    "trustedCircle": ["sarah.ali@kfupm.edu.sa"],
+    "canRent": true,
+    "canLend": true
   },
   {
-    "id": 2,
-    "name": "Sarah Al-Ali",
+    "id": "3",
+    "fullName": "Sarah Al-Ali",
     "email": "sarah.ali@kfupm.edu.sa",
+    "password": "LenderPass123",
     "phone": "+966509876543",
     "avatar": "https://via.placeholder.com/150?text=Sarah",
     "role": "lender",
@@ -25,12 +46,15 @@
     "rating": 4.9,
     "reviews": 45,
     "bio": "Tech entrepreneur renting equipment for various projects.",
-    "trustedCircle": ["ahmed.dosari@kfupm.edu.sa"]
+    "trustedCircle": ["ahmed.dosari@kfupm.edu.sa"],
+    "canRent": true,
+    "canLend": true
   },
   {
-    "id": 3,
-    "name": "Mohammad Al-Shammari",
+    "id": "4",
+    "fullName": "Mohammad Al-Shammari",
     "email": "mohammad.shammari@kfupm.edu.sa",
+    "password": "LenderPass123",
     "phone": "+966555123456",
     "avatar": "https://via.placeholder.com/150?text=Mohammad",
     "role": "lender",
@@ -39,12 +63,15 @@
     "rating": 4.7,
     "reviews": 18,
     "bio": "KFUPM faculty member sharing equipment.",
-    "trustedCircle": []
+    "trustedCircle": [],
+    "canRent": true,
+    "canLend": true
   },
   {
-    "id": 4,
-    "name": "Fatima Al-Qahtani",
+    "id": "5",
+    "fullName": "Fatima Al-Qahtani",
     "email": "fatima.qahtani@kfupm.edu.sa",
+    "password": "UserPass123",
     "phone": "+966502468135",
     "avatar": "https://via.placeholder.com/150?text=Fatima",
     "role": "renter",
@@ -53,12 +80,15 @@
     "rating": 4.6,
     "reviews": 12,
     "bio": "KFUPM student looking to borrow equipment for projects.",
-    "trustedCircle": []
+    "trustedCircle": [],
+    "canRent": true,
+    "canLend": true
   },
   {
-    "id": 5,
-    "name": "Omar Al-Otaibi",
+    "id": "6",
+    "fullName": "Omar Al-Otaibi",
     "email": "omar.otaibi@kfupm.edu.sa",
+    "password": "UserPass123",
     "phone": "+966506789012",
     "avatar": "https://via.placeholder.com/150?text=Omar",
     "role": "renter",
@@ -67,6 +97,25 @@
     "rating": 4.2,
     "reviews": 5,
     "bio": "New member renting for university projects.",
-    "trustedCircle": []
+    "trustedCircle": [],
+    "canRent": true,
+    "canLend": false
+  },
+  {
+    "id": "99",
+    "fullName": "Platform Admin",
+    "email": "admin@equipshare.com",
+    "password": "AdminPass123",
+    "phone": "+966 50 9999999",
+    "avatar": "https://via.placeholder.com/150?text=Admin",
+    "role": "admin",
+    "verified": true,
+    "joinDate": "2025-01-01",
+    "rating": 0,
+    "reviews": 0,
+    "bio": "Platform administrator.",
+    "trustedCircle": [],
+    "canRent": false,
+    "canLend": false
   }
 ]
