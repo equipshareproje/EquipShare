@@ -46,7 +46,7 @@ param azureStorageConnectionString string = ''
 param stripeSecretKey string = ''
 
 @secure()
-@description('GitHub PAT with read:packages scope — used to pull the private ghcr.io image')
+@description('GITHUB_TOKEN from the workflow — used to pull the private ghcr.io image (no separate PAT needed)')
 param ghcrToken string = ''
 
 // ── Non-secret config ─────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/mongodbDatabases@
 // Raw Cosmos DB connection string format:
 //   mongodb://{account}:{key}@{account}.mongo.cosmos.azure.com:10255/?ssl=true&...
 // We insert the database name before '?':
-var rawMongoUri = listConnectionStrings(cosmosAccount.id, '2023-04-15').connectionStrings[0].connectionString
+var rawMongoUri = cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
 var mongoUri = replace(rawMongoUri, '/?', '/equipshare?')
 
 // ── Container Apps Environment (consumption – free tier) ─────────────────────
