@@ -22,6 +22,10 @@ const envSchema = z.object({
   SMTP_PASS: z.string().default(""),
   SMTP_FROM_NAME: z.string().default("EquipShare"),
   SMTP_FROM_EMAIL: z.string().default("noreply@equipshare.com"),
+  AZURE_STORAGE_CONNECTION_STRING: z.string().default(""),
+  AZURE_STORAGE_CONTAINER_NAME: z.string().default("listings"),
+  STRIPE_SECRET_KEY: z.string().default(""),
+  PLATFORM_SERVICE_FEE_RATE: z.coerce.number().default(0.1),
 });
 
 const parsed = envSchema.safeParse(process.env);

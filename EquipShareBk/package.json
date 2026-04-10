@@ -4,7 +4,7 @@
     "description": "EquipShare backend — Node.js + Express + TypeScript + MongoDB",
     "main": "dist/server.js",
     "scripts": {
-        "dev": "nodemon --exec tsx src/server.ts",
+        "dev": "nodemon --watch src --watch .env --ext ts,json,env --exec tsx src/server.ts",
         "build": "tsc",
         "start": "node dist/server.js",
         "lint": "tsc --noEmit"
@@ -14,6 +14,7 @@
     "license": "ISC",
     "dependencies": {
         "@asteasolutions/zod-to-openapi": "^8.5.0",
+        "@azure/storage-blob": "^12.31.0",
         "@scalar/express-api-reference": "^0.9.7",
         "bcryptjs": "^3.0.3",
         "cookie-parser": "^1.4.7",
@@ -24,7 +25,9 @@
         "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.3",
         "mongoose": "^9.4.1",
+        "multer": "^2.1.1",
         "nodemailer": "^8.0.5",
+        "stripe": "^22.0.1",
         "winston": "^3.19.0",
         "zod": "^4.3.6"
     },
@@ -34,6 +37,7 @@
         "@types/cors": "^2.8.19",
         "@types/express": "^5.0.6",
         "@types/jsonwebtoken": "^9.0.10",
+        "@types/multer": "^2.1.0",
         "@types/node": "^25.5.2",
         "@types/nodemailer": "^8.0.0",
         "nodemon": "^3.1.14",

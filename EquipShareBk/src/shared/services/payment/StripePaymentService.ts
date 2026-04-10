@@ -1,0 +1,39 @@
+import Stripe from "stripe";
+import { env } from "@config/env";
+import { IPaymentService, CreatePaymentHoldResult } from "./IPaymentService";
+
+export class StripePaymentService implements IPaymentService {
+  private stripe: InstanceType<typeof Stripe>;
+
+  constructor() {
+    this.stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+      apiVersion: "2026-03-25.dahlia",
+    });
+  }
+
+  async createHold(options: {
+    amount: number;
+    currency: string;
+    metadata: Record<string, string>;
+  }): Promise<CreatePaymentHoldResult> {
+    const intent = await this.stripe.paymentIntents.create({
+      amount: options.amount,
+      currency: options.currency,
+      capture_method: "manual", // authorize only — do NOT charge yet
+      metadata: options.metadata,
+    });
+
+    return {
+      paymentIntentId: intent.id,
+      clientSecret: intent.client_secret!,
+    };
+  }
+
+  async captureHold(paymentIntentId: string): Promise<void> {
+    await this.stripe.paymentIntents.capture(paymentIntentId);
+  }
+
+  async cancelHold(paymentIntentId: string): Promise<void> {
+    await this.stripe.paymentIntents.cancel(paymentIntentId);
+  }
+}
