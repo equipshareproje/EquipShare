@@ -1,4 +1,8 @@
 import { registry, ApiSuccess, ApiError, z } from "./registry";
+import {
+  LISTING_CATEGORIES,
+  LISTING_CONDITIONS,
+} from "../../modules/listing/listing.schema";
 
 // ── Listing shared schema ──────────────────────────────────────────────────
 
@@ -139,10 +143,13 @@ registry.registerPath({
   request: {
     query: z.object({
       category: z
-        .string()
+        .enum(LISTING_CATEGORIES)
         .optional()
         .openapi({ example: "Cameras & Photography" }),
-      condition: z.string().optional().openapi({ example: "Good" }),
+      condition: z
+        .enum(LISTING_CONDITIONS)
+        .optional()
+        .openapi({ example: "Good" }),
       minPrice: z.coerce.number().optional().openapi({ example: 50 }),
       maxPrice: z.coerce.number().optional().openapi({ example: 500 }),
       search: z.string().optional().openapi({ example: "camera tripod" }),
@@ -238,9 +245,9 @@ registry.registerPath({
           schema: z
             .object({
               title: z.string().optional(),
-              category: z.string().optional(),
+              category: z.enum(LISTING_CATEGORIES).optional(),
               description: z.string().optional(),
-              condition: z.string().optional(),
+              condition: z.enum(LISTING_CONDITIONS).optional(),
               dailyPrice: z.number().optional(),
               photos: z.array(z.string().url()).optional(),
               status: z.enum(["Active", "Inactive"]).optional(),
