@@ -30,10 +30,10 @@ export const incrementMemberCount = (circleId: string) =>
   CircleModel.findByIdAndUpdate(circleId, { $inc: { memberCount: 1 } });
 
 export const decrementMemberCount = (circleId: string) =>
-  CircleModel.findByIdAndUpdate(circleId, {
-    $inc: { memberCount: -1 },
-    $max: { memberCount: 0 },
-  });
+  CircleModel.findOneAndUpdate(
+    { _id: circleId, memberCount: { $gt: 0 } },
+    { $inc: { memberCount: -1 } },
+  );
 
 export const deactivate = (circleId: string) =>
   CircleModel.findByIdAndUpdate(
