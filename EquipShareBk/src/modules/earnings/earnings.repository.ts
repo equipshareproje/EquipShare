@@ -94,7 +94,7 @@ export const getTransactions = async (
     BookingModel.find(match)
       .populate<{ listingId: { title: string } }>("listingId", "title")
       .populate<{ renterId: { name: string } }>("renterId", "name")
-      .sort({ updatedAt: -1 })
+      .sort({ _id: -1 })
       .skip(skip)
       .limit(filters.limit)
       .lean(),
@@ -164,5 +164,5 @@ export const createPayout = (data: {
 
 export const findPayoutsByLender = (lenderId: string) =>
   PayoutModel.find({ lenderId: new Types.ObjectId(lenderId) }).sort({
-    createdAt: -1,
+    _id: -1,
   });
