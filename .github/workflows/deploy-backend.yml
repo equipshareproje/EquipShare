@@ -102,7 +102,7 @@ jobs:
           _STORAGE: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
           _STRIPE: ${{ secrets.STRIPE_SECRET_KEY }}
           _FRONTEND: ${{ secrets.FRONTEND_URL }}
-          _GHCR: ${{ secrets.GITHUB_TOKEN }}   # built-in token — no extra secret needed
+          _GHCR: ${{ secrets.GHCR_TOKEN }}
         run: |
           jq -n \
             --arg appName      "${{ env.APP_NAME }}" \
