@@ -6,7 +6,7 @@ export const authorize = (...roles: string[]) =>
     if (!req.user) {
       throw new AppError("Not authenticated", 401, "UNAUTHORIZED");
     }
-    if (!req.user.roles.some((r) => roles.includes(r))) {
+    if (!req.user.roles?.some((r) => roles.includes(r))) {
       throw new AppError("Insufficient permissions", 403, "FORBIDDEN");
     }
     next();

@@ -13,7 +13,13 @@ export const authenticate = asyncHandler(async (req, _res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const payload = jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
+    const payload = jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload & {
+      role?: string;
+    };
+    // Normalize: legacy tokens carried role (string), new tokens carry roles (string[])
+    if (!payload.roles) {
+      payload.roles = payload.role ? [payload.role] : ["Renter"];
+    }
     req.user = payload;
     next();
   } catch {

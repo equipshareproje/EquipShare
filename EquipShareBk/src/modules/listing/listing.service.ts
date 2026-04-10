@@ -49,7 +49,9 @@ export const createListing = async (ownerId: string, dto: CreateListingDto) => {
   });
 
   // Auto-promote owner to Lender role on their first listing
-  await UserModel.findByIdAndUpdate(ownerId, { $addToSet: { roles: "Lender" } });
+  await UserModel.findByIdAndUpdate(ownerId, {
+    $addToSet: { roles: "Lender" },
+  });
 
   return listing;
 };
