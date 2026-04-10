@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import demoUsers from '../data/users.json';
 
 export const AuthContext = createContext();
 
@@ -22,18 +21,45 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Initialize demo users from users.json
-    demoUsers.forEach(demoUser => {
-      if (!users.some(u => u.email === demoUser.email)) {
-        const userToAdd = {
-          ...demoUser,
-          createdAt: new Date().toISOString(),
-          rentalHistory: [],
-          listings: []
-        };
-        users.push(userToAdd);
-      }
-    });
+    // Ensure demo renter user exists
+    if (!users.some(u => u.email === 'demo@example.com')) {
+      users.push({
+        id: '1',
+        fullName: 'Demo User',
+        email: 'demo@example.com',
+        password: 'TestPass123',
+        phone: '+966 50 1234567',
+        role: 'renter',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: true,
+        canLend: true,
+        rating: 4.8,
+        reviews: 12,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
+    // Ensure admin user exists
+    if (!users.some(u => u.email === 'admin@equipshare.com')) {
+      users.push({
+        id: '99',
+        fullName: 'Platform Admin',
+        email: 'admin@equipshare.com',
+        password: 'AdminPass123',
+        phone: '+966 50 9999999',
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: false,
+        canLend: false,
+        rating: 0,
+        reviews: 0,
+        rentalHistory: [],
+        listings: []
+      });
+    }
 
     localStorage.setItem('equipshare_users', JSON.stringify(users));
 

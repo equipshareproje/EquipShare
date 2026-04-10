@@ -13,7 +13,6 @@ import EquipmentDetail from './pages/EquipmentDetail';
 import Checkout from './pages/Checkout';
 import Dashboard from './pages/Dashboard';
 import PublicProfile from './pages/PublicProfile';
-import UserProfile from './pages/UserProfile';
 import CreateListing from './pages/CreateListing';
 import AdminDashboard from './pages/AdminDashboard';
 import EarningsDashboard from './pages/EarningsDashboard';
@@ -38,7 +37,6 @@ function App() {
               <Route path="/equipment/:id" element={<EquipmentDetail />} />
               <Route path="/checkout/:id" element={<Checkout />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<ProtectedRoute element={<UserProfile />} fallbackPath="/signin" />} />
               <Route path="/user/:userId" element={<PublicProfile />} />
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} requiredRole="admin" fallbackPath="/signin" />} />

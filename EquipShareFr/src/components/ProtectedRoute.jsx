@@ -23,13 +23,8 @@ const ProtectedRoute = ({ element, requiredRole, fallbackPath = '/signin' }) => 
     );
   }
 
-  // Check if user is authenticated
-  if (!user) {
-    return <Navigate to={fallbackPath} replace />;
-  }
-
-  // If requiredRole is specified, check if user has that role
-  if (requiredRole && user.role !== requiredRole) {
+  // Check if user is authenticated and has required role
+  if (!user || user.role !== requiredRole) {
     return <Navigate to={fallbackPath} replace />;
   }
 

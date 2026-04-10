@@ -107,14 +107,6 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link
-                  to="/profile"
-                  className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white hover:bg-primary-dark transition-colors text-sm font-bold"
-                  title="View Profile"
-                  aria-label="User profile"
-                >
-                  U
-                </Link>
                 <span className="text-sm text-text-secondary">
                   {user.fullName}
                 </span>
@@ -191,13 +183,6 @@ const Navbar = () => {
                       <p className="text-sm font-medium text-text-primary">{user.fullName}</p>
                       <p className="text-xs text-text-secondary">{user.email}</p>
                     </div>
-                    <Link
-                      to="/profile"
-                      onClick={handleNavClick}
-                      className="text-left px-2 py-2 text-text-secondary hover:text-primary font-medium transition-colors hover:bg-surface rounded"
-                    >
-                      Edit Profile
-                    </Link>
                     <button
                       onClick={handleLogout}
                       className="text-left px-2 py-2 text-text-secondary hover:text-error font-medium transition-colors hover:bg-surface rounded"
