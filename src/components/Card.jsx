@@ -15,7 +15,7 @@ const Card = ({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden cursor-pointer border border-border"
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer border border-border"
     >
       {/* Image Container */}
       <div className="relative h-48 bg-surface overflow-hidden">
