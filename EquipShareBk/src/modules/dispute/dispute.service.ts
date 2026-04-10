@@ -110,12 +110,12 @@ export const fileDispute = async (userId: string, dto: FileDisputeDto) => {
 export const getDispute = async (
   disputeId: string,
   userId: string,
-  userRole: string,
+  userRoles: string[],
 ) => {
   const dispute = await disputeRepository.findById(disputeId);
   if (!dispute) throw new AppError("Dispute not found", 404, "NOT_FOUND");
 
-  if (userRole !== "Admin") {
+  if (!userRoles.includes("Admin")) {
     const toId = (f: unknown) =>
       (f as { _id?: unknown })?._id
         ? String((f as { _id: unknown })._id)

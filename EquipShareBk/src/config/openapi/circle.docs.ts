@@ -6,11 +6,16 @@ const CircleSchema = z
   .object({
     _id: z.string(),
     name: z.string().openapi({ example: "KAUST Alumni" }),
-    description: z.string().openapi({ example: "Community for KAUST graduates" }),
+    description: z
+      .string()
+      .openapi({ example: "Community for KAUST graduates" }),
     eligibilityCriteria: z
       .string()
       .openapi({ example: "Must be a verified KAUST graduate" }),
-    emailDomainRule: z.string().optional().openapi({ example: ".kaust.edu.sa" }),
+    emailDomainRule: z
+      .string()
+      .optional()
+      .openapi({ example: ".kaust.edu.sa" }),
     isActive: z.boolean(),
     memberCount: z.number(),
     createdById: z.string(),
@@ -39,7 +44,10 @@ const CreateCircleBody = z
     eligibilityCriteria: z
       .string()
       .openapi({ example: "Verified KAUST email address required" }),
-    emailDomainRule: z.string().optional().openapi({ example: ".kaust.edu.sa" }),
+    emailDomainRule: z
+      .string()
+      .optional()
+      .openapi({ example: ".kaust.edu.sa" }),
   })
   .openapi("CreateCircleBody");
 
@@ -193,8 +201,14 @@ registry.registerPath({
       description: "Member removed",
       content: { "application/json": { schema: ApiSuccess(z.null()) } },
     },
-    404: { description: "Circle or user not found", content: { "application/json": { schema: ApiError } } },
-    409: { description: "User is not a member", content: { "application/json": { schema: ApiError } } },
+    404: {
+      description: "Circle or user not found",
+      content: { "application/json": { schema: ApiError } },
+    },
+    409: {
+      description: "User is not a member",
+      content: { "application/json": { schema: ApiError } },
+    },
   },
 });
 
@@ -203,7 +217,8 @@ registry.registerPath({
   path: "/api/circles/{id}/deactivate",
   tags: ["Circles"],
   summary: "Deactivate a circle (Admin only)",
-  description: "Marks the circle as inactive. Members remain but no new members can join.",
+  description:
+    "Marks the circle as inactive. Members remain but no new members can join.",
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({ id: z.string() }),

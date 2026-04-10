@@ -14,7 +14,7 @@ export const getDispute = asyncHandler(async (req: Request, res: Response) => {
   const dispute = await disputeService.getDispute(
     String(req.params.id),
     req.user!.sub,
-    req.user!.role,
+    req.user!.roles,
   );
   res.json(ApiResponse.success(dispute, "Dispute fetched"));
 });

@@ -6,7 +6,7 @@ export interface IUser extends Document {
   passwordHash: string;
   phone?: string;
   avatar?: string;
-  role: "Admin" | "Lender" | "Renter";
+  roles: string[];
   bio?: string;
   verified: boolean;
   verificationToken?: string;
@@ -40,11 +40,7 @@ const userSchema = new Schema<IUser>(
     passwordHash: { type: String, required: true, select: false },
     phone: { type: String },
     avatar: { type: String },
-    role: {
-      type: String,
-      enum: ["Admin", "Lender", "Renter"],
-      default: "Renter",
-    },
+    roles: { type: [String], default: () => ["Renter"] },
     bio: { type: String, maxlength: 500 },
     verified: { type: Boolean, default: false },
     verificationToken: { type: String, select: false },

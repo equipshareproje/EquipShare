@@ -6,12 +6,12 @@ import { JwtPayload } from "@shared/types/express.d";
 export const signAccessToken = (user: {
   _id: unknown;
   email: string;
-  role: string;
+  roles: string[];
 }): string => {
   const payload: JwtPayload = {
     sub: String(user._id),
     email: user.email,
-    role: user.role as "Admin" | "User",
+    roles: user.roles,
   };
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
     expiresIn: env.JWT_ACCESS_EXPIRES as jwt.SignOptions["expiresIn"],

@@ -106,7 +106,7 @@ export const login = async (
       id: String(user._id),
       name: user.name,
       email: user.email,
-      role: user.role,
+      roles: user.roles,
       avatar: user.avatar,
     },
   };

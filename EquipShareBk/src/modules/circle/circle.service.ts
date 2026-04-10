@@ -8,13 +8,17 @@ export const createCircle = async (
   adminId: string,
   dto: Omit<CreateCircleDto, "createdById">,
 ) => {
-  const existing = await circleRepository.findAllActive().then((circles) =>
-    circles.find(
-      (c) => c.name.toLowerCase() === dto.name.toLowerCase(),
-    ),
-  );
+  const existing = await circleRepository
+    .findAllActive()
+    .then((circles) =>
+      circles.find((c) => c.name.toLowerCase() === dto.name.toLowerCase()),
+    );
   if (existing) {
-    throw new AppError("A circle with this name already exists", 409, "CIRCLE_NAME_TAKEN");
+    throw new AppError(
+      "A circle with this name already exists",
+      409,
+      "CIRCLE_NAME_TAKEN",
+    );
   }
   return circleRepository.createCircle({ ...dto, createdById: adminId });
 };
@@ -41,10 +45,18 @@ export const joinCircle = async (userId: string, circleId: string) => {
 
   if (!circle) throw new AppError("Circle not found", 404, "CIRCLE_NOT_FOUND");
   if (!circle.isActive)
-    throw new AppError("This circle is no longer active", 409, "CIRCLE_INACTIVE");
+    throw new AppError(
+      "This circle is no longer active",
+      409,
+      "CIRCLE_INACTIVE",
+    );
   if (!user) throw new AppError("User not found", 404, "USER_NOT_FOUND");
   if (user.trustedCircle.includes(circleId))
-    throw new AppError("You are already a member of this circle", 409, "ALREADY_A_MEMBER");
+    throw new AppError(
+      "You are already a member of this circle",
+      409,
+      "ALREADY_A_MEMBER",
+    );
 
   if (circle.emailDomainRule) {
     if (!user.email.endsWith(circle.emailDomainRule)) {
@@ -66,7 +78,11 @@ export const leaveCircle = async (userId: string, circleId: string) => {
   const user = await UserModel.findById(userId).lean();
   if (!user) throw new AppError("User not found", 404, "USER_NOT_FOUND");
   if (!user.trustedCircle.includes(circleId))
-    throw new AppError("You are not a member of this circle", 409, "NOT_A_MEMBER");
+    throw new AppError(
+      "You are not a member of this circle",
+      409,
+      "NOT_A_MEMBER",
+    );
 
   await Promise.all([
     removeCircle(userId, circleId),
@@ -81,7 +97,11 @@ export const removeMember = async (circleId: string, userId: string) => {
   const user = await UserModel.findById(userId).lean();
   if (!user) throw new AppError("User not found", 404, "USER_NOT_FOUND");
   if (!user.trustedCircle.includes(circleId))
-    throw new AppError("This user is not a member of this circle", 409, "NOT_A_MEMBER");
+    throw new AppError(
+      "This user is not a member of this circle",
+      409,
+      "NOT_A_MEMBER",
+    );
 
   await Promise.all([
     removeCircle(userId, circleId),

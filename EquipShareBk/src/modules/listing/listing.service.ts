@@ -47,6 +47,10 @@ export const createListing = async (ownerId: string, dto: CreateListingDto) => {
     blockedDates: dto.blockedDates?.map((d) => new Date(d)) ?? [],
     status: "Active",
   });
+
+  // Auto-promote owner to Lender role on their first listing
+  await UserModel.findByIdAndUpdate(ownerId, { $addToSet: { roles: "Lender" } });
+
   return listing;
 };
 

@@ -20,7 +20,7 @@ export interface AuthResponseDto {
     id: string;
     name: string;
     email: string;
-    role: string;
+    roles: string[];
     avatar?: string;
   };
 }

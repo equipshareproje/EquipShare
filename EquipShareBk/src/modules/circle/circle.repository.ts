@@ -36,4 +36,8 @@ export const decrementMemberCount = (circleId: string) =>
   });
 
 export const deactivate = (circleId: string) =>
-  CircleModel.findByIdAndUpdate(circleId, { isActive: false }, { new: true }).lean();
+  CircleModel.findByIdAndUpdate(
+    circleId,
+    { isActive: false },
+    { new: true },
+  ).lean();
