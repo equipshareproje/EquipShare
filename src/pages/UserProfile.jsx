@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 
@@ -16,16 +16,14 @@ const UserProfile = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/signin');
-      return;
+    if (user) {
+      setFormData({
+        fullName: user.fullName || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
+      });
     }
-    setFormData({
-      fullName: user.fullName || '',
-      phone: user.phone || '',
-      bio: user.bio || '',
-    });
-  }, [user, navigate]);
+  }, [user]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -225,13 +223,12 @@ const UserProfile = () => {
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </Button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="px-6 py-2 border border-border text-text-primary rounded-lg hover:bg-surface transition-colors"
+              <Link
+                to="/dashboard"
+                className="px-6 py-2 border border-border text-text-primary rounded-lg hover:bg-surface transition-colors inline-flex items-center"
               >
                 Cancel
-              </button>
+              </Link>
             </div>
           </form>
 

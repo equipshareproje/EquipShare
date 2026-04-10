@@ -109,11 +109,11 @@ const Navbar = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/profile"
-                  className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white hover:bg-primary-dark transition-colors"
+                  className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white hover:bg-primary-dark transition-colors text-sm font-bold"
                   title="View Profile"
                   aria-label="User profile"
                 >
-                  <span className="text-sm font-bold">👤</span>
+                  U
                 </Link>
                 <span className="text-sm text-text-secondary">
                   {user.fullName}
