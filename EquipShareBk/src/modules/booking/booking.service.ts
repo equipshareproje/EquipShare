@@ -218,7 +218,7 @@ export const uploadPreRentalPhotos = async (
   ownerId: string,
   files: Express.Multer.File[],
 ) => {
-  const booking = await bookingRepository.findById(bookingId);
+  const booking = await bookingRepository.findByIdWithSecret(bookingId);
   if (!booking) throw new AppError("Booking not found", 404, "NOT_FOUND");
   if (String(booking.ownerId) !== ownerId)
     throw new AppError("Not authorised", 403, "FORBIDDEN");
@@ -273,7 +273,7 @@ export const uploadReceivedPhotos = async (
   renterId: string,
   files: Express.Multer.File[],
 ) => {
-  const booking = await bookingRepository.findById(bookingId);
+  const booking = await bookingRepository.findByIdWithSecret(bookingId);
   if (!booking) throw new AppError("Booking not found", 404, "NOT_FOUND");
   if (String(booking.renterId) !== renterId)
     throw new AppError("Not authorised", 403, "FORBIDDEN");
