@@ -129,8 +129,8 @@ LENDERS:
 - Mohammad Al-Shammari (mohammad.shammari@kfupm.edu.sa) / Password: LenderPass123
 
 USERS:
-- Fatima Al-Qahtani / Password: UserPass123
-- Omar Al-Rashid / Password: UserPass123
+- Fatima Al-Qahtani (fatima.qahtani@kfupm.edu.sa) / Password: UserPass123
+- Omar Al-Otaibi (omar.otaibi@kfupm.edu.sa) / Password: UserPass123
 - Demo User (demo@example.com) / Password: TestPass123
 
 ADMIN:

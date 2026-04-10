@@ -61,6 +61,103 @@ export const AuthProvider = ({ children }) => {
       });
     }
 
+    // Ensure lender users exist
+    if (!users.some(u => u.email === 'ahmed.dosari@kfupm.edu.sa')) {
+      users.push({
+        id: '2',
+        fullName: 'Ahmed Al-Dosari',
+        email: 'ahmed.dosari@kfupm.edu.sa',
+        password: 'LenderPass123',
+        phone: '+966501234567',
+        role: 'lender',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: true,
+        canLend: true,
+        rating: 4.8,
+        reviews: 23,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
+    if (!users.some(u => u.email === 'sarah.ali@kfupm.edu.sa')) {
+      users.push({
+        id: '3',
+        fullName: 'Sarah Al-Ali',
+        email: 'sarah.ali@kfupm.edu.sa',
+        password: 'LenderPass123',
+        phone: '+966509876543',
+        role: 'lender',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: true,
+        canLend: true,
+        rating: 4.9,
+        reviews: 45,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
+    if (!users.some(u => u.email === 'mohammad.shammari@kfupm.edu.sa')) {
+      users.push({
+        id: '4',
+        fullName: 'Mohammad Al-Shammari',
+        email: 'mohammad.shammari@kfupm.edu.sa',
+        password: 'LenderPass123',
+        phone: '+966555123456',
+        role: 'lender',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: true,
+        canLend: true,
+        rating: 4.7,
+        reviews: 18,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
+    // Ensure renter users exist
+    if (!users.some(u => u.email === 'fatima.qahtani@kfupm.edu.sa')) {
+      users.push({
+        id: '5',
+        fullName: 'Fatima Al-Qahtani',
+        email: 'fatima.qahtani@kfupm.edu.sa',
+        password: 'UserPass123',
+        phone: '+966502468135',
+        role: 'renter',
+        createdAt: new Date().toISOString(),
+        verified: true,
+        canRent: true,
+        canLend: true,
+        rating: 4.6,
+        reviews: 12,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
+    if (!users.some(u => u.email === 'omar.otaibi@kfupm.edu.sa')) {
+      users.push({
+        id: '6',
+        fullName: 'Omar Al-Otaibi',
+        email: 'omar.otaibi@kfupm.edu.sa',
+        password: 'UserPass123',
+        phone: '+966506789012',
+        role: 'renter',
+        createdAt: new Date().toISOString(),
+        verified: false,
+        canRent: true,
+        canLend: false,
+        rating: 4.2,
+        reviews: 5,
+        rentalHistory: [],
+        listings: []
+      });
+    }
+
     localStorage.setItem('equipshare_users', JSON.stringify(users));
 
     const storedUser = localStorage.getItem('equipshare_user');
