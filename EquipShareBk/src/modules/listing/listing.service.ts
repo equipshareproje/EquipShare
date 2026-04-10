@@ -4,6 +4,7 @@ import * as listingRepository from "./listing.repository";
 import { ListingFilters } from "./listing.repository";
 import { ListingCategory, ListingCondition } from "./listing.schema";
 import { UserModel } from "../auth/auth.schema";
+import { BookingModel } from "../booking/booking.schema";
 
 export interface CreateListingDto {
   title: string;
@@ -137,5 +138,18 @@ export const deleteListing = async (id: string, ownerId: string) => {
   if (!listing) {
     throw new AppError("Listing not found or not yours", 404, "NOT_FOUND");
   }
+
+  const activeBooking = await BookingModel.exists({
+    listingId: listing._id,
+    status: { $in: ["Pending", "Approved", "Active"] },
+  });
+  if (activeBooking) {
+    throw new AppError(
+      "Cannot delete a listing that has active or pending bookings",
+      409,
+      "LISTING_HAS_ACTIVE_BOOKINGS",
+    );
+  }
+
   await listingRepository.softDelete(id);
 };

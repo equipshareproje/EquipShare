@@ -9,7 +9,7 @@ const envSchema = z.object({
   MONGODB_URI: z.string().min(1),
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_ACCESS_EXPIRES: z.string().default("15m"),
-  JWT_REFRESH_EXPIRES: z.string().default("7d"),
+  JWT_REFRESH_EXPIRES: z.string().default("1h"),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
   BASE_URL: z.string().default("http://localhost:5000"),
   SMTP_HOST: z.string().default("smtp.gmail.com"),
