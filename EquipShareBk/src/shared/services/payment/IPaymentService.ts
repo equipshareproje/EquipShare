@@ -13,4 +13,7 @@ export interface IPaymentService {
   captureHold(paymentIntentId: string): Promise<void>;
 
   cancelHold(paymentIntentId: string): Promise<void>;
+
+  /** Issue a partial or full refund against a captured payment intent */
+  issueRefund(paymentIntentId: string, amountInHalalas: number): Promise<void>;
 }

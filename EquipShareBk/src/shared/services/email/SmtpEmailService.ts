@@ -8,6 +8,11 @@ import {
   BookingRejectedEmailPayload,
   HandoverPromptEmailPayload,
   ReviewPromptEmailPayload,
+  DisputeFiledEmailPayload,
+  DisputeResolvedEmailPayload,
+  ReportReceivedEmailPayload,
+  ListingWarningEmailPayload,
+  ListingRemovedEmailPayload,
 } from "./IEmailService";
 
 export class SmtpEmailService implements IEmailService {
@@ -163,6 +168,135 @@ export class SmtpEmailService implements IEmailService {
           <p>Hi ${renterName}, we hope your rental of <strong>${listingTitle}</strong> went well.</p>
           <p>Help the community by rating your experience. It only takes a minute.</p>
           <p>Log in to EquipShare → Rental History → Leave a Review.</p>
+        </body>`,
+    });
+  }
+
+  async sendDisputeFiledEmail({
+    to,
+    recipientName,
+    disputeId,
+    listingTitle,
+    filedByName,
+    description,
+  }: DisputeFiledEmailPayload): Promise<void> {
+    await this.transporter.sendMail({
+      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
+      to,
+      subject: `Dispute Filed — Ticket #${disputeId}`,
+      html: `
+        <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <h2 style="color:#c0392b;">A dispute has been filed</h2>
+          <p>Hi ${recipientName},</p>
+          <p><strong>${filedByName}</strong> has filed a dispute regarding the booking for <strong>${listingTitle}</strong>.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <tr><td style="padding:8px;background:#f5f5f5;font-weight:bold;">Ticket ID</td><td style="padding:8px;">#${disputeId}</td></tr>
+            <tr><td style="padding:8px;background:#f5f5f5;font-weight:bold;">Description</td><td style="padding:8px;">${description.substring(0, 200)}${description.length > 200 ? "..." : ""}</td></tr>
+          </table>
+          <p>Our admin team will review the evidence and reach a decision. You will be notified once a ruling is made.</p>
+          <p style="color:#555;font-size:13px;">If you have additional evidence, please contact support with the ticket ID.</p>
+        </body>`,
+    });
+  }
+
+  async sendDisputeResolvedEmail({
+    to,
+    recipientName,
+    disputeId,
+    listingTitle,
+    ruling,
+    rulingNote,
+    refundAmount,
+  }: DisputeResolvedEmailPayload): Promise<void> {
+    const rulingLabel: Record<string, string> = {
+      RenterResponsible: "Renter Responsible",
+      LenderResponsible: "Lender Responsible",
+      NoFaultFound: "No Fault Found",
+    };
+    const refundRow =
+      refundAmount !== undefined
+        ? `<tr><td style="padding:8px;background:#f5f5f5;font-weight:bold;">Refund Issued</td><td style="padding:8px;">SAR ${refundAmount.toFixed(2)}</td></tr>`
+        : "";
+
+    await this.transporter.sendMail({
+      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
+      to,
+      subject: `Dispute Resolved — Ticket #${disputeId}`,
+      html: `
+        <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <h2 style="color:#27ae60;">Dispute Resolved</h2>
+          <p>Hi ${recipientName}, the dispute for <strong>${listingTitle}</strong> has been resolved.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <tr><td style="padding:8px;background:#f5f5f5;font-weight:bold;">Ticket ID</td><td style="padding:8px;">#${disputeId}</td></tr>
+            <tr><td style="padding:8px;background:#f5f5f5;font-weight:bold;">Ruling</td><td style="padding:8px;"><strong>${rulingLabel[ruling] ?? ruling}</strong></td></tr>
+            <tr><td style="padding:8px;background:#f5f5f5;font-weight:bold;">Admin Note</td><td style="padding:8px;">${rulingNote}</td></tr>
+            ${refundRow}
+          </table>
+          <p style="color:#555;font-size:13px;">This decision is final. If you have questions, please contact support with the ticket ID.</p>
+        </body>`,
+    });
+  }
+
+  async sendReportReceivedEmail({
+    to,
+    reporterName,
+    listingTitle,
+    reportId,
+  }: ReportReceivedEmailPayload): Promise<void> {
+    await this.transporter.sendMail({
+      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
+      to,
+      subject: `Report Received — We're reviewing "${listingTitle}"`,
+      html: `
+        <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <h2 style="color:#1a1a1a;">Thank you for your report</h2>
+          <p>Hi ${reporterName}, we've received your report about <strong>${listingTitle}</strong>.</p>
+          <p>Our moderation team will review it and take appropriate action. Your report reference is <strong>#${reportId}</strong>.</p>
+          <p style="color:#555;font-size:13px;">We take platform safety seriously. Thank you for helping keep EquipShare trustworthy.</p>
+        </body>`,
+    });
+  }
+
+  async sendListingWarningEmail({
+    to,
+    lenderName,
+    listingTitle,
+    reason,
+  }: ListingWarningEmailPayload): Promise<void> {
+    await this.transporter.sendMail({
+      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
+      to,
+      subject: `Warning — Your listing "${listingTitle}" has been flagged`,
+      html: `
+        <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <h2 style="color:#e67e22;">Platform Policy Warning</h2>
+          <p>Hi ${lenderName},</p>
+          <p>Your listing <strong>${listingTitle}</strong> has been reviewed by our moderation team and found to violate platform policies.</p>
+          <p><strong>Reason:</strong> ${reason}</p>
+          <p>Please update your listing to comply with our policies. Repeated violations may result in listing removal or account suspension.</p>
+          <p style="color:#555;font-size:13px;">If you believe this is an error, please contact support.</p>
+        </body>`,
+    });
+  }
+
+  async sendListingRemovedEmail({
+    to,
+    lenderName,
+    listingTitle,
+    reason,
+  }: ListingRemovedEmailPayload): Promise<void> {
+    await this.transporter.sendMail({
+      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
+      to,
+      subject: `Your listing "${listingTitle}" has been removed`,
+      html: `
+        <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <h2 style="color:#c0392b;">Listing Removed</h2>
+          <p>Hi ${lenderName},</p>
+          <p>Your listing <strong>${listingTitle}</strong> has been removed from EquipShare for violating our platform policies.</p>
+          <p><strong>Reason:</strong> ${reason}</p>
+          <p>If you believe this decision was made in error, please contact our support team.</p>
+          <p style="color:#555;font-size:13px;">EquipShare reserves the right to remove content that endangers the community or violates our terms of service.</p>
         </body>`,
     });
   }
