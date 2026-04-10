@@ -40,3 +40,28 @@ export const revokeAllUserTokens = (userId: string) =>
     { userId: new Types.ObjectId(userId), isRevoked: false },
     { isRevoked: true },
   );
+
+export const saveVerificationToken = (
+  userId: string,
+  tokenHash: string,
+  expiry: Date,
+) =>
+  UserModel.findByIdAndUpdate(userId, {
+    verificationToken: tokenHash,
+    verificationTokenExpiry: expiry,
+  });
+
+export const findByVerificationToken = (tokenHash: string) =>
+  UserModel.findOne({
+    verificationToken: tokenHash,
+    verificationTokenExpiry: { $gt: new Date() },
+  }).select("+verificationToken");
+
+export const deleteUserById = (userId: string) =>
+  UserModel.findByIdAndDelete(userId);
+
+export const setVerified = (userId: string) =>
+  UserModel.findByIdAndUpdate(userId, {
+    verified: true,
+    $unset: { verificationToken: "", verificationTokenExpiry: "" },
+  });

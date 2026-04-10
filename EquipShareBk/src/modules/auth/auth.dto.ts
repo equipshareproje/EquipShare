@@ -10,6 +10,10 @@ export interface LoginDto {
   password: string;
 }
 
+export interface RegisterResponseDto {
+  message: string;
+}
+
 export interface AuthResponseDto {
   accessToken: string;
   user: {

@@ -4,6 +4,7 @@ import {
   extendZodWithOpenApi,
 } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
+import { env } from "./env";
 
 extendZodWithOpenApi(z);
 
@@ -44,6 +45,12 @@ const AuthResponseSchema = z
   })
   .openapi("AuthResponse");
 
+const RegisterResponseSchema = z
+  .object({
+    message: z.string(),
+  })
+  .openapi("RegisterResponse");
+
 // ── Bearer secuirty scheme ─────────────────────────────────────────────────
 
 registry.registerComponent("securitySchemes", "bearerAuth", {
@@ -77,10 +84,10 @@ registry.registerPath({
   },
   responses: {
     201: {
-      description: "User registered",
+      description: "User registered. Verification email sent.",
       content: {
         "application/json": {
-          schema: ApiSuccess(AuthResponseSchema),
+          schema: ApiSuccess(RegisterResponseSchema),
         },
       },
     },
@@ -195,6 +202,55 @@ registry.registerPath({
   },
 });
 
+registry.registerPath({
+  method: "get",
+  path: "/api/auth/verify-email",
+  tags: ["Auth"],
+  summary: "Verify email address",
+  description:
+    "Validates the one-time token from the verification email. On success redirects to `FRONTEND_URL/verified`; on failure to `FRONTEND_URL/verify-failed`.",
+  request: {
+    query: z.object({ token: z.string().openapi({ example: "abc123" }) }),
+  },
+  responses: {
+    302: { description: "Redirect to frontend (success or failure path)" },
+    400: {
+      description: "Missing token",
+      content: { "application/json": { schema: ApiError } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/auth/resend-verification",
+  tags: ["Auth"],
+  summary: "Resend verification email",
+  description:
+    "Always returns 200 to prevent email enumeration. The email is only sent if the address exists and is unverified.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z
+            .object({ email: z.string().email() })
+            .openapi("ResendVerificationBody"),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Response sent",
+      content: {
+        "application/json": {
+          schema: ApiSuccess(z.null()),
+        },
+      },
+    },
+  },
+});
+
 // ── Generate spec ──────────────────────────────────────────────────────────
 
 export const generateOpenApiSpec = () => {
@@ -206,6 +262,6 @@ export const generateOpenApiSpec = () => {
       version: "1.0.0",
       description: "Equipment rental marketplace API — KFUPM",
     },
-    servers: [{ url: "http://localhost:5000" }],
+    servers: [{ url: env.BASE_URL }],
   });
 };

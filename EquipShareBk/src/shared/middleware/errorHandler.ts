@@ -10,7 +10,13 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   }
 
   logger.error(err);
-  res
-    .status(500)
-    .json(ApiResponse.error("Internal server error", "SERVER_ERROR"));
+
+  const isDev = process.env.NODE_ENV === "development";
+  res.status(500).json({
+    success: false,
+    message: isDev ? (err as Error).message : "Internal server error",
+    code: "SERVER_ERROR",
+    ...(isDev && { stack: (err as Error).stack }),
+    data: null,
+  });
 };

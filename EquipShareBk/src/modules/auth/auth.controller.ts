@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 import { ApiResponse } from "../../shared/utils/apiResponse";
 import { AppError } from "../../shared/errors/AppError";
+import { env } from "../../config/env";
 import * as authService from "./auth.service";
 
 const REFRESH_COOKIE = "refreshToken";
@@ -15,7 +16,7 @@ const COOKIE_OPTIONS = {
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const result = await authService.register(req.body);
-  res.status(201).json(ApiResponse.success(result, "Registered successfully"));
+  res.status(201).json(ApiResponse.success(result, result.message));
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
@@ -26,10 +27,13 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
   const rawToken = req.cookies?.[REFRESH_COOKIE];
+  
   if (!rawToken) {
     throw new AppError("No refresh token", 401, "UNAUTHORIZED");
   }
-  const { accessToken } = await authService.refresh(rawToken);
+  
+  const { accessToken, refreshToken } = await authService.refresh(rawToken);
+  res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTIONS);
   res.json(ApiResponse.success({ accessToken }, "Token refreshed"));
 });
 
@@ -46,3 +50,28 @@ export const me = asyncHandler(async (req: Request, res: Response) => {
   const user = await authService.getMe(req.user!.sub);
   res.json(ApiResponse.success(user, "User fetched"));
 });
+
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const token = typeof req.query.token === "string" ? req.query.token : "";
+  if (!token) {
+    return res.redirect(`${env.FRONTEND_URL}/verify-failed`);
+  }
+  try {
+    await authService.verifyEmail(token);
+    res.redirect(`${env.FRONTEND_URL}/verified`);
+  } catch {
+    res.redirect(`${env.FRONTEND_URL}/verify-failed`);
+  }
+});
+
+export const resendVerification = asyncHandler(
+  async (req: Request, res: Response) => {
+    await authService.resendVerification(req.body.email);
+    res.json(
+      ApiResponse.success(
+        null,
+        "If that email exists, a verification link has been sent.",
+      ),
+    );
+  },
+);

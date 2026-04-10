@@ -1,55 +1,33 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { env } from "../../config/env";
 import { AppError } from "../../shared/errors/AppError";
-import { JwtPayload } from "../../shared/types/express.d";
+import { emailService } from "../../shared/services/email";
 import * as authRepository from "./auth.repository";
-import { RegisterDto, LoginDto, AuthResponseDto } from "./auth.dto";
+import {
+  RegisterDto,
+  LoginDto,
+  RegisterResponseDto,
+  AuthResponseDto,
+} from "./auth.dto";
+import {
+  signAccessToken,
+  generateRefreshToken,
+  generateVerificationToken,
+  hashToken,
+  refreshTokenExpiresAt,
+  verificationTokenExpiresAt,
+} from "./helpers/token.helper";
+import { hashPassword, comparePassword } from "./helpers/password.helper";
 
-const signAccessToken = (user: {
-  _id: unknown;
-  email: string;
-  role: string;
-}): string => {
-  const payload: JwtPayload = {
-    sub: String(user._id),
-    email: user.email,
-    role: user.role as "Admin" | "User",
-  };
-  return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_EXPIRES as jwt.SignOptions["expiresIn"],
-  });
-};
-
-const generateRefreshToken = () => crypto.randomBytes(64).toString("hex");
-
-const refreshTokenExpiresAt = (): Date => {
-  const ms = parseDuration(env.JWT_REFRESH_EXPIRES);
-  return new Date(Date.now() + ms);
-};
-
-const parseDuration = (duration: string): number => {
-  const match = duration.match(/^(\d+)([smhd])$/);
-  if (!match) return 7 * 24 * 60 * 60 * 1000;
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
-  const multipliers: Record<string, number> = {
-    s: 1000,
-    m: 60 * 1000,
-    h: 60 * 60 * 1000,
-    d: 24 * 60 * 60 * 1000,
-  };
-  return value * multipliers[unit];
-};
-
-export const register = async (dto: RegisterDto): Promise<AuthResponseDto> => {
+export const register = async (
+  dto: RegisterDto,
+): Promise<RegisterResponseDto> => {
   const existing = await authRepository.findByEmail(dto.email);
   if (existing) {
     throw new AppError("Email already in use", 409, "CONFLICT");
   }
 
-  const passwordHash = await bcrypt.hash(dto.password, 12);
+  const passwordHash = await hashPassword(dto.password);
+
   const user = await authRepository.createUser({
     name: dto.name,
     email: dto.email,
@@ -57,16 +35,34 @@ export const register = async (dto: RegisterDto): Promise<AuthResponseDto> => {
     passwordHash,
   });
 
-  const accessToken = signAccessToken(user);
-  return {
-    accessToken,
-    user: {
-      id: String(user._id),
+  const rawToken = generateVerificationToken();
+  const tokenHash = hashToken(rawToken);
+  await authRepository.saveVerificationToken(
+    String(user._id),
+    tokenHash,
+    verificationTokenExpiresAt(),
+  );
+
+  const verificationUrl = `${env.BASE_URL}/api/auth/verify-email?token=${rawToken}`;
+  try {
+    await emailService.sendVerificationEmail({
+      to: user.email,
       name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-    },
+      verificationUrl,
+    });
+  } catch (emailError) {
+    // Roll back: delete the user so they can retry registration cleanly
+    await authRepository.deleteUserById(String(user._id));
+    throw new AppError(
+      "Failed to send verification email. Please try again later.",
+      503,
+      "EMAIL_SEND_FAILED",
+    );
+  }
+
+  return {
+    message:
+      "Registration successful. Please check your email to verify your account.",
   };
 };
 
@@ -82,7 +78,15 @@ export const login = async (
     throw new AppError("Account is deactivated", 403, "FORBIDDEN");
   }
 
-  const valid = await bcrypt.compare(dto.password, user.passwordHash);
+  if (!user.verified) {
+    throw new AppError(
+      "Please verify your email before logging in",
+      403,
+      "EMAIL_NOT_VERIFIED",
+    );
+  }
+
+  const valid = await comparePassword(dto.password, user.passwordHash);
   if (!valid) {
     throw new AppError("Invalid credentials", 401, "INVALID_CREDENTIALS");
   }
@@ -110,7 +114,7 @@ export const login = async (
 
 export const refresh = async (
   rawToken: string,
-): Promise<{ accessToken: string }> => {
+): Promise<{ accessToken: string; refreshToken: string }> => {
   const storedToken = await authRepository.findRefreshToken(rawToken);
   if (!storedToken || storedToken.expiresAt < new Date()) {
     throw new AppError(
@@ -135,7 +139,7 @@ export const refresh = async (
     rawRefreshToken,
   );
 
-  return { accessToken };
+  return { accessToken, refreshToken: rawRefreshToken };
 };
 
 export const logout = async (rawToken: string): Promise<void> => {
@@ -151,4 +155,38 @@ export const getMe = async (userId: string) => {
     throw new AppError("User not found", 404, "NOT_FOUND");
   }
   return user;
+};
+
+export const verifyEmail = async (rawToken: string): Promise<void> => {
+  const tokenHash = hashToken(rawToken);
+  const user = await authRepository.findByVerificationToken(tokenHash);
+  if (!user) {
+    throw new AppError(
+      "Invalid or expired verification link",
+      400,
+      "TOKEN_INVALID",
+    );
+  }
+  await authRepository.setVerified(String(user._id));
+};
+
+export const resendVerification = async (email: string): Promise<void> => {
+  const user = await authRepository.findByEmail(email);
+  // Return silently to prevent email enumeration
+  if (!user || user.verified) return;
+
+  const rawToken = generateVerificationToken();
+  const tokenHash = hashToken(rawToken);
+  await authRepository.saveVerificationToken(
+    String(user._id),
+    tokenHash,
+    verificationTokenExpiresAt(),
+  );
+
+  const verificationUrl = `${env.BASE_URL}/api/auth/verify-email?token=${rawToken}`;
+  await emailService.sendVerificationEmail({
+    to: user.email,
+    name: user.name,
+    verificationUrl,
+  });
 };

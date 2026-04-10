@@ -9,6 +9,8 @@ export interface IUser extends Document {
   role: "Admin" | "User";
   bio?: string;
   verified: boolean;
+  verificationToken?: string;
+  verificationTokenExpiry?: Date;
   isActive: boolean;
   rating: number;
   reviewCount: number;
@@ -41,6 +43,8 @@ const userSchema = new Schema<IUser>(
     role: { type: String, enum: ["Admin", "User"], default: "User" },
     bio: { type: String, maxlength: 500 },
     verified: { type: Boolean, default: false },
+    verificationToken: { type: String, select: false },
+    verificationTokenExpiry: { type: Date },
     isActive: { type: Boolean, default: true },
     rating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },

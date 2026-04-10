@@ -8,10 +8,20 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   MONGODB_URI: z.string().min(1),
   JWT_ACCESS_SECRET: z.string().min(32),
-  JWT_REFRESH_SECRET: z.string().min(32),
   JWT_ACCESS_EXPIRES: z.string().default("15m"),
   JWT_REFRESH_EXPIRES: z.string().default("7d"),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
+  BASE_URL: z.string().default("http://localhost:5000"),
+  SMTP_HOST: z.string().default("smtp.gmail.com"),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+  SMTP_USER: z.string().default(""),
+  SMTP_PASS: z.string().default(""),
+  SMTP_FROM_NAME: z.string().default("EquipShare"),
+  SMTP_FROM_EMAIL: z.string().default("noreply@equipshare.com"),
 });
 
 const parsed = envSchema.safeParse(process.env);
