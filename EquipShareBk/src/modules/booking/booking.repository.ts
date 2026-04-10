@@ -16,13 +16,13 @@ export const findByIdWithSecret = (id: string) =>
 export const findByRenter = (renterId: string) =>
   BookingModel.find({ renterId: new Types.ObjectId(renterId) })
     .populate("listingId", "title photos dailyPrice")
-    .sort({ createdAt: -1 });
+    .sort({ _id: -1 });
 
 export const findByOwner = (ownerId: string) =>
   BookingModel.find({ ownerId: new Types.ObjectId(ownerId) })
     .populate("listingId", "title photos dailyPrice")
     .populate("renterId", "name email rating reviewCount")
-    .sort({ createdAt: -1 });
+    .sort({ _id: -1 });
 
 export const updateBooking = (
   id: string,

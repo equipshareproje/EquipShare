@@ -26,7 +26,7 @@ router.get("/my/lending", authenticate, bookingController.getMyLendingBookings);
 router.post(
   "/",
   authenticate,
-  validate(createBookingSchema.shape.body as never),
+  validate(createBookingSchema),
   bookingController.createBooking,
 );
 
@@ -40,7 +40,7 @@ router.post("/:id/approve", authenticate, bookingController.approveBooking);
 router.post(
   "/:id/reject",
   authenticate,
-  validate(rejectBookingSchema.shape.body as never),
+  validate(rejectBookingSchema),
   bookingController.rejectBooking,
 );
 

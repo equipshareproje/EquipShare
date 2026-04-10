@@ -13,7 +13,7 @@ export const findById = (id: string) =>
 export const findByReporter = (userId: string) =>
   ReportModel.find({ reportedById: new Types.ObjectId(userId) })
     .populate("listingId", "title photos status")
-    .sort({ createdAt: -1 });
+    .sort({ _id: -1 });
 
 export const findAll = (
   filter: { status?: string; listingId?: string } = {},
@@ -24,7 +24,7 @@ export const findAll = (
   return ReportModel.find(query)
     .populate("listingId", "title photos status")
     .populate("reportedById", "name email")
-    .sort({ createdAt: -1 });
+    .sort({ _id: -1 });
 };
 
 export const findOpenByUserAndListing = (userId: string, listingId: string) =>

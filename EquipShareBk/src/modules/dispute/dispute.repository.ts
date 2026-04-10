@@ -15,7 +15,7 @@ export const findById = (id: string) =>
 export const findByFilerId = (userId: string) =>
   DisputeModel.find({ filedById: userId })
     .populate("bookingId", "listingId startDate endDate status")
-    .sort({ createdAt: -1 });
+    .sort({ _id: -1 });
 
 export const findInvolvedDisputes = (userId: string) =>
   DisputeModel.find({ $or: [{ filedById: userId }] })
@@ -23,7 +23,7 @@ export const findInvolvedDisputes = (userId: string) =>
       "bookingId",
       "listingId startDate endDate status renterId ownerId",
     )
-    .sort({ createdAt: -1 });
+    .sort({ _id: -1 });
 
 export const findAll = (filter: { status?: string } = {}) => {
   const query: Record<string, unknown> = {};
@@ -31,7 +31,7 @@ export const findAll = (filter: { status?: string } = {}) => {
   return DisputeModel.find(query)
     .populate("bookingId", "listingId startDate endDate totalAmount")
     .populate("filedById", "name email")
-    .sort({ createdAt: -1 });
+    .sort({ _id: -1 });
 };
 
 export const findOpenByBooking = (bookingId: string) =>

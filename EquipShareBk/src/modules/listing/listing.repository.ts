@@ -42,7 +42,7 @@ export const findByOwner = (ownerId: string) =>
   ListingModel.find({
     ownerId: new Types.ObjectId(ownerId),
     status: { $ne: "Deleted" },
-  }).sort({ createdAt: -1 });
+  }).sort({ _id: -1 });
 
 export const findMarketplace = async (
   filters: ListingFilters,
@@ -80,10 +80,7 @@ export const findMarketplace = async (
 
   const skip = (filters.page - 1) * filters.limit;
   const [listings, total] = await Promise.all([
-    ListingModel.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(filters.limit),
+    ListingModel.find(query).sort({ _id: -1 }).skip(skip).limit(filters.limit),
     ListingModel.countDocuments(query),
   ]);
 

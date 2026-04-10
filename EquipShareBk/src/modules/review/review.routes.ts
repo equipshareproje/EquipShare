@@ -10,7 +10,7 @@ const router = Router();
 router.post(
   "/",
   authenticate,
-  validate(createReviewSchema.shape.body as never),
+  validate(createReviewSchema),
   reviewController.createReview,
 );
 

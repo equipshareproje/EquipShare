@@ -38,7 +38,7 @@ router.get("/my", authenticate, listingController.getMyListings);
 router.post(
   "/",
   authenticate,
-  validate(createListingSchema.shape.body as never),
+  validate(createListingSchema),
   listingController.createListing,
 );
 
@@ -49,7 +49,7 @@ router.get("/:id", listingController.getListing);
 router.put(
   "/:id",
   authenticate,
-  validate(updateListingSchema.shape.body as never),
+  validate(updateListingSchema),
   listingController.updateListing,
 );
 
