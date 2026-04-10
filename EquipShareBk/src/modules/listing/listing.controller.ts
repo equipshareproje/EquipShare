@@ -3,7 +3,7 @@ import { asyncHandler } from "../../shared/utils/asyncHandler";
 import { ApiResponse } from "../../shared/utils/apiResponse";
 import { AppError } from "../../shared/errors/AppError";
 import * as listingService from "./listing.service";
-import { ListingFilters } from "./listing.repository";
+import { MarketplaceFilters } from "./listing.service";
 
 export const uploadPhoto = asyncHandler(async (req: Request, res: Response) => {
   if (!req.file) {
@@ -27,12 +27,20 @@ export const getListing = asyncHandler(async (req: Request, res: Response) => {
 
 export const getMarketplace = asyncHandler(
   async (req: Request, res: Response) => {
-    const filters: ListingFilters = {
+    const filters: MarketplaceFilters = {
       category: req.query.category as never,
       condition: req.query.condition as never,
       minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
       maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
       search: req.query.search as string | undefined,
+      availableFrom: req.query.availableFrom
+        ? new Date(req.query.availableFrom as string)
+        : undefined,
+      availableTo: req.query.availableTo
+        ? new Date(req.query.availableTo as string)
+        : undefined,
+      trustedCircleOnly: req.query.trustedCircleOnly === "true",
+      userId: req.user?.sub,
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 12,
     };

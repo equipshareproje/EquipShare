@@ -35,6 +35,12 @@ export const marketplaceQuerySchema = z.object({
     minPrice: z.coerce.number().positive().optional(),
     maxPrice: z.coerce.number().positive().optional(),
     search: z.string().optional(),
+    availableFrom: z.string().datetime().optional(),
+    availableTo: z.string().datetime().optional(),
+    trustedCircleOnly: z
+      .enum(["true", "false"])
+      .optional()
+      .transform((v) => v === "true"),
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().min(1).max(50).default(12),
   }),

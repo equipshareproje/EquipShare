@@ -135,7 +135,7 @@ registry.registerPath({
   tags: ["Listings"],
   summary: "Browse marketplace (public)",
   description:
-    "Returns paginated active listings. All query params are optional.",
+    "Returns paginated active listings. All query params are optional. Pass a Bearer token to enable `trustedCircleOnly` filtering.",
   request: {
     query: z.object({
       category: z
@@ -146,6 +146,21 @@ registry.registerPath({
       minPrice: z.coerce.number().optional().openapi({ example: 50 }),
       maxPrice: z.coerce.number().optional().openapi({ example: 500 }),
       search: z.string().optional().openapi({ example: "camera tripod" }),
+      availableFrom: z.string().optional().openapi({
+        description: "ISO date — exclude listings with blocked dates in range",
+        example: "2026-06-01T00:00:00.000Z",
+      }),
+      availableTo: z.string().optional().openapi({
+        example: "2026-06-05T00:00:00.000Z",
+      }),
+      trustedCircleOnly: z
+        .enum(["true", "false"])
+        .optional()
+        .openapi({
+          description:
+            "When true (and token present), returns only listings from lenders in your Trusted Circles",
+          example: "false",
+        }),
       page: z.coerce.number().default(1).openapi({ example: 1 }),
       limit: z.coerce.number().default(12).openapi({ example: 12 }),
     }),

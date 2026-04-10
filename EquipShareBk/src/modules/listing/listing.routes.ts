@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { authenticate } from "../../shared/middleware/authenticate";
+import { optionalAuthenticate } from "../../shared/middleware/optionalAuthenticate";
 import { validate } from "../../shared/middleware/validate";
 import * as listingController from "./listing.controller";
 import { createListingSchema, updateListingSchema } from "./listing.validation";
@@ -27,8 +28,8 @@ router.post(
   listingController.uploadPhoto,
 );
 
-// Marketplace browse — public
-router.get("/", listingController.getMarketplace);
+// Marketplace browse — public, but token used if present for trustedCircleOnly
+router.get("/", optionalAuthenticate, listingController.getMarketplace);
 
 // My listings — authenticated
 router.get("/my", authenticate, listingController.getMyListings);

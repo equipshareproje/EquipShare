@@ -13,6 +13,9 @@ export interface ListingFilters {
   minPrice?: number;
   maxPrice?: number;
   search?: string;
+  availableFrom?: Date;
+  availableTo?: Date;
+  ownerIds?: string[]; // used for trustedCircleOnly filter
   page: number;
   limit: number;
 }
@@ -57,6 +60,20 @@ export const findMarketplace = async (
   }
   if (filters.search) {
     query.$text = { $search: filters.search };
+  }
+  if (filters.availableFrom && filters.availableTo) {
+    // Exclude listings that have any blocked date within the requested range
+    const dates: Date[] = [];
+    const cursor = new Date(filters.availableFrom);
+    const end = new Date(filters.availableTo);
+    while (cursor <= end) {
+      dates.push(new Date(cursor));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    query.blockedDates = { $not: { $elemMatch: { $in: dates } } };
+  }
+  if (filters.ownerIds && filters.ownerIds.length > 0) {
+    query.ownerId = { $in: filters.ownerIds.map((id) => new Types.ObjectId(id)) };
   }
 
   const skip = (filters.page - 1) * filters.limit;
