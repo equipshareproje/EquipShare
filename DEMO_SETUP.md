@@ -20,18 +20,12 @@ npm start
 Open any browser and go to: **http://localhost:3003**
 
 ### 3. Login with Demo Account
-- **Renter Account**: demo@example.com / TestPass123
+- **User Account**: demo@example.com / TestPass123
 - **Admin Account**: admin@equipshare.com / AdminPass123
 
 ---
 
 ## System Requirements
-
-### Browser Support
-- Chrome (latest 2 versions)
-- Firefox (latest 2 versions)
-- Safari (latest 2 versions)
-- Edge (latest 2 versions)
 
 ### Technology Stack
 - **Frontend**: React 19.2.4 with Hooks
@@ -68,7 +62,7 @@ Open any browser and go to: **http://localhost:3003**
   - Transaction history with date/listing filters
   - Request payout to registered payment account
 
-#### Renter Features (4/4)
+#### User Features (4/4)
 - **FR-R1**: User Registration & Account Creation
   - Sign up with email, phone, password (strength validation)
   - Email verification flow
@@ -130,17 +124,17 @@ Open any browser and go to: **http://localhost:3003**
 ### Users (10+ Test Accounts)
 ```
 LENDERS:
-- Ahmed Al-Dosari (ahmed.dosari@kfupm.edu.sa) - 4.8★ 
-- Sarah Al-Ali (sarah.ali@kfupm.edu.sa) - 4.9★
-- Mohammad Al-Shammari (mohammad.shammari@kfupm.edu.sa) - 4.7★
+- Ahmed Al-Dosari (ahmed.dosari@kfupm.edu.sa) / Password: LenderPass123
+- Sarah Al-Ali (sarah.ali@kfupm.edu.sa) / Password: LenderPass123
+- Mohammad Al-Shammari (mohammad.shammari@kfupm.edu.sa) / Password: LenderPass123
 
-RENTERS:
-- Fatima Al-Qahtani
-- Omar Al-Rashid
-- Demo User (demo@example.com)
+USERS:
+- Fatima Al-Qahtani / Password: UserPass123
+- Omar Al-Rashid / Password: UserPass123
+- Demo User (demo@example.com) / Password: TestPass123
 
 ADMIN:
-- Platform Admin (admin@equipshare.com)
+- Platform Admin (admin@equipshare.com) / Password: AdminPass123
 ```
 
 ### Equipment Listings (15+ Items)
@@ -161,7 +155,7 @@ COMPUTERS
 - iPad Pro 12.9 - $60/day Available
 
 DRONES
-- DJI Air 3S - $200/day ❌ Currently Unavailable (Apr 15-30)
+- DJI Air 3S - $200/day Currently Unavailable (Apr 15-30)
 
 [And more...]
 ```
@@ -181,26 +175,10 @@ DRONES
 
 ---
 
-## Color Scheme (KFUPM Brand)
-
-| Component | Color | Code |
-|-----------|-------|------|
-| Primary Button | Petrol (dark teal) | #003E51 |
-| Button Hover | Darker Petrol | #002A38 |
-| Accents & Links | Teal | #00879E |
-| Background | Off-white | #F4F7F8 |
-| Text Primary | Near-black | #0A1F29 |
-| Text Secondary | Muted Blue-Gray | #4A6572 |
-| Success | Green | #1A7F5A |
-| Warning | Amber | #D97706 |
-| Error | Red | #DC2626 |
-
----
-
 ## Testing Flows
 
 ### Complete User Journey (20 minutes)
-1. **Signup** → Create new renter account
+1. **Signup** → Create new user account
 2. **Browse** → Search marketplace for equipment
 3. **Book** → Request equipment rental with dates
 4. **Checkout** → Complete mock payment
@@ -291,22 +269,6 @@ DRONES
 
 ---
 
-## Keyboard Shortcuts & Features
-
-### Navigation
-- **Mobile Menu**: Hamburger icon (visible on screens < 768px)
-- **Tab Navigation**: Use Tab key to navigate form fields
-- **Enter Key**: Submit forms
-
-### Accessibility
-- WCAG 2.1 Level AA compliant
-- Keyboard navigation throughout
-- Screen reader labels on all inputs
-- Color contrast sufficient for visibility
-- Images have descriptive alt text
-
----
-
 ## Responsive Design Testing
 
 ### Desktop (1920px)
@@ -344,144 +306,7 @@ admin_circleMembers        → Members in each circle
 admin_auditLogs            → Admin action history
 ```
 
-### Clear Data (Factory Reset)
-Open browser DevTools (F12):
-1. Application → Local Storage
-2. Right-click each key → Delete
-3. Refresh page → App reinitializes with default data
 
----
 
-## Common Test Scenarios
 
-### Scenario 1: Happy Path (Success Flow)
-- Renter: Search → Book → Pay → Handshake → Review = SUCCESS ✅
 
-### Scenario 2: Lender Rejects (Rejection Flow)
-- Lender: Receive request → Click Reject → Renter notified = SUCCESS ✅
-
-### Scenario 3: Dispute Resolution (Admin Flow)
-- Admin: Review evidence → Rule "Lender Responsible" → Charges applied = SUCCESS ✅
-
-### Scenario 4: Content Moderation (Safety Flow)
-- Admin: Flag item → Click "Remove Listing" → Item offline = SUCCESS ✅
-
-### Scenario 5: Trusted Circles (Community Flow)
-- Admin: Create circle → Add members → Set eligibility = SUCCESS ✅
-
----
-
-## Known Limitations (Mock Data)
-
-1. **No Real Backend** → Uses localStorage (data lost on browser clear)
-2. **No Payment Processing** → Mock Stripe checkout only
-3. **No Email Notifications** → Alerts/toasts display instead
-4. **No Photo Upload Validation** → Any image accepted (min 3 photos required)
-5. **No SMS Notifications** → In-app notifications only
-6. **No Real Geolocation** → All items in "KFUPM Main Campus"
-
----
-
-## Browser DevTools Tips
-
-### Debug Login Issues
-```
-F12 → Application → Local Storage → equipshare_users
-(Check if demo/admin accounts exist)
-```
-
-### Inspect Network Calls
-```
-F12 → Network tab
-(All calls are localStorage, no network requests - this is expected)
-```
-
-### Debug Admin Disputes
-```
-F12 → Application → Local Storage → admin_disputes
-(View dispute JSON structure)
-```
-
-### Mobile Testing
-```
-F12 → Toggle Device Toolbar (Ctrl+Shift+M)
-Select iPhone 12 or iPad for responsive testing
-```
-
----
-
-## Success Criteria
-
-### All Functional Requirements Working
-- [ ] Can search and filter equipment (FR-R2)
-- [ ] Can book with payment (FR-R3)
-- [ ] Can verify users as admin (FR-A1)
-- [ ] Can manage circles as admin (FR-A2)
-- [ ] Can mediate disputes as admin (FR-A3)
-- [ ] Can moderate content as admin (FR-A4)
-- [ ] Can create listings as lender (FR-L1)
-- [ ] Can approve bookings as lender (FR-L2)
-- [ ] Can upload handshake photos as lender (FR-L3)
-- [ ] Can view earnings as lender (FR-L4)
-- [ ] Can signup as renter (FR-R1)
-- [ ] Can review equipment as renter (FR-R4)
-
-### UI/UX Quality
-- [ ] No console errors (F12)
-- [ ] All pages responsive (desktop/tablet/mobile)
-- [ ] Forms validate inline
-- [ ] Navigation works without page reloads
-- [ ] Images load
-- [ ] Buttons have hover states
-
-### Performance
-- [ ] Page loads instantly (localStorage)
-- [ ] Search results < 1 second
-- [ ] Navigation responsive (no lag)
-- [ ] Photos display quickly
-
----
-
-## Getting Help
-
-### If App Won't Start
-```bash
-npm install
-npm start
-```
-
-### If Port 3003 is In Use
-```bash
-# Find process on port 3003 and kill it
-# Or change port in .env
-```
-
-### If Data Won't Load
-1. Clear Browser Cache (Ctrl+Shift+Delete)
-2. Open DevTools (F12)
-3. Go to Application → Local Storage
-4. Delete all `equipshare_*` keys
-5. Refresh page
-
-### If Photos Won't Upload
-- Check file size < 5MB
-- Use JPG, PNG, or WebP format
-- Upload minimum 3 photos
-- Check browser console for errors
-
----
-
-## Feedback to Developers
-
-Please document any bugs or improvements during testing by noting:
-1. **What you did** (step-by-step)
-2. **What you expected**
-3. **What actually happened**
-4. **Browser/Device used**
-5. **Screenshot/video** (if possible)
-
----
-
-**Ready to test! All features are implemented and ready for comprehensive QA.** 🚀
-
-Good luck with your testing! Please reach out with any questions.
