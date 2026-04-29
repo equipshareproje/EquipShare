@@ -5,7 +5,7 @@ import Button from '../components/Button';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -37,8 +37,8 @@ const SignUp = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
     }
 
     if (!formData.email.trim()) {
@@ -97,7 +97,7 @@ const SignUp = () => {
 
     try {
       await signup({
-        fullName: formData.fullName,
+        name: formData.name,
         email: formData.email,
         password: formData.password,
         phone: formData.phone,
@@ -148,22 +148,22 @@ const SignUp = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-text-primary mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-text-primary mb-1">
               Full Name
             </label>
             <input
               type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
+              id="name"
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               placeholder="John Doe"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                errors.fullName ? 'border-error' : 'border-border'
+                errors.name ? 'border-error' : 'border-border'
               }`}
             />
-            {errors.fullName && (
-              <p className="text-error text-sm mt-1">{errors.fullName}</p>
+            {errors.name && (
+              <p className="text-error text-sm mt-1">{errors.name}</p>
             )}
           </div>
 

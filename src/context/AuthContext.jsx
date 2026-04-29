@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   // ── Sign up ───────────────────────────────────────────────────────────────
   const signup = useCallback(async (userData) => {
     const res = await authApi.register({
-      name: userData.fullName || userData.name,
+      name: userData.name,
       email: userData.email,
       password: userData.password,
       phone: userData.phone,

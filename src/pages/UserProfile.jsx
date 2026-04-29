@@ -11,8 +11,6 @@ const UserProfile = () => {
     bio: '',
   });
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -59,38 +57,8 @@ const UserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
-    setSuccess(false);
-
-    try {
-      // Update user in localStorage
-      const users = JSON.parse(localStorage.getItem('equipshare_users') || '[]');
-      const userIndex = users.findIndex(u => u.id === user.id);
-
-      if (userIndex !== -1) {
-        users[userIndex] = {
-          ...users[userIndex],
-          ...formData
-        };
-        localStorage.setItem('equipshare_users', JSON.stringify(users));
-
-        // Update current user in auth
-        const updatedUser = { ...user, ...formData };
-        localStorage.setItem('equipshare_user', JSON.stringify(updatedUser));
-
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      }
-    } catch (error) {
-      setErrors({ submit: 'Failed to update profile' });
-    } finally {
-      setLoading(false);
-    }
+    // Profile update API endpoint is not yet available on the backend.
+    setErrors({ submit: 'Profile editing is not yet supported. Please contact support to update your details.' });
   };
 
   if (!user) {
@@ -134,13 +102,6 @@ const UserProfile = () => {
               </div>
             </div>
           </div>
-
-          {/* Success Message */}
-          {success && (
-            <div className="mb-6 p-4 bg-success/10 border border-success rounded-lg">
-              <p className="text-success font-medium">Profile updated successfully!</p>
-            </div>
-          )}
 
           {/* Error Message */}
           {errors.submit && (
@@ -216,11 +177,8 @@ const UserProfile = () => {
 
             {/* Action Buttons */}
             <div className="flex space-x-3 pt-6 border-t border-border">
-              <Button
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
+              <Button type="submit">
+                Save Changes
               </Button>
               <Link
                 to="/dashboard"
