@@ -59,8 +59,12 @@ export const AuthProvider = ({ children }) => {
   // ── Sign in ───────────────────────────────────────────────────────────────
   const signin = useCallback(async (email, password) => {
     const res = await authApi.login(email, password);
-    const { accessToken: token, user: apiUser } = res.data.data;
+    const { accessToken: token } = res.data.data;
     setAccessToken(token);
+    // Always fetch /me after login so we get the full, authoritative user object
+    // (the login response may not include the user body in all backend versions)
+    const meRes = await authApi.me();
+    const apiUser = meRes.data.data;
     const normalized = { ...apiUser, role: apiUser.role?.toLowerCase() };
     setUser(normalized);
     return normalized;
