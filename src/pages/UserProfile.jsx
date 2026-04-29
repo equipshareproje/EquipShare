@@ -17,7 +17,7 @@ const UserProfile = () => {
   useEffect(() => {
     if (user) {
       setFormData({
-        fullName: user.fullName || '',
+        fullName: user.name || '',
         phone: user.phone || '',
         bio: user.bio || '',
       });

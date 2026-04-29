@@ -116,7 +116,7 @@ const Navbar = () => {
                   U
                 </Link>
                 <span className="text-sm text-text-secondary">
-                  {user.fullName}
+                  {user.name}
                 </span>
                 <button
                   onClick={handleLogout}
@@ -188,7 +188,7 @@ const Navbar = () => {
                 ) : (
                   <>
                     <div className="px-2 py-2">
-                      <p className="text-sm font-medium text-text-primary">{user.fullName}</p>
+                      <p className="text-sm font-medium text-text-primary">{user.name}</p>
                       <p className="text-xs text-text-secondary">{user.email}</p>
                     </div>
                     <Link

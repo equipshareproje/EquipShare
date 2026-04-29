@@ -40,12 +40,22 @@ export default function EarningsDashboard() {
     return true;
   });
 
-  const monthlyEarnings = {};
-  transactions.forEach((t) => {
-    const dateStr = t.date || t.createdAt || '';
-    const month = dateStr.substring(0, 7);
-    if (month) monthlyEarnings[month] = (monthlyEarnings[month] || 0) + (t.total || t.amount || 0);
-  });
+  // Prefer the API-provided monthly breakdown; fall back to deriving from transactions
+  const monthlyEarnings = (() => {
+    const breakdown = summary?.monthlyBreakdown;
+    if (Array.isArray(breakdown) && breakdown.length > 0) {
+      const map = {};
+      breakdown.forEach((b) => { if (b.month) map[b.month] = b.total ?? b.amount ?? 0; });
+      return map;
+    }
+    const map = {};
+    transactions.forEach((t) => {
+      const dateStr = t.date || t.createdAt || '';
+      const month = dateStr.substring(0, 7);
+      if (month) map[month] = (map[month] || 0) + (t.total || t.amount || 0);
+    });
+    return map;
+  })();
   const months = Object.keys(monthlyEarnings).sort();
   const maxEarning = Math.max(...Object.values(monthlyEarnings), 1);
 
@@ -78,9 +88,9 @@ export default function EarningsDashboard() {
   }
 
   const totalEarnings = summary?.totalEarnings ?? 0;
-  const availableBalance = summary?.availableBalance ?? 0;
+  const availableBalance = summary?.pendingPayoutBalance ?? 0;
   const pendingEarnings = summary?.pendingEarnings ?? 0;
-  const transactionCount = summary?.transactionCount ?? transactions.length;
+  const transactionCount = transactions.length;
 
   return (
     <div className="min-h-screen bg-[#F4F7F8] pt-8 pb-20">

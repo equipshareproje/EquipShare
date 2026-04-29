@@ -100,12 +100,12 @@ export default function Circles() {
                   <p className="text-text-secondary text-sm mb-4">{circle.description}</p>
                 )}
 
-                {circle.verificationCriteria && (
+                {circle.eligibilityCriteria && (
                   <div className="mb-6">
                     <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
                       Verification criteria
                     </p>
-                    <p className="text-text-primary font-medium">{circle.verificationCriteria}</p>
+                    <p className="text-text-primary font-medium">{circle.eligibilityCriteria}</p>
                   </div>
                 )}
 

@@ -103,12 +103,12 @@ export default function Checkout() {
   const dailyPrice = equipment.dailyPrice || booking.dailyRate || 0;
   const startDate = booking.startDate;
   const endDate = booking.endDate;
-  const days = booking.days || (startDate && endDate
+  const days = booking.totalDays || (startDate && endDate
     ? Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24))
     : 0);
   const subtotal = booking.subtotal || dailyPrice * days;
   const serviceFee = booking.serviceFee || subtotal * 0.1;
-  const totalCost = booking.totalPrice || booking.totalCost || subtotal + serviceFee;
+  const totalCost = booking.totalAmount || booking.totalPrice || subtotal + serviceFee;
 
   if (paymentSuccess) {
     return (
