@@ -41,7 +41,10 @@ client.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
-    if (error.response?.status === 401 && !original._retry) {
+    const isAuthEndpoint = original.url?.includes('/api/auth/login') ||
+      original.url?.includes('/api/auth/register');
+
+    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         // Queue concurrent 401s until refresh resolves
         return new Promise((resolve, reject) => {
