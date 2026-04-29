@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import authApi from '../api/auth';
 import Button from '../components/Button';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState('');
   const { signin } = useAuth();
   const navigate = useNavigate();
 
@@ -32,12 +36,25 @@ const SignIn = () => {
       const user = await signin(formData.email, formData.password);
       navigate(user.role === 'admin' ? '/admin' : '/marketplace');
     } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        'Invalid email or password. Please try again.';
+      const msg = err.response?.data?.message || 'Invalid email or password. Please try again.';
+      const isVerificationError = /verif/i.test(msg) || err.response?.status === 403;
+      setNeedsVerification(isVerificationError);
       setErrors({ submit: msg });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    setResendSuccess('');
+    try {
+      await authApi.resendVerification(formData.email);
+      setResendSuccess('Verification email sent! Check your inbox.');
+    } catch (err) {
+      setResendSuccess(err.response?.data?.message || 'Failed to resend. Please try again.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -52,6 +69,21 @@ const SignIn = () => {
         {errors.submit && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-300">
             <p className="text-red-700 text-sm">{errors.submit}</p>
+            {needsVerification && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                  className="text-sm font-medium text-red-700 underline disabled:opacity-50"
+                >
+                  {resendLoading ? 'Sending…' : 'Resend verification email'}
+                </button>
+                {resendSuccess && (
+                  <p className="text-sm text-green-700 mt-1">{resendSuccess}</p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
