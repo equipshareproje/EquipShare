@@ -12,7 +12,9 @@ export default function AdminDashboard() {
   const [selectedDispute, setSelectedDispute] = useState(null);
   const [rulingEnum, setRulingEnum] = useState('');
   const [rulingNote, setRulingNote] = useState('');
+  const [refundAmount, setRefundAmount] = useState('');
   const [resolvingDispute, setResolvingDispute] = useState(false);
+  const [markingDisputeId, setMarkingDisputeId] = useState(null);
 
   // Reports
   const [reports, setReports] = useState([]);
@@ -21,6 +23,7 @@ export default function AdminDashboard() {
   const [reportAction, setReportAction] = useState('');
   const [reportNote, setReportNote] = useState('');
   const [resolvingReport, setResolvingReport] = useState(false);
+  const [markingReportId, setMarkingReportId] = useState(null);
 
   // Circles
   const [circles, setCircles] = useState([]);
@@ -79,14 +82,47 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleMarkDisputeUnderReview = async (dispute) => {
+    setMarkingDisputeId(dispute._id);
+    try {
+      await disputesApi.markUnderReview(dispute._id);
+      setDisputes((prev) =>
+        prev.map((d) => d._id === dispute._id ? { ...d, status: 'UnderReview' } : d)
+      );
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update status.');
+    } finally {
+      setMarkingDisputeId(null);
+    }
+  };
+
+  const handleMarkReportUnderReview = async (report) => {
+    setMarkingReportId(report._id);
+    try {
+      await reportsApi.markUnderReview(report._id);
+      setReports((prev) =>
+        prev.map((r) => r._id === report._id ? { ...r, status: 'UnderReview' } : r)
+      );
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update status.');
+    } finally {
+      setMarkingReportId(null);
+    }
+  };
+
   const handleResolveDispute = async () => {
     if (!selectedDispute || !rulingEnum) return;
+    if (rulingNote.trim().length < 10) {
+      alert('Ruling note must be at least 10 characters.');
+      return;
+    }
     setResolvingDispute(true);
     try {
-      await disputesApi.resolveDispute(selectedDispute._id, {
-        ruling: rulingEnum,
-        rulingNote: rulingNote.trim(),
-      });
+      const body = { ruling: rulingEnum, rulingNote: rulingNote.trim() };
+      if (rulingEnum === 'LenderResponsible' && refundAmount) {
+        body.refundAmount = parseFloat(refundAmount);
+      }
+      await disputesApi.resolveDispute(selectedDispute._id, body);
       setDisputes((prev) =>
         prev.map((d) =>
           d._id === selectedDispute._id ? { ...d, status: 'Resolved', ruling: rulingEnum } : d
@@ -95,6 +131,7 @@ export default function AdminDashboard() {
       setSelectedDispute(null);
       setRulingEnum('');
       setRulingNote('');
+      setRefundAmount('');
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to resolve dispute.');
     } finally {
@@ -238,12 +275,23 @@ export default function AdminDashboard() {
                     <p className="text-[#4A6572] mb-4">{dispute.description || dispute.issue || '—'}</p>
 
                     {dispute.status !== 'Resolved' && (
-                      <button
-                        onClick={() => { setSelectedDispute(dispute); setRulingEnum(''); setRulingNote(''); }}
-                        className="px-4 py-2 bg-[#003E51] text-white text-sm font-medium rounded-lg hover:bg-[#002A38] transition"
-                      >
-                        Resolve Dispute
-                      </button>
+                      <div className="flex gap-2">
+                        {dispute.status === 'Open' && (
+                          <button
+                            onClick={() => handleMarkDisputeUnderReview(dispute)}
+                            disabled={markingDisputeId === dispute._id}
+                            className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 disabled:opacity-50 transition"
+                          >
+                            {markingDisputeId === dispute._id ? 'Updating…' : 'Mark Under Review'}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => { setSelectedDispute(dispute); setRulingEnum(''); setRulingNote(''); setRefundAmount(''); }}
+                          className="px-4 py-2 bg-[#003E51] text-white text-sm font-medium rounded-lg hover:bg-[#002A38] transition"
+                        >
+                          Resolve Dispute
+                        </button>
+                      </div>
                     )}
 
                     {dispute.ruling && (
@@ -298,12 +346,23 @@ export default function AdminDashboard() {
                     <p className="text-[#4A6572] mb-4">{report.reason || report.description || '—'}</p>
 
                     {report.status !== 'Resolved' && (
-                      <button
-                        onClick={() => { setSelectedReport(report); setReportAction(''); setReportNote(''); }}
-                        className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition"
-                      >
-                        Resolve Report
-                      </button>
+                      <div className="flex gap-2">
+                        {report.status === 'Open' && (
+                          <button
+                            onClick={() => handleMarkReportUnderReview(report)}
+                            disabled={markingReportId === report._id}
+                            className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 disabled:opacity-50 transition"
+                          >
+                            {markingReportId === report._id ? 'Updating…' : 'Mark Under Review'}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => { setSelectedReport(report); setReportAction(''); setReportNote(''); }}
+                          className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition"
+                        >
+                          Resolve Report
+                        </button>
+                      </div>
                     )}
 
                     {report.action && (
@@ -393,7 +452,9 @@ export default function AdminDashboard() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#003E51] mb-2">Ruling Note</label>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">
+                  Ruling Note * <span className="text-xs font-normal text-[#4A6572]">(min 10 characters)</span>
+                </label>
                 <textarea
                   value={rulingNote}
                   onChange={(e) => setRulingNote(e.target.value)}
@@ -401,7 +462,22 @@ export default function AdminDashboard() {
                   placeholder="Explain the decision…"
                   className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
                 />
+                <p className="text-xs text-[#4A6572] mt-1">{rulingNote.trim().length}/10 minimum</p>
               </div>
+              {rulingEnum === 'LenderResponsible' && (
+                <div>
+                  <label className="block text-sm font-bold text-[#003E51] mb-2">Refund Amount (SAR) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={refundAmount}
+                    onChange={(e) => setRefundAmount(e.target.value)}
+                    placeholder="e.g. 150.00"
+                    className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                  />
+                </div>
+              )}
             </div>
             <div className="flex gap-3">
               <button
@@ -412,7 +488,12 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={handleResolveDispute}
-                disabled={!rulingEnum || resolvingDispute}
+                disabled={
+                  !rulingEnum ||
+                  rulingNote.trim().length < 10 ||
+                  (rulingEnum === 'LenderResponsible' && !refundAmount) ||
+                  resolvingDispute
+                }
                 className="flex-1 px-4 py-2 bg-[#003E51] text-white rounded-lg font-medium hover:bg-[#002A38] disabled:opacity-50"
               >
                 {resolvingDispute ? 'Resolving…' : 'Confirm Resolution'}

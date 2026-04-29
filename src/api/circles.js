@@ -13,8 +13,8 @@ const circlesApi = {
   // POST /api/circles/:id/join
   joinCircle: (id) => client.post(`/api/circles/${id}/join`),
 
-  // DELETE /api/circles/:id/leave
-  leaveCircle: (id) => client.delete(`/api/circles/${id}/leave`),
+  // POST /api/circles/:id/leave
+  leaveCircle: (id) => client.post(`/api/circles/${id}/leave`),
 
   // GET /api/circles/:id/members  (Admin only)
   getMembers: (id) => client.get(`/api/circles/${id}/members`),
