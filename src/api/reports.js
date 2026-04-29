@@ -11,8 +11,8 @@ const reportsApi = {
   // GET /api/reports/:id
   getReport: (id) => client.get(`/api/reports/${id}`),
 
-  // POST /api/reports/:id/resolve  (Admin only)
-  resolveReport: (id, data) => client.post(`/api/reports/${id}/resolve`, data),
+  // PUT /api/reports/:id/resolve  (Admin only)
+  resolveReport: (id, data) => client.put(`/api/reports/${id}/resolve`, data),
 };
 
 export default reportsApi;

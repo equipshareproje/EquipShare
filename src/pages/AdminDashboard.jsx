@@ -10,14 +10,16 @@ export default function AdminDashboard() {
   const [disputes, setDisputes] = useState([]);
   const [disputesLoading, setDisputesLoading] = useState(true);
   const [selectedDispute, setSelectedDispute] = useState(null);
-  const [rulingText, setRulingText] = useState('');
+  const [rulingEnum, setRulingEnum] = useState('');
+  const [rulingNote, setRulingNote] = useState('');
   const [resolvingDispute, setResolvingDispute] = useState(false);
 
   // Reports
   const [reports, setReports] = useState([]);
   const [reportsLoading, setReportsLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [resolutionText, setResolutionText] = useState('');
+  const [reportAction, setReportAction] = useState('');
+  const [reportNote, setReportNote] = useState('');
   const [resolvingReport, setResolvingReport] = useState(false);
 
   // Circles
@@ -29,7 +31,7 @@ export default function AdminDashboard() {
 
   // Create circle form
   const [showNewCircleForm, setShowNewCircleForm] = useState(false);
-  const [newCircle, setNewCircle] = useState({ name: '', description: '', verificationCriteria: '' });
+  const [newCircle, setNewCircle] = useState({ name: '', description: '', eligibilityCriteria: '' });
   const [creatingCircle, setCreatingCircle] = useState(false);
 
   useEffect(() => {
@@ -78,15 +80,21 @@ export default function AdminDashboard() {
   };
 
   const handleResolveDispute = async () => {
-    if (!selectedDispute || !rulingText.trim()) return;
+    if (!selectedDispute || !rulingEnum) return;
     setResolvingDispute(true);
     try {
-      await disputesApi.resolveDispute(selectedDispute._id, { ruling: rulingText });
+      await disputesApi.resolveDispute(selectedDispute._id, {
+        ruling: rulingEnum,
+        rulingNote: rulingNote.trim(),
+      });
       setDisputes((prev) =>
-        prev.map((d) => d._id === selectedDispute._id ? { ...d, status: 'resolved', ruling: rulingText } : d)
+        prev.map((d) =>
+          d._id === selectedDispute._id ? { ...d, status: 'Resolved', ruling: rulingEnum } : d
+        )
       );
       setSelectedDispute(null);
-      setRulingText('');
+      setRulingEnum('');
+      setRulingNote('');
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to resolve dispute.');
     } finally {
@@ -95,15 +103,21 @@ export default function AdminDashboard() {
   };
 
   const handleResolveReport = async () => {
-    if (!selectedReport || !resolutionText.trim()) return;
+    if (!selectedReport || !reportAction) return;
     setResolvingReport(true);
     try {
-      await reportsApi.resolveReport(selectedReport._id, { resolution: resolutionText });
+      await reportsApi.resolveReport(selectedReport._id, {
+        action: reportAction,
+        note: reportNote.trim() || undefined,
+      });
       setReports((prev) =>
-        prev.map((r) => r._id === selectedReport._id ? { ...r, status: 'resolved', resolution: resolutionText } : r)
+        prev.map((r) =>
+          r._id === selectedReport._id ? { ...r, status: 'Resolved', action: reportAction } : r
+        )
       );
       setSelectedReport(null);
-      setResolutionText('');
+      setReportAction('');
+      setReportNote('');
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to resolve report.');
     } finally {
@@ -136,7 +150,7 @@ export default function AdminDashboard() {
       const res = await circlesApi.createCircle(newCircle);
       const created = res.data.data;
       setCircles((prev) => [...prev, created]);
-      setNewCircle({ name: '', description: '', verificationCriteria: '' });
+      setNewCircle({ name: '', description: '', eligibilityCriteria: '' });
       setShowNewCircleForm(false);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to create circle.');
@@ -150,9 +164,11 @@ export default function AdminDashboard() {
     return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  const isOpen = (status) => status === 'Open' || status === 'UnderReview';
+
   const tabs = [
-    { id: 'disputes', label: `Disputes (${disputes.filter((d) => d.status === 'open' || d.status === 'pending').length})` },
-    { id: 'reports', label: `Reports (${reports.filter((r) => r.status === 'pending' || r.status === 'open').length})` },
+    { id: 'disputes', label: `Disputes (${disputes.filter((d) => isOpen(d.status)).length})` },
+    { id: 'reports', label: `Reports (${reports.filter((r) => isOpen(r.status)).length})` },
     { id: 'circles', label: `Circles (${circles.length})` },
   ];
 
@@ -205,7 +221,7 @@ export default function AdminDashboard() {
                             {dispute.bookingId?.listingId?.title || dispute.equipment || 'Dispute'}
                           </h3>
                           <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                            dispute.status === 'resolved'
+                            dispute.status === 'Resolved'
                               ? 'bg-green-100 text-green-700'
                               : 'bg-orange-100 text-orange-700'
                           }`}>
@@ -221,9 +237,9 @@ export default function AdminDashboard() {
 
                     <p className="text-[#4A6572] mb-4">{dispute.description || dispute.issue || '—'}</p>
 
-                    {dispute.status !== 'resolved' && (
+                    {dispute.status !== 'Resolved' && (
                       <button
-                        onClick={() => { setSelectedDispute(dispute); setRulingText(''); }}
+                        onClick={() => { setSelectedDispute(dispute); setRulingEnum(''); setRulingNote(''); }}
                         className="px-4 py-2 bg-[#003E51] text-white text-sm font-medium rounded-lg hover:bg-[#002A38] transition"
                       >
                         Resolve Dispute
@@ -265,7 +281,7 @@ export default function AdminDashboard() {
                             {report.listingId?.title || report.listing || 'Report'}
                           </h3>
                           <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                            report.status === 'resolved'
+                            report.status === 'Resolved'
                               ? 'bg-green-100 text-green-700'
                               : 'bg-red-100 text-red-700'
                           }`}>
@@ -281,19 +297,19 @@ export default function AdminDashboard() {
 
                     <p className="text-[#4A6572] mb-4">{report.reason || report.description || '—'}</p>
 
-                    {report.status !== 'resolved' && (
+                    {report.status !== 'Resolved' && (
                       <button
-                        onClick={() => { setSelectedReport(report); setResolutionText(''); }}
+                        onClick={() => { setSelectedReport(report); setReportAction(''); setReportNote(''); }}
                         className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition"
                       >
                         Resolve Report
                       </button>
                     )}
 
-                    {report.resolution && (
+                    {report.action && (
                       <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-xs font-semibold text-green-900 mb-1">Resolution:</p>
-                        <p className="text-sm text-green-800">{report.resolution}</p>
+                        <p className="text-xs font-semibold text-green-900 mb-1">Action taken:</p>
+                        <p className="text-sm text-green-800">{report.action}</p>
                       </div>
                     )}
                   </div>
@@ -336,8 +352,8 @@ export default function AdminDashboard() {
                     {circle.description && (
                       <p className="text-sm text-[#4A6572] mb-3">{circle.description}</p>
                     )}
-                    {circle.verificationCriteria && (
-                      <p className="text-xs text-[#00879E] mb-4">Criteria: {circle.verificationCriteria}</p>
+                    {circle.eligibilityCriteria && (
+                      <p className="text-xs text-[#00879E] mb-4">Criteria: {circle.eligibilityCriteria}</p>
                     )}
                     <button
                       onClick={() => handleViewMembers(circle)}
@@ -362,27 +378,30 @@ export default function AdminDashboard() {
               Equipment: <strong>{selectedDispute.bookingId?.listingId?.title || selectedDispute.equipment || '—'}</strong>
             </p>
             <p className="text-sm text-[#4A6572] mb-4">{selectedDispute.description || selectedDispute.issue}</p>
-            <div className="mb-4">
-              <label className="block text-sm font-bold text-[#003E51] mb-2">Ruling / Decision</label>
-              <select
-                value={rulingText}
-                onChange={(e) => setRulingText(e.target.value)}
-                className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] mb-2"
-              >
-                <option value="">Select ruling…</option>
-                <option value="Lender compensated - damage confirmed">Lender compensated - damage confirmed</option>
-                <option value="No damage found - dismissed">No damage found - dismissed</option>
-                <option value="Partial refund issued">Partial refund issued</option>
-                <option value="Renter penalized - late return">Renter penalized - late return</option>
-                <option value="Both parties at fault - mutual settlement">Both parties at fault - mutual settlement</option>
-              </select>
-              <textarea
-                value={rulingText}
-                onChange={(e) => setRulingText(e.target.value)}
-                rows="3"
-                placeholder="Or write a custom ruling…"
-                className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
-              />
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Ruling *</label>
+                <select
+                  value={rulingEnum}
+                  onChange={(e) => setRulingEnum(e.target.value)}
+                  className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                >
+                  <option value="">Select ruling…</option>
+                  <option value="RenterResponsible">Renter Responsible</option>
+                  <option value="LenderResponsible">Lender Responsible</option>
+                  <option value="NoFaultFound">No Fault Found</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Ruling Note</label>
+                <textarea
+                  value={rulingNote}
+                  onChange={(e) => setRulingNote(e.target.value)}
+                  rows="3"
+                  placeholder="Explain the decision…"
+                  className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                />
+              </div>
             </div>
             <div className="flex gap-3">
               <button
@@ -393,7 +412,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={handleResolveDispute}
-                disabled={!rulingText.trim() || resolvingDispute}
+                disabled={!rulingEnum || resolvingDispute}
                 className="flex-1 px-4 py-2 bg-[#003E51] text-white rounded-lg font-medium hover:bg-[#002A38] disabled:opacity-50"
               >
                 {resolvingDispute ? 'Resolving…' : 'Confirm Resolution'}
@@ -412,26 +431,30 @@ export default function AdminDashboard() {
               Listing: <strong>{selectedReport.listingId?.title || selectedReport.listing || '—'}</strong>
             </p>
             <p className="text-sm text-[#4A6572] mb-4">{selectedReport.reason || selectedReport.description}</p>
-            <div className="mb-4">
-              <label className="block text-sm font-bold text-[#003E51] mb-2">Resolution Action</label>
-              <select
-                value={resolutionText}
-                onChange={(e) => setResolutionText(e.target.value)}
-                className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] mb-2"
-              >
-                <option value="">Select action…</option>
-                <option value="Listing removed - policy violation">Listing removed - policy violation</option>
-                <option value="Warning issued to lender">Warning issued to lender</option>
-                <option value="Report dismissed - no violation found">Report dismissed - no violation found</option>
-                <option value="User suspended">User suspended</option>
-              </select>
-              <textarea
-                value={resolutionText}
-                onChange={(e) => setResolutionText(e.target.value)}
-                rows="3"
-                placeholder="Or write a custom resolution…"
-                className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
-              />
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Action *</label>
+                <select
+                  value={reportAction}
+                  onChange={(e) => setReportAction(e.target.value)}
+                  className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                >
+                  <option value="">Select action…</option>
+                  <option value="Dismiss">Dismiss — no violation found</option>
+                  <option value="WarnLender">Warn Lender</option>
+                  <option value="RemoveListing">Remove Listing</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Note (optional)</label>
+                <textarea
+                  value={reportNote}
+                  onChange={(e) => setReportNote(e.target.value)}
+                  rows="3"
+                  placeholder="Additional notes…"
+                  className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                />
+              </div>
             </div>
             <div className="flex gap-3">
               <button
@@ -442,7 +465,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={handleResolveReport}
-                disabled={!resolutionText.trim() || resolvingReport}
+                disabled={!reportAction || resolvingReport}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
               >
                 {resolvingReport ? 'Resolving…' : 'Confirm Resolution'}
@@ -511,11 +534,11 @@ export default function AdminDashboard() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#003E51] mb-2">Verification Criteria</label>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Eligibility Criteria</label>
                 <input
                   type="text"
-                  value={newCircle.verificationCriteria}
-                  onChange={(e) => setNewCircle({ ...newCircle, verificationCriteria: e.target.value })}
+                  value={newCircle.eligibilityCriteria}
+                  onChange={(e) => setNewCircle({ ...newCircle, eligibilityCriteria: e.target.value })}
                   className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
                   placeholder="e.g. @kfupm.edu.sa email domain"
                 />

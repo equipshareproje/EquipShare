@@ -14,8 +14,8 @@ const disputesApi = {
   // GET /api/disputes/:id
   getDispute: (id) => client.get(`/api/disputes/${id}`),
 
-  // POST /api/disputes/:id/resolve  (Admin only)
-  resolveDispute: (id, data) => client.post(`/api/disputes/${id}/resolve`, data),
+  // PUT /api/disputes/:id/resolve  (Admin only)
+  resolveDispute: (id, data) => client.put(`/api/disputes/${id}/resolve`, data),
 };
 
 export default disputesApi;
