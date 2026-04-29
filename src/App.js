@@ -41,7 +41,7 @@ function App() {
               <Route path="/profile" element={<ProtectedRoute element={<UserProfile />} fallbackPath="/signin" />} />
               <Route path="/user/:userId" element={<PublicProfile />} />
               <Route path="/create-listing" element={<CreateListing />} />
-              <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} requiredRole="admin" fallbackPath="/signin" />} />
+              <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} requiredRole="admin" fallbackPath="/marketplace" />} />
               <Route path="/earnings" element={<EarningsDashboard />} />
               <Route path="/my-listings" element={<MyListings />} />
               <Route path="/circles" element={<Circles />} />
