@@ -117,9 +117,9 @@ export default function EarningsDashboard() {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#1A7F5A]">
-            <p className="text-[#4A6572] font-medium text-sm mb-2">Available Balance</p>
+            <p className="text-[#4A6572] font-medium text-sm mb-2">Pending Payout Balance</p>
             <p className="text-3xl font-bold text-[#1A7F5A]">SAR {availableBalance.toFixed(2)}</p>
-            <p className="text-xs text-[#4A6572] mt-2">Ready to withdraw</p>
+            <p className="text-xs text-[#4A6572] mt-2">Awaiting payout request</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#D97706]">
@@ -257,7 +257,7 @@ export default function EarningsDashboard() {
             <p className="text-[#4A6572] mb-6">Transfer your available earnings to your registered account</p>
 
             <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6">
-              <p className="text-sm text-[#4A6572] mb-2">Available Balance:</p>
+              <p className="text-sm text-[#4A6572] mb-2">Pending Payout Balance:</p>
               <p className="text-2xl font-bold text-[#003E51]">SAR {availableBalance.toFixed(2)}</p>
               <p className="text-xs text-[#4A6572] mt-2">Minimum: SAR 100</p>
             </div>
