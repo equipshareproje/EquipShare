@@ -36,8 +36,14 @@ const SignIn = () => {
       const user = await signin(formData.email, formData.password);
       navigate(user.role === 'admin' ? '/admin' : '/marketplace');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Invalid email or password. Please try again.';
-      const isVerificationError = /verif/i.test(msg) || err.response?.status === 403;
+      const status = err.response?.status;
+      const rawData = err.response?.data;
+      const msg =
+        status === 429
+          ? 'Too many login attempts. Please wait a few minutes and try again.'
+          : (typeof rawData === 'object' ? rawData?.message : rawData) ||
+            'Invalid email or password. Please try again.';
+      const isVerificationError = /verif/i.test(msg) || status === 403;
       setNeedsVerification(isVerificationError);
       setErrors({ submit: msg });
     } finally {
