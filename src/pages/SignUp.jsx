@@ -84,6 +84,8 @@ const SignUp = () => {
     }
   };
 
+  const [success, setSuccess] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -94,19 +96,22 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      signup({
+      await signup({
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
-        phone: formData.phone
+        phone: formData.phone,
       });
 
-      // Redirect to marketplace after successful signup
-      navigate('/marketplace');
+      setSuccess(
+        'Account created! Please check your email to verify your address before signing in.'
+      );
     } catch (error) {
-      setErrors({
-        submit: error.message || 'Failed to create account. Please try again.'
-      });
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to create account. Please try again.';
+      setErrors({ submit: msg });
     } finally {
       setLoading(false);
     }
@@ -121,10 +126,21 @@ const SignUp = () => {
           <p className="text-text-secondary">Join EquipShare today</p>
         </div>
 
-        {/* Submit Error */}
+        {success && (
+          <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-300">
+            <p className="text-green-700 text-sm">{success}</p>
+            <button
+              onClick={() => navigate('/signin')}
+              className="mt-2 text-sm font-medium text-green-700 underline"
+            >
+              Go to Sign In
+            </button>
+          </div>
+        )}
+
         {errors.submit && (
-          <div className="mb-6 p-4 rounded-lg bg-error bg-opacity-10 border border-error">
-            <p className="text-error text-sm">{errors.submit}</p>
+          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-300">
+            <p className="text-red-700 text-sm">{errors.submit}</p>
           </div>
         )}
 
