@@ -20,6 +20,8 @@ import EarningsDashboard from './pages/EarningsDashboard';
 import MyListings from './pages/MyListings';
 import EditListing from './pages/EditListing';
 import Circles from './pages/Circles';
+import Verified from './pages/Verified';
+import VerifyFailed from './pages/VerifyFailed';
 import './index.css';
 
 function App() {
@@ -46,6 +48,8 @@ function App() {
               <Route path="/my-listings" element={<MyListings />} />
               <Route path="/circles" element={<Circles />} />
               <Route path="/edit-listing/:listingId" element={<EditListing />} />
+              <Route path="/verified" element={<Verified />} />
+              <Route path="/verify-failed" element={<VerifyFailed />} />
             </Routes>
           </main>
           <Footer />

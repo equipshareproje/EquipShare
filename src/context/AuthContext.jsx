@@ -21,6 +21,14 @@ export const AuthProvider = ({ children }) => {
     setLogoutHandler(logout);
   }, [logout]);
 
+  // ── Role helper: backend returns roles[] array, derive single role string ──
+  const deriveRole = (roles) => {
+    if (!Array.isArray(roles)) return 'user';
+    const lower = roles.map((r) => r.toLowerCase());
+    if (lower.includes('admin')) return 'admin';
+    return 'user';
+  };
+
   // ── Session restore on mount ──────────────────────────────────────────────
   useEffect(() => {
     const restore = async () => {
@@ -31,8 +39,7 @@ export const AuthProvider = ({ children }) => {
 
         const meRes = await authApi.me();
         const apiUser = meRes.data.data;
-        // Normalize role to lowercase so existing role checks keep working
-        setUser({ ...apiUser, role: apiUser.role?.toLowerCase() });
+        setUser({ ...apiUser, role: deriveRole(apiUser.roles) });
       } catch (_) {
         // No valid session — user stays null
         setUser(null);
@@ -65,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     // (the login response may not include the user body in all backend versions)
     const meRes = await authApi.me();
     const apiUser = meRes.data.data;
-    const normalized = { ...apiUser, role: apiUser.role?.toLowerCase() };
+    const normalized = { ...apiUser, role: deriveRole(apiUser.roles) };
     setUser(normalized);
     return normalized;
   }, []);

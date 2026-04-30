@@ -90,7 +90,7 @@ const UserProfile = () => {
                 <p className="text-sm text-text-secondary">Account Status</p>
                 <p className="text-lg font-medium">
                   <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    user.verified ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
+                    user.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
                     {user.verified ? 'Verified' : 'Pending Verification'}
                   </span>
@@ -98,8 +98,18 @@ const UserProfile = () => {
               </div>
               <div>
                 <p className="text-sm text-text-secondary">Joined</p>
-                <p className="text-lg font-medium text-text-primary">{new Date(user.joinDate).toLocaleDateString()}</p>
+                <p className="text-lg font-medium text-text-primary">
+                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
+                </p>
               </div>
+              {user.rating !== undefined && (
+                <div>
+                  <p className="text-sm text-text-secondary">Rating</p>
+                  <p className="text-lg font-medium text-text-primary">
+                    {user.rating > 0 ? `${user.rating} (${user.reviewCount} review${user.reviewCount !== 1 ? 's' : ''})` : 'No reviews yet'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -189,17 +199,6 @@ const UserProfile = () => {
             </div>
           </form>
 
-          {/* Additional Info */}
-          <div className="mt-8 p-4 bg-surface rounded-lg">
-            <p className="text-sm text-text-secondary mb-3">
-              <strong>Rating:</strong> {user.rating ? `${user.rating} (${user.reviews} reviews)` : 'No reviews yet'}
-            </p>
-            {user.role === 'lender' && (
-              <p className="text-sm text-text-secondary">
-                <strong>Listings:</strong> {user.listings || 0} active equipment listings
-              </p>
-            )}
-          </div>
         </div>
       </div>
     </div>

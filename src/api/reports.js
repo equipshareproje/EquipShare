@@ -8,6 +8,9 @@ const reportsApi = {
   getReports: (status) =>
     client.get('/api/reports', { params: status ? { status } : {} }),
 
+  // GET /api/reports/my
+  getMyReports: () => client.get('/api/reports/my'),
+
   // GET /api/reports/:id
   getReport: (id) => client.get(`/api/reports/${id}`),
 

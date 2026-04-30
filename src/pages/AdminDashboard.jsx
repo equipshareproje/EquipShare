@@ -34,7 +34,8 @@ export default function AdminDashboard() {
 
   // Create circle form
   const [showNewCircleForm, setShowNewCircleForm] = useState(false);
-  const [newCircle, setNewCircle] = useState({ name: '', description: '', eligibilityCriteria: '' });
+  const [newCircle, setNewCircle] = useState({ name: '', description: '', eligibilityCriteria: '', emailDomainRule: '' });
+  const [circleFormErrors, setCircleFormErrors] = useState({});
   const [creatingCircle, setCreatingCircle] = useState(false);
 
   useEffect(() => {
@@ -149,7 +150,7 @@ export default function AdminDashboard() {
       });
       setReports((prev) =>
         prev.map((r) =>
-          r._id === selectedReport._id ? { ...r, status: 'Resolved', action: reportAction } : r
+          r._id === selectedReport._id ? { ...r, status: 'Resolved', adminAction: reportAction, adminNote: reportNote.trim() || undefined } : r
         )
       );
       setSelectedReport(null);
@@ -181,16 +182,31 @@ export default function AdminDashboard() {
   };
 
   const handleCreateCircle = async () => {
-    if (!newCircle.name || !newCircle.description) return;
+    // Client-side validation matching backend rules
+    const errs = {};
+    if (!newCircle.name.trim()) errs.name = 'Circle name is required.';
+    if (!newCircle.description.trim()) errs.description = 'Description is required.';
+    else if (newCircle.description.trim().length < 10) errs.description = 'Description must be at least 10 characters.';
+    if (!newCircle.eligibilityCriteria.trim()) errs.eligibilityCriteria = 'Eligibility criteria is required.';
+    if (Object.keys(errs).length > 0) { setCircleFormErrors(errs); return; }
+    setCircleFormErrors({});
     setCreatingCircle(true);
     try {
-      const res = await circlesApi.createCircle(newCircle);
+      const payload = {
+        name: newCircle.name.trim(),
+        description: newCircle.description.trim(),
+        eligibilityCriteria: newCircle.eligibilityCriteria.trim(),
+      };
+      if (newCircle.emailDomainRule.trim()) payload.emailDomainRule = newCircle.emailDomainRule.trim();
+      const res = await circlesApi.createCircle(payload);
       const created = res.data.data;
       setCircles((prev) => [...prev, created]);
-      setNewCircle({ name: '', description: '', eligibilityCriteria: '' });
+      setNewCircle({ name: '', description: '', eligibilityCriteria: '', emailDomainRule: '' });
+      setCircleFormErrors({});
       setShowNewCircleForm(false);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to create circle.');
+      const msg = err.response?.data?.message || 'Failed to create circle.';
+      setCircleFormErrors({ submit: msg });
     } finally {
       setCreatingCircle(false);
     }
@@ -267,7 +283,7 @@ export default function AdminDashboard() {
                         </div>
                         <p className="text-sm text-[#4A6572]">
                           Filed: {formatDate(dispute.createdAt)} •{' '}
-                          Filed by: {dispute.filedBy?.name || dispute.renterId?.name || '—'}
+                          Filed by: {dispute.filedById?.name || '—'}{dispute.filedByRole ? ` (${dispute.filedByRole})` : ''}
                         </p>
                       </div>
                     </div>
@@ -338,7 +354,7 @@ export default function AdminDashboard() {
                         </div>
                         <p className="text-sm text-[#4A6572]">
                           Reported: {formatDate(report.createdAt)} •{' '}
-                          By: {report.reportedBy?.name || '—'}
+                          By: {report.reportedById?.name || '—'}
                         </p>
                       </div>
                     </div>
@@ -365,10 +381,12 @@ export default function AdminDashboard() {
                       </div>
                     )}
 
-                    {report.action && (
+                    {report.adminAction && (
                       <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-xs font-semibold text-green-900 mb-1">Action taken:</p>
-                        <p className="text-sm text-green-800">{report.action}</p>
+                        <p className="text-xs font-semibold text-green-900 mb-1">Action taken: {report.adminAction}</p>
+                        {report.adminNote && (
+                          <p className="text-sm text-green-800">{report.adminNote}</p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -593,48 +611,66 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-[#003E51] mb-4">Create Trusted Circle</h2>
+            {circleFormErrors.submit && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-700 text-sm font-medium">{circleFormErrors.submit}</p>
+              </div>
+            )}
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm font-bold text-[#003E51] mb-2">Circle Name *</label>
                 <input
                   type="text"
                   value={newCircle.name}
-                  onChange={(e) => setNewCircle({ ...newCircle, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                  onChange={(e) => { setNewCircle({ ...newCircle, name: e.target.value }); setCircleFormErrors((p) => ({ ...p, name: '' })); }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${circleFormErrors.name ? 'border-red-400' : 'border-[#D0DDE2]'}`}
                   placeholder="e.g. KFUPM Students"
                 />
+                {circleFormErrors.name && <p className="text-red-600 text-xs mt-1">{circleFormErrors.name}</p>}
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#003E51] mb-2">Description *</label>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Description * <span className="font-normal text-[#4A6572]">(min 10 chars)</span></label>
                 <textarea
                   value={newCircle.description}
-                  onChange={(e) => setNewCircle({ ...newCircle, description: e.target.value })}
+                  onChange={(e) => { setNewCircle({ ...newCircle, description: e.target.value }); setCircleFormErrors((p) => ({ ...p, description: '' })); }}
                   rows="3"
-                  className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${circleFormErrors.description ? 'border-red-400' : 'border-[#D0DDE2]'}`}
                   placeholder="Describe this circle…"
                 />
+                {circleFormErrors.description && <p className="text-red-600 text-xs mt-1">{circleFormErrors.description}</p>}
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#003E51] mb-2">Eligibility Criteria</label>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Eligibility Criteria *</label>
                 <input
                   type="text"
                   value={newCircle.eligibilityCriteria}
-                  onChange={(e) => setNewCircle({ ...newCircle, eligibilityCriteria: e.target.value })}
+                  onChange={(e) => { setNewCircle({ ...newCircle, eligibilityCriteria: e.target.value }); setCircleFormErrors((p) => ({ ...p, eligibilityCriteria: '' })); }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51] ${circleFormErrors.eligibilityCriteria ? 'border-red-400' : 'border-[#D0DDE2]'}`}
+                  placeholder="e.g. Verified KFUPM email address required"
+                />
+                {circleFormErrors.eligibilityCriteria && <p className="text-red-600 text-xs mt-1">{circleFormErrors.eligibilityCriteria}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#003E51] mb-2">Email Domain Rule <span className="font-normal text-[#4A6572]">(optional — gates self-join)</span></label>
+                <input
+                  type="text"
+                  value={newCircle.emailDomainRule}
+                  onChange={(e) => setNewCircle({ ...newCircle, emailDomainRule: e.target.value })}
                   className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
-                  placeholder="e.g. @kfupm.edu.sa email domain"
+                  placeholder="e.g. kfupm.edu.sa"
                 />
               </div>
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowNewCircleForm(false)}
+                onClick={() => { setShowNewCircleForm(false); setCircleFormErrors({}); }}
                 className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateCircle}
-                disabled={!newCircle.name || !newCircle.description || creatingCircle}
+                disabled={!newCircle.name || !newCircle.description || !newCircle.eligibilityCriteria || creatingCircle}
                 className="flex-1 px-4 py-2 bg-[#003E51] text-white rounded-lg font-medium hover:bg-[#002A38] disabled:opacity-50"
               >
                 {creatingCircle ? 'Creating…' : 'Create Circle'}

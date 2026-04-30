@@ -5,6 +5,8 @@ import Button from '../components/Button';
 import VisualHandshake from '../components/VisualHandshake';
 import bookingsApi from '../api/bookings';
 import reviewsApi from '../api/reviews';
+import disputesApi from '../api/disputes';
+import reportsApi from '../api/reports';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -13,6 +15,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('renter');
   const [renterBookings, setRenterBookings] = useState([]);
   const [lenderBookings, setLenderBookings] = useState([]);
+  const [myDisputes, setMyDisputes] = useState([]);
+  const [myReports, setMyReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -28,19 +32,28 @@ export default function Dashboard() {
   const [visualHandshakeBooking, setVisualHandshakeBooking] = useState(null);
   const [handshakeType, setHandshakeType] = useState('pre-rental');
 
+  // File dispute
+  const [filingDisputeBooking, setFilingDisputeBooking] = useState(null);
+  const [disputeDescription, setDisputeDescription] = useState('');
+  const [filingDispute, setFilingDispute] = useState(false);
+
   const fetchBookings = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     setError('');
     try {
-      const [rentingRes, lendingRes] = await Promise.all([
+      const [rentingRes, lendingRes, disputesRes, reportsRes] = await Promise.all([
         bookingsApi.getMyRenting(),
         bookingsApi.getMyLending(),
+        disputesApi.getMyDisputes(),
+        reportsApi.getMyReports(),
       ]);
       setRenterBookings(rentingRes.data.data || []);
       setLenderBookings(lendingRes.data.data || []);
+      setMyDisputes(Array.isArray(disputesRes.data.data) ? disputesRes.data.data : []);
+      setMyReports(Array.isArray(reportsRes.data.data) ? reportsRes.data.data : []);
     } catch (err) {
-      setError('Failed to load bookings. Please refresh.');
+      setError('Failed to load dashboard data. Please refresh.');
     } finally {
       setLoading(false);
     }
@@ -59,7 +72,6 @@ export default function Dashboard() {
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   const formatDate = (iso) => {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -73,11 +85,13 @@ export default function Dashboard() {
       Completed: 'bg-gray-100 text-gray-700',
       Rejected: 'bg-red-100 text-red-700',
       Cancelled: 'bg-red-100 text-red-700',
+      Open: 'bg-orange-100 text-orange-800',
+      UnderReview: 'bg-blue-100 text-blue-800',
+      Resolved: 'bg-gray-100 text-gray-700',
     };
     return `${map[status] || 'bg-gray-100 text-gray-700'} px-3 py-1 rounded text-sm font-medium`;
   };
 
-  // ── Approve ───────────────────────────────────────────────────────────────
   const handleApprove = async (bookingId) => {
     setActionLoading(true);
     try {
@@ -90,7 +104,6 @@ export default function Dashboard() {
     }
   };
 
-  // ── Reject ────────────────────────────────────────────────────────────────
   const handleReject = async () => {
     if (!rejectingBooking) return;
     setActionLoading(true);
@@ -106,7 +119,6 @@ export default function Dashboard() {
     }
   };
 
-  // ── Review submit ─────────────────────────────────────────────────────────
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!reviewingBooking) return;
@@ -129,7 +141,6 @@ export default function Dashboard() {
     }
   };
 
-  // ── Handshake complete (uploads real files) ───────────────────────────────
   const handleCompleteHandshake = async (handshakeData) => {
     if (!visualHandshakeBooking) return;
     try {
@@ -137,6 +148,7 @@ export default function Dashboard() {
       if (handshakeType === 'pre-rental') {
         await bookingsApi.uploadPreRentalPhotos(visualHandshakeBooking._id, files);
       } else {
+        // renter-receipt or post-rental → uploadReceivedPhotos
         await bookingsApi.uploadReceivedPhotos(visualHandshakeBooking._id, files);
       }
       setVisualHandshakeBooking(null);
@@ -147,10 +159,30 @@ export default function Dashboard() {
     }
   };
 
-  // ── Render booking rows ───────────────────────────────────────────────────
+  const handleFileDispute = async () => {
+    if (!filingDisputeBooking || disputeDescription.trim().length < 20) return;
+    setFilingDispute(true);
+    try {
+      await disputesApi.fileDispute({
+        bookingId: filingDisputeBooking._id,
+        description: disputeDescription.trim(),
+      });
+      setFilingDisputeBooking(null);
+      setDisputeDescription('');
+      await fetchBookings();
+      alert('Dispute filed successfully.');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to file dispute.');
+    } finally {
+      setFilingDispute(false);
+    }
+  };
+
   const renderRenterRow = (b) => {
     const listingTitle = b.listingId?.title || b.listingId || 'Equipment';
     const lenderId = b.ownerId;
+    const handoverStatus = b.handover?.status;
+    const canDispute = b.status === 'Active' || b.status === 'Completed';
     return (
       <React.Fragment key={b._id}>
         <tr className="border-b border-[#D0DDE2] hover:bg-gray-50 transition">
@@ -180,9 +212,10 @@ export default function Dashboard() {
               >
                 {expandedDetails === b._id ? 'Hide' : 'Details'}
               </button>
-              {b.status === 'Approved' && (
+              {/* Renter confirms receipt only when lender has done pre-rental handover */}
+              {b.status === 'Approved' && handoverStatus === 'lender_done' && (
                 <button
-                  onClick={() => { setVisualHandshakeBooking(b); setHandshakeType('pre-rental'); }}
+                  onClick={() => { setVisualHandshakeBooking(b); setHandshakeType('renter-receipt'); }}
                   className="text-blue-600 hover:underline font-medium"
                 >
                   Confirm Receipt
@@ -196,6 +229,14 @@ export default function Dashboard() {
                   Review
                 </button>
               )}
+              {canDispute && (
+                <button
+                  onClick={() => { setFilingDisputeBooking(b); setDisputeDescription(''); }}
+                  className="text-red-600 hover:underline font-medium"
+                >
+                  File Dispute
+                </button>
+              )}
             </div>
           </td>
         </tr>
@@ -207,6 +248,12 @@ export default function Dashboard() {
                 <p><span className="font-medium">Total Paid:</span> {b.totalAmount?.toFixed(2)} SAR</p>
                 <p><span className="font-medium">Daily Price:</span> {b.dailyPrice} SAR</p>
                 <p><span className="font-medium">Service Fee:</span> {b.serviceFee?.toFixed(2)} SAR</p>
+                <p><span className="font-medium">Payment Status:</span> {b.stripe?.chargeStatus || '—'}</p>
+                {b.status === 'Approved' && (
+                  <p className="text-blue-700 text-xs mt-1">
+                    Handover: {handoverStatus === 'pending' ? 'Waiting for lender to upload pre-rental photos' : handoverStatus === 'lender_done' ? 'Lender done — confirm receipt above' : 'Complete'}
+                  </p>
+                )}
               </div>
             </td>
           </tr>
@@ -219,6 +266,7 @@ export default function Dashboard() {
     const listingTitle = b.listingId?.title || b.listingId || 'Equipment';
     const renterId = b.renterId;
     const handoverStatus = b.handover?.status;
+    const canDispute = b.status === 'Active' || b.status === 'Completed';
     return (
       <React.Fragment key={b._id}>
         <tr className="border-b border-[#D0DDE2] hover:bg-gray-50 transition">
@@ -286,12 +334,12 @@ export default function Dashboard() {
                 </>
               )}
 
-              {b.status === 'Active' && (
+              {canDispute && (
                 <button
-                  onClick={() => { setVisualHandshakeBooking(b); setHandshakeType('post-rental'); }}
-                  className="text-orange-600 hover:underline font-medium"
+                  onClick={() => { setFilingDisputeBooking(b); setDisputeDescription(''); }}
+                  className="text-red-600 hover:underline font-medium"
                 >
-                  Return Handover
+                  File Dispute
                 </button>
               )}
             </div>
@@ -334,28 +382,35 @@ export default function Dashboard() {
     );
   };
 
+  const tabs = [
+    { id: 'renter', label: 'As Renter' },
+    { id: 'lender', label: 'As Lender' },
+    { id: 'disputes', label: `My Disputes${myDisputes.length > 0 ? ` (${myDisputes.length})` : ''}` },
+    { id: 'reports', label: `My Reports${myReports.length > 0 ? ` (${myReports.length})` : ''}` },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F4F7F8]">
       <div className="bg-[#003E51] text-white py-8">
         <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-3xl font-bold mb-2">My Rentals</h1>
-          <p className="text-gray-200">Manage your rentals and bookings</p>
+          <h1 className="text-3xl font-bold mb-2">My Dashboard</h1>
+          <p className="text-gray-200">Manage your rentals, disputes, and reports</p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 max-w-7xl py-8">
-        <div className="flex gap-4 mb-6 border-b border-[#D0DDE2]">
-          {['renter', 'lender'].map((tab) => (
+        <div className="flex gap-4 mb-6 border-b border-[#D0DDE2] overflow-x-auto">
+          {tabs.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-4 px-4 font-medium transition capitalize ${
-                activeTab === tab
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`pb-4 px-4 font-medium transition whitespace-nowrap ${
+                activeTab === tab.id
                   ? 'text-[#003E51] border-b-2 border-[#003E51]'
                   : 'text-[#4A6572] hover:text-[#003E51]'
               }`}
             >
-              As {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -433,6 +488,71 @@ export default function Dashboard() {
                 )}
               </div>
             )}
+
+            {/* ── My Disputes ── */}
+            {activeTab === 'disputes' && (
+              <div>
+                {myDisputes.length === 0 ? (
+                  <div className="bg-white rounded-lg shadow-md p-12 text-center">
+                    <p className="text-lg text-[#4A6572]">You have not filed any disputes.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {myDisputes.map((d) => (
+                      <div key={d._id} className="bg-white rounded-lg shadow-md p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <p className="font-bold text-[#003E51]">Dispute — Booking {d.bookingId?._id || d.bookingId}</p>
+                            <p className="text-sm text-[#4A6572]">Filed: {formatDate(d.createdAt)} • Role: {d.filedByRole || '—'}</p>
+                          </div>
+                          <span className={statusBadge(d.status)}>{d.status}</span>
+                        </div>
+                        <p className="text-[#4A6572] text-sm mb-2">{d.description}</p>
+                        {d.ruling && (
+                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <p className="text-xs font-semibold text-green-900">Ruling: {d.ruling}</p>
+                            {d.rulingNote && <p className="text-sm text-green-800 mt-1">{d.rulingNote}</p>}
+                            {d.refundAmount && <p className="text-xs text-green-700 mt-1">Refund: SAR {d.refundAmount}</p>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── My Reports ── */}
+            {activeTab === 'reports' && (
+              <div>
+                {myReports.length === 0 ? (
+                  <div className="bg-white rounded-lg shadow-md p-12 text-center">
+                    <p className="text-lg text-[#4A6572]">You have not filed any reports.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {myReports.map((r) => (
+                      <div key={r._id} className="bg-white rounded-lg shadow-md p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <p className="font-bold text-[#003E51]">{r.listingId?.title || 'Listing'}</p>
+                            <p className="text-sm text-[#4A6572]">Reason: {r.reason} • Filed: {formatDate(r.createdAt)}</p>
+                          </div>
+                          <span className={statusBadge(r.status)}>{r.status}</span>
+                        </div>
+                        <p className="text-[#4A6572] text-sm mb-2">{r.description}</p>
+                        {r.adminAction && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-xs font-semibold text-blue-900">Admin action: {r.adminAction}</p>
+                            {r.adminNote && <p className="text-sm text-blue-800 mt-1">{r.adminNote}</p>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -443,36 +563,21 @@ export default function Dashboard() {
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h2 className="text-2xl font-bold text-[#0A1F29] mb-4">Leave a Review</h2>
             <form onSubmit={handleReviewSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-[#0A1F29] mb-2">Overall Rating</label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <button key={s} type="button" onClick={() => setReviewForm((p) => ({ ...p, starRating: s }))}
-                      className={`text-2xl transition ${s <= reviewForm.starRating ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
-                  ))}
+              {[
+                { label: 'Overall Rating', key: 'starRating', color: 'text-yellow-400' },
+                { label: 'Equipment Condition (1–5)', key: 'equipmentCondition', color: 'text-blue-400' },
+                { label: 'Lender Reliability (1–5)', key: 'lenderReliability', color: 'text-green-400' },
+              ].map(({ label, key, color }) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-[#0A1F29] mb-2">{label}</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <button key={s} type="button" onClick={() => setReviewForm((p) => ({ ...p, [key]: s }))}
+                        className={`text-2xl transition ${s <= reviewForm[key] ? color : 'text-gray-300'}`}>★</button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#0A1F29] mb-2">Equipment Condition (1–5)</label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <button key={s} type="button" onClick={() => setReviewForm((p) => ({ ...p, equipmentCondition: s }))}
-                      className={`text-2xl transition ${s <= reviewForm.equipmentCondition ? 'text-blue-400' : 'text-gray-300'}`}>★</button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#0A1F29] mb-2">Lender Reliability (1–5)</label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <button key={s} type="button" onClick={() => setReviewForm((p) => ({ ...p, lenderReliability: s }))}
-                      className={`text-2xl transition ${s <= reviewForm.lenderReliability ? 'text-green-400' : 'text-gray-300'}`}>★</button>
-                  ))}
-                </div>
-              </div>
-
+              ))}
               <div>
                 <label className="block text-sm font-medium text-[#0A1F29] mb-2">Comment (optional)</label>
                 <textarea
@@ -482,7 +587,6 @@ export default function Dashboard() {
                   className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
                 />
               </div>
-
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setReviewingBooking(null)}
                   className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50">
@@ -525,6 +629,46 @@ export default function Dashboard() {
               <button onClick={handleReject} disabled={actionLoading}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50">
                 {actionLoading ? 'Rejecting…' : 'Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── File Dispute Modal ── */}
+      {filingDisputeBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-red-600 mb-2">File a Dispute</h2>
+            <p className="text-sm text-[#4A6572] mb-4">
+              Booking: <strong>{filingDisputeBooking.listingId?.title || filingDisputeBooking.listingId}</strong>
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[#0A1F29] mb-2">
+                Description <span className="text-xs text-[#4A6572]">(min 20 characters)</span>
+              </label>
+              <textarea
+                value={disputeDescription}
+                onChange={(e) => setDisputeDescription(e.target.value)}
+                rows="5"
+                placeholder="Describe the issue in detail. Include what happened, when, and any evidence you have…"
+                className="w-full px-3 py-2 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
+              />
+              <p className="text-xs text-[#4A6572] mt-1">{disputeDescription.trim().length}/20 minimum</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setFilingDisputeBooking(null); setDisputeDescription(''); }}
+                className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFileDispute}
+                disabled={filingDispute || disputeDescription.trim().length < 20}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {filingDispute ? 'Filing…' : 'File Dispute'}
               </button>
             </div>
           </div>

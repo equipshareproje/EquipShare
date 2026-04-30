@@ -10,6 +10,9 @@ const earningsApi = {
 
   // POST /api/earnings/payout
   requestPayout: () => client.post('/api/earnings/payout'),
+
+  // GET /api/earnings/payouts
+  getPayouts: () => client.get('/api/earnings/payouts'),
 };
 
 export default earningsApi;

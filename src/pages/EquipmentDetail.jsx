@@ -6,6 +6,16 @@ import DateRangeCalendar from '../components/DateRangeCalendar';
 import listingsApi from '../api/listings';
 import reviewsApi from '../api/reviews';
 import bookingsApi from '../api/bookings';
+import reportsApi from '../api/reports';
+
+const REPORT_REASONS = [
+  'Scam',
+  'FakePhotos',
+  'InappropriateContent',
+  'Overpriced',
+  'MisleadingDescription',
+  'Other',
+];
 
 export default function EquipmentDetail() {
   const { id } = useParams();
@@ -21,6 +31,13 @@ export default function EquipmentDetail() {
   const [endDate, setEndDate] = useState('');
   const [booking, setBooking] = useState(false);
   const [bookingError, setBookingError] = useState('');
+
+  // Report listing
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDescription, setReportDescription] = useState('');
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -63,7 +80,7 @@ export default function EquipmentDetail() {
     );
   }
 
-  // ── Booking cost calc ─────────────────────────────────────────────────────
+  // Booking cost calc
   let bookingDays = 1;
   if (startDate && endDate) {
     const [sy, sm, sd] = startDate.split('-').map(Number);
@@ -75,7 +92,6 @@ export default function EquipmentDetail() {
   const serviceFee = subtotal * 0.1;
   const total = subtotal + serviceFee;
 
-  // Blocked dates from the listing
   const blockedDates = equipment.blockedDates || [];
   const today = new Date().toISOString().split('T')[0];
 
@@ -90,16 +106,39 @@ export default function EquipmentDetail() {
         new Date(startDate + 'T00:00:00').toISOString(),
         new Date(endDate + 'T00:00:00').toISOString()
       );
-      const { bookingId } = res.data.data;
-      // Navigate to checkout with the bookingId
-      navigate(`/checkout/${bookingId}`);
+      const { bookingId, clientSecret } = res.data.data;
+      // Pass clientSecret via navigation state so Checkout can use it for Stripe
+      navigate(`/checkout/${bookingId}`, { state: { clientSecret } });
     } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        'Failed to create booking. Dates may be unavailable.';
-      setBookingError(msg);
+      const status = err.response?.status;
+      const msg = err.response?.data?.message || 'Failed to create booking. Dates may be unavailable.';
+      if (status === 409) {
+        setBookingError('These dates are no longer available. Please choose different dates.');
+      } else {
+        setBookingError(msg);
+      }
     } finally {
       setBooking(false);
+    }
+  };
+
+  const handleReportSubmit = async () => {
+    if (!reportReason || reportDescription.trim().length < 20) return;
+    setReportSubmitting(true);
+    try {
+      await reportsApi.fileReport({
+        listingId: equipment._id,
+        reason: reportReason,
+        description: reportDescription.trim(),
+      });
+      setReportSuccess('Report submitted. Our team will review it shortly.');
+      setReportReason('');
+      setReportDescription('');
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to submit report.';
+      alert(msg);
+    } finally {
+      setReportSubmitting(false);
     }
   };
 
@@ -151,7 +190,17 @@ export default function EquipmentDetail() {
 
             {/* Equipment info */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h1 className="text-3xl font-bold text-[#003E51] mb-2">{equipment.title}</h1>
+              <div className="flex items-start justify-between mb-2">
+                <h1 className="text-3xl font-bold text-[#003E51]">{equipment.title}</h1>
+                {user && !isOwner && (
+                  <button
+                    onClick={() => { setShowReportModal(true); setReportSuccess(''); }}
+                    className="text-xs text-[#4A6572] hover:text-red-600 transition ml-4 flex-shrink-0"
+                  >
+                    Report Listing
+                  </button>
+                )}
+              </div>
               <p className="text-[#4A6572] mb-4">{equipment.category}</p>
 
               <div className="flex items-center gap-4 mb-4 pb-4 border-b border-[#D0DDE2]">
@@ -350,12 +399,77 @@ export default function EquipmentDetail() {
               )}
 
               <div className="mt-6 pt-6 border-t border-[#D0DDE2] text-sm text-[#4A6572]">
-                <p>Secure payment with Stripe</p>
+                <p>Secure payment with Stripe. Your card is held, not charged, until the lender approves.</p>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Report Listing Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-[#003E51] mb-2">Report Listing</h2>
+            <p className="text-sm text-[#4A6572] mb-4">
+              Listing: <strong>{equipment.title}</strong>
+            </p>
+
+            {reportSuccess ? (
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-700 text-sm">{reportSuccess}</p>
+              </div>
+            ) : (
+              <div className="space-y-4 mb-4">
+                <div>
+                  <label className="block text-sm font-bold text-[#003E51] mb-2">Reason *</label>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                  >
+                    <option value="">Select a reason…</option>
+                    {REPORT_REASONS.map((r) => (
+                      <option key={r} value={r}>{r.replace(/([A-Z])/g, ' $1').trim()}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#003E51] mb-2">
+                    Description * <span className="text-xs font-normal text-[#4A6572]">(min 20 characters)</span>
+                  </label>
+                  <textarea
+                    value={reportDescription}
+                    onChange={(e) => setReportDescription(e.target.value)}
+                    rows="4"
+                    placeholder="Describe the issue in detail…"
+                    className="w-full px-4 py-3 border border-[#D0DDE2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003E51]"
+                  />
+                  <p className="text-xs text-[#4A6572] mt-1">{reportDescription.trim().length}/20 minimum</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50"
+              >
+                {reportSuccess ? 'Close' : 'Cancel'}
+              </button>
+              {!reportSuccess && (
+                <button
+                  onClick={handleReportSubmit}
+                  disabled={reportSubmitting || !reportReason || reportDescription.trim().length < 20}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
+                >
+                  {reportSubmitting ? 'Submitting…' : 'Submit Report'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

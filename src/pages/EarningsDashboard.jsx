@@ -4,26 +4,30 @@ import earningsApi from '../api/earnings';
 export default function EarningsDashboard() {
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
-  const [payoutAmount, setPayoutAmount] = useState('');
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [payoutLoading, setPayoutLoading] = useState(false);
   const [payoutSuccess, setPayoutSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState('transactions');
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [summaryRes, txRes] = await Promise.all([
+        const [summaryRes, txRes, payoutsRes] = await Promise.all([
           earningsApi.getSummary(),
           earningsApi.getTransactions(),
+          earningsApi.getPayouts(),
         ]);
         setSummary(summaryRes.data.data || summaryRes.data);
         const txData = txRes.data.data;
         setTransactions(Array.isArray(txData) ? txData : txData?.transactions || []);
+        const payoutsData = payoutsRes.data.data;
+        setPayouts(Array.isArray(payoutsData) ? payoutsData : []);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load earnings data.');
       } finally {
@@ -33,26 +37,27 @@ export default function EarningsDashboard() {
     load();
   }, []);
 
+  // Filter by completedAt (the correct API field)
   const filteredTransactions = transactions.filter((t) => {
-    const date = t.date || t.createdAt || '';
+    const date = t.completedAt || '';
     if (filterStartDate && date < filterStartDate) return false;
     if (filterEndDate && date > filterEndDate) return false;
     return true;
   });
 
-  // Prefer the API-provided monthly breakdown; fall back to deriving from transactions
+  // Monthly chart from API breakdown (uses amount field per spec)
   const monthlyEarnings = (() => {
     const breakdown = summary?.monthlyBreakdown;
     if (Array.isArray(breakdown) && breakdown.length > 0) {
       const map = {};
-      breakdown.forEach((b) => { if (b.month) map[b.month] = b.total ?? b.amount ?? 0; });
+      breakdown.forEach((b) => { if (b.month) map[b.month] = b.amount ?? 0; });
       return map;
     }
+    // Fallback: derive from transactions using completedAt + totalAmount
     const map = {};
     transactions.forEach((t) => {
-      const dateStr = t.date || t.createdAt || '';
-      const month = dateStr.substring(0, 7);
-      if (month) map[month] = (map[month] || 0) + (t.total || t.amount || 0);
+      const month = (t.completedAt || '').substring(0, 7);
+      if (month) map[month] = (map[month] || 0) + (t.totalAmount || 0);
     });
     return map;
   })();
@@ -63,12 +68,14 @@ export default function EarningsDashboard() {
     setPayoutLoading(true);
     setPayoutSuccess('');
     try {
-      await earningsApi.requestPayout();
+      const res = await earningsApi.requestPayout();
+      const newPayout = res.data.data;
       setPayoutSuccess('Payout request submitted! Processed within 3-5 business days.');
-      setPayoutAmount('');
+      if (newPayout) setPayouts((prev) => [newPayout, ...prev]);
       setShowPayoutModal(false);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to request payout.');
+      const msg = err.response?.data?.message || 'Failed to request payout.';
+      alert(msg);
     } finally {
       setPayoutLoading(false);
     }
@@ -77,6 +84,16 @@ export default function EarningsDashboard() {
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const payoutStatusBadge = (status) => {
+    const map = {
+      Pending: 'bg-yellow-100 text-yellow-800',
+      Processing: 'bg-blue-100 text-blue-800',
+      Paid: 'bg-green-100 text-green-800',
+      Failed: 'bg-red-100 text-red-700',
+    };
+    return `${map[status] || 'bg-gray-100 text-gray-700'} px-3 py-1 rounded-full text-xs font-medium`;
   };
 
   if (loading) {
@@ -88,9 +105,7 @@ export default function EarningsDashboard() {
   }
 
   const totalEarnings = summary?.totalEarnings ?? 0;
-  const availableBalance = summary?.pendingPayoutBalance ?? 0;
-  const pendingEarnings = summary?.pendingEarnings ?? 0;
-  const transactionCount = transactions.length;
+  const pendingPayoutBalance = summary?.pendingPayoutBalance ?? 0;
 
   return (
     <div className="min-h-screen bg-[#F4F7F8] pt-8 pb-20">
@@ -109,29 +124,23 @@ export default function EarningsDashboard() {
         )}
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#003E51]">
             <p className="text-[#4A6572] font-medium text-sm mb-2">Total Earnings</p>
             <p className="text-3xl font-bold text-[#003E51]">SAR {totalEarnings.toFixed(2)}</p>
-            <p className="text-xs text-[#4A6572] mt-2">{transactionCount} transactions</p>
+            <p className="text-xs text-[#4A6572] mt-2">{transactions.length} completed transactions</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#1A7F5A]">
             <p className="text-[#4A6572] font-medium text-sm mb-2">Pending Payout Balance</p>
-            <p className="text-3xl font-bold text-[#1A7F5A]">SAR {availableBalance.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-[#1A7F5A]">SAR {pendingPayoutBalance.toFixed(2)}</p>
             <p className="text-xs text-[#4A6572] mt-2">Awaiting payout request</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#D97706]">
-            <p className="text-[#4A6572] font-medium text-sm mb-2">Pending Earnings</p>
-            <p className="text-3xl font-bold text-[#D97706]">SAR {pendingEarnings.toFixed(2)}</p>
-            <p className="text-xs text-[#4A6572] mt-2">Awaiting completion</p>
           </div>
 
           <div className="bg-gradient-to-br from-[#003E51] to-[#002A38] rounded-lg shadow-md p-6 text-white flex flex-col justify-between">
             <div>
               <p className="font-medium text-sm mb-2 opacity-90">Ready to receive?</p>
-              <p className="text-sm opacity-75">Min. SAR 100</p>
+              <p className="text-sm opacity-75">Min. SAR 50</p>
             </div>
             <button
               onClick={() => setShowPayoutModal(true)}
@@ -168,85 +177,134 @@ export default function EarningsDashboard() {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-bold text-[#0A1F29] mb-4">Filter Transactions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#0A1F29] mb-2">From Date</label>
-              <input
-                type="date"
-                value={filterStartDate}
-                onChange={(e) => setFilterStartDate(e.target.value)}
-                className="w-full border border-[#D0DDE2] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00879E]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#0A1F29] mb-2">To Date</label>
-              <input
-                type="date"
-                value={filterEndDate}
-                onChange={(e) => setFilterEndDate(e.target.value)}
-                className="w-full border border-[#D0DDE2] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00879E]"
-              />
-            </div>
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-4 mb-6 border-b border-[#D0DDE2]">
+          {['transactions', 'payouts'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-4 px-4 font-medium transition capitalize ${
+                activeTab === tab
+                  ? 'text-[#003E51] border-b-2 border-[#003E51]'
+                  : 'text-[#4A6572] hover:text-[#003E51]'
+              }`}
+            >
+              {tab === 'transactions' ? 'Transaction History' : 'Payout History'}
+            </button>
+          ))}
         </div>
 
-        {/* Transaction Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-6 border-b border-[#D0DDE2]">
-            <h2 className="text-xl font-bold text-[#0A1F29]">Transaction History</h2>
-            <p className="text-sm text-[#4A6572] mt-1">Showing {filteredTransactions.length} transaction(s)</p>
-          </div>
+        {activeTab === 'transactions' && (
+          <>
+            {/* Filters */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-lg font-bold text-[#0A1F29] mb-4">Filter Transactions</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#0A1F29] mb-2">From Date</label>
+                  <input
+                    type="date"
+                    value={filterStartDate}
+                    onChange={(e) => setFilterStartDate(e.target.value)}
+                    className="w-full border border-[#D0DDE2] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00879E]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0A1F29] mb-2">To Date</label>
+                  <input
+                    type="date"
+                    value={filterEndDate}
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    className="w-full border border-[#D0DDE2] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00879E]"
+                  />
+                </div>
+              </div>
+            </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-[#F4F7F8] border-b border-[#D0DDE2]">
-                <tr>
-                  <th className="px-6 py-3 text-left font-semibold text-[#0A1F29]">Date</th>
-                  <th className="px-6 py-3 text-left font-semibold text-[#0A1F29]">Equipment</th>
-                  <th className="px-6 py-3 text-left font-semibold text-[#0A1F29]">Renter</th>
-                  <th className="px-6 py-3 text-right font-semibold text-[#0A1F29]">Total</th>
-                  <th className="px-6 py-3 text-center font-semibold text-[#0A1F29]">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTransactions.length > 0 ? (
-                  filteredTransactions.map((t) => (
-                    <tr key={t._id || t.id} className="border-b border-[#D0DDE2] hover:bg-[#F4F7F8] transition">
-                      <td className="px-6 py-3 text-[#0A1F29]">{formatDate(t.date || t.createdAt)}</td>
-                      <td className="px-6 py-3 text-[#0A1F29] font-medium">
-                        {t.equipment || t.listingTitle || t.listingId?.title || '—'}
-                      </td>
-                      <td className="px-6 py-3 text-[#4A6572]">
-                        {t.renter || t.renterName || t.renterId?.name || '—'}
-                      </td>
-                      <td className="px-6 py-3 text-right font-bold text-[#003E51]">
-                        SAR {(t.total || t.amount || 0).toFixed(2)}
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        <span className={
-                          t.status === 'completed'
-                            ? 'bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium'
-                            : 'bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium'
-                        }>
-                          {t.status === 'completed' ? 'Completed' : t.status || 'Pending'}
-                        </span>
-                      </td>
+            {/* Transaction Table */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="p-6 border-b border-[#D0DDE2]">
+                <h2 className="text-xl font-bold text-[#0A1F29]">Transaction History</h2>
+                <p className="text-sm text-[#4A6572] mt-1">Showing {filteredTransactions.length} transaction(s)</p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-[#F4F7F8] border-b border-[#D0DDE2]">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-semibold text-[#0A1F29]">Completed</th>
+                      <th className="px-6 py-3 text-left font-semibold text-[#0A1F29]">Equipment</th>
+                      <th className="px-6 py-3 text-left font-semibold text-[#0A1F29]">Renter</th>
+                      <th className="px-6 py-3 text-right font-semibold text-[#0A1F29]">Days</th>
+                      <th className="px-6 py-3 text-right font-semibold text-[#0A1F29]">Subtotal</th>
+                      <th className="px-6 py-3 text-right font-semibold text-[#0A1F29]">Fee</th>
+                      <th className="px-6 py-3 text-right font-semibold text-[#0A1F29]">Total</th>
                     </tr>
-                  ))
-                ) : (
+                  </thead>
+                  <tbody>
+                    {filteredTransactions.length > 0 ? (
+                      filteredTransactions.map((t, i) => (
+                        <tr key={t.bookingId || i} className="border-b border-[#D0DDE2] hover:bg-[#F4F7F8] transition">
+                          <td className="px-6 py-3 text-[#0A1F29]">{formatDate(t.completedAt)}</td>
+                          <td className="px-6 py-3 text-[#0A1F29] font-medium">{t.listingTitle || '—'}</td>
+                          <td className="px-6 py-3 text-[#4A6572]">{t.renterName || '—'}</td>
+                          <td className="px-6 py-3 text-right text-[#4A6572]">{t.totalDays ?? '—'}</td>
+                          <td className="px-6 py-3 text-right text-[#4A6572]">SAR {(t.subtotal || 0).toFixed(2)}</td>
+                          <td className="px-6 py-3 text-right text-[#4A6572]">SAR {(t.serviceFee || 0).toFixed(2)}</td>
+                          <td className="px-6 py-3 text-right font-bold text-[#003E51]">SAR {(t.totalAmount || 0).toFixed(2)}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="px-6 py-8 text-center text-[#4A6572]">
+                          {transactions.length === 0 ? 'No transactions yet.' : 'No transactions match the selected filters.'}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'payouts' && (
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="p-6 border-b border-[#D0DDE2]">
+              <h2 className="text-xl font-bold text-[#0A1F29]">Payout History</h2>
+              <p className="text-sm text-[#4A6572] mt-1">{payouts.length} payout request(s)</p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[#F4F7F8] border-b border-[#D0DDE2]">
                   <tr>
-                    <td colSpan="5" className="px-6 py-8 text-center text-[#4A6572]">
-                      {transactions.length === 0 ? 'No transactions yet.' : 'No transactions match the selected filters.'}
-                    </td>
+                    <th className="px-6 py-3 text-left font-semibold text-[#0A1F29]">Date</th>
+                    <th className="px-6 py-3 text-right font-semibold text-[#0A1F29]">Amount</th>
+                    <th className="px-6 py-3 text-center font-semibold text-[#0A1F29]">Status</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {payouts.length > 0 ? (
+                    payouts.map((p, i) => (
+                      <tr key={p._id || i} className="border-b border-[#D0DDE2] hover:bg-[#F4F7F8] transition">
+                        <td className="px-6 py-3 text-[#0A1F29]">{formatDate(p.createdAt)}</td>
+                        <td className="px-6 py-3 text-right font-bold text-[#003E51]">SAR {(p.amount || 0).toFixed(2)}</td>
+                        <td className="px-6 py-3 text-center">
+                          <span className={payoutStatusBadge(p.status)}>{p.status}</span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="px-6 py-8 text-center text-[#4A6572]">No payout requests yet.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Payout Modal */}
@@ -258,9 +316,15 @@ export default function EarningsDashboard() {
 
             <div className="bg-[#F4F7F8] rounded-lg p-4 mb-6">
               <p className="text-sm text-[#4A6572] mb-2">Pending Payout Balance:</p>
-              <p className="text-2xl font-bold text-[#003E51]">SAR {availableBalance.toFixed(2)}</p>
-              <p className="text-xs text-[#4A6572] mt-2">Minimum: SAR 100</p>
+              <p className="text-2xl font-bold text-[#003E51]">SAR {pendingPayoutBalance.toFixed(2)}</p>
+              <p className="text-xs text-[#4A6572] mt-2">Minimum payout: SAR 50</p>
             </div>
+
+            {pendingPayoutBalance < 50 && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">Your balance is below the minimum payout of SAR 50.</p>
+              </div>
+            )}
 
             <div className="flex gap-3">
               <button
@@ -271,7 +335,7 @@ export default function EarningsDashboard() {
               </button>
               <button
                 onClick={handlePayoutRequest}
-                disabled={payoutLoading || availableBalance < 100}
+                disabled={payoutLoading || pendingPayoutBalance < 50}
                 className="flex-1 bg-[#003E51] text-white font-semibold py-3 px-4 rounded-lg hover:bg-[#002A38] disabled:opacity-50 transition"
               >
                 {payoutLoading ? 'Submitting…' : 'Submit Request'}

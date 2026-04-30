@@ -18,6 +18,12 @@ const circlesApi = {
 
   // GET /api/circles/:id/members  (Admin only)
   getMembers: (id) => client.get(`/api/circles/${id}/members`),
+
+  // DELETE /api/circles/:id/members/:userId  (Admin only)
+  removeMember: (circleId, userId) => client.delete(`/api/circles/${circleId}/members/${userId}`),
+
+  // PATCH /api/circles/:id/deactivate  (Admin only)
+  deactivateCircle: (id) => client.patch(`/api/circles/${id}/deactivate`),
 };
 
 export default circlesApi;
