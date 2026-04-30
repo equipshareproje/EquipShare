@@ -1,207 +1,133 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import listingsApi from '../api/listings';
 
 export default function MyListings() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [myListings, setMyListings] = useState([]);
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [deleteModal, setDeleteModal] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    // Load listings from localStorage
-    const allListings = JSON.parse(localStorage.getItem('myListings') || '[]');
-    const userListings = allListings.filter(listing => listing.lenderId === user?.id || listing.lenderId === 1);
-    setMyListings(userListings);
-  }, [user]);
-
-  const handleDeleteListing = (listing) => {
-    setDeleteModal(listing);
+  const fetchListings = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await listingsApi.getMyListings();
+      setListings(res.data.data || []);
+    } catch (err) {
+      setError('Failed to load your listings.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const confirmDelete = () => {
+  useEffect(() => { fetchListings(); }, []); // eslint-disable-line
+
+  const confirmDelete = async () => {
     if (!deleteModal) return;
-
-    const allListings = JSON.parse(localStorage.getItem('myListings') || '[]');
-    const updatedListings = allListings.filter(listing => listing.id !== deleteModal.id);
-    localStorage.setItem('myListings', JSON.stringify(updatedListings));
-    setMyListings(updatedListings);
-    setDeleteModal(null);
-    alert('✅ Listing deleted successfully!');
-  };
-
-  const handleArchiveListing = (listingId) => {
-    const allListings = JSON.parse(localStorage.getItem('myListings') || '[]');
-    const updatedListings = allListings.map(listing => 
-      listing.id === listingId 
-        ? { ...listing, status: listing.status === 'active' ? 'archived' : 'active' }
-        : listing
-    );
-    localStorage.setItem('myListings', JSON.stringify(updatedListings));
-    setMyListings(updatedListings);
-    alert(updatedListings.find(l => l.id === listingId).status === 'archived' 
-      ? 'Listing archived' 
-      : '✅ Listing reactivated');
+    setDeleting(true);
+    try {
+      await listingsApi.deleteListing(deleteModal._id);
+      setDeleteModal(null);
+      await fetchListings();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete listing.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (!user) {
     return (
       <div className="min-h-screen bg-[#F4F7F8] flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <p className="text-lg text-[#4A6572] mb-4">Please sign in to manage your listings</p>
-          <button
-            onClick={() => navigate('/signin')}
-            className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
-          >
-            Sign In
-          </button>
+          <p className="text-lg text-[#4A6572] mb-4">Please sign in to view your listings</p>
+          <button onClick={() => navigate('/signin')} className="bg-[#003E51] text-white px-6 py-2 rounded-lg">Sign In</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F7F8] pt-24 pb-20">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-start">
+    <div className="min-h-screen bg-[#F4F7F8]">
+      <div className="bg-[#003E51] text-white py-8">
+        <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-[#0A1F29] mb-2">My Listings</h1>
-            <p className="text-[#4A6572] text-lg">Manage your equipment listings</p>
+            <h1 className="text-3xl font-bold mb-1">My Listings</h1>
+            <p className="text-gray-200">Manage your equipment listings</p>
           </div>
           <button
             onClick={() => navigate('/create-listing')}
-            className="bg-[#003E51] hover:bg-[#002A38] text-white font-semibold py-3 px-6 rounded-lg transition"
+            className="bg-white text-[#003E51] font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition"
           >
-            + Add New Listing
+            + New Listing
           </button>
         </div>
+      </div>
 
-        {/* Stats Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#003E51]">
-            <p className="text-[#4A6572] text-sm mb-1">Active Listings</p>
-            <p className="text-3xl font-bold text-[#003E51]">
-              {myListings.filter(l => l.status === 'active').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#D97706]">
-            <p className="text-[#4A6572] text-sm mb-1">Archived Listings</p>
-            <p className="text-3xl font-bold text-[#D97706]">
-              {myListings.filter(l => l.status === 'archived').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#00879E]">
-            <p className="text-[#4A6572] text-sm mb-1">Total Views</p>
-            <p className="text-3xl font-bold text-[#00879E]">
-              {myListings.reduce((sum, l) => sum + (l.viewCount || 0), 0)}
-            </p>
-          </div>
-        </div>
+      <div className="container mx-auto px-4 max-w-7xl py-8">
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">{error}</div>
+        )}
 
-        {/* Listings Grid */}
-        {myListings.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-12 h-12 border-4 border-[#003E51] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : listings.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <p className="text-lg text-[#4A6572] mb-6">You haven't listed any equipment yet.</p>
-            <button
-              onClick={() => navigate('/create-listing')}
-              className="bg-[#003E51] hover:bg-[#002A38] text-white font-medium py-2 px-6 rounded-lg transition"
-            >
+            <p className="text-lg text-[#4A6572] mb-4">You don't have any listings yet</p>
+            <button onClick={() => navigate('/create-listing')} className="bg-[#003E51] text-white px-6 py-2 rounded-lg hover:bg-[#002A38]">
               Create Your First Listing
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myListings.map(listing => (
-              <div
-                key={listing.id}
-                className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition ${
-                  listing.status === 'archived' ? 'opacity-60' : ''
-                }`}
-              >
-                {/* Photo */}
-                <div className="relative h-48 bg-[#F4F7F8]">
-                  {listing.photos && listing.photos.length > 0 ? (
-                    <img
-                      src={typeof listing.photos[0] === 'string' 
-                        ? listing.photos[0] 
-                        : (listing.photos[0]?.url || 'https://via.placeholder.com/300?text=Equipment')}
-                      alt={listing.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/300?text=Equipment'; }}
-                    />
+            {listings.map((listing) => (
+              <div key={listing._id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="relative">
+                  {listing.photos?.[0] ? (
+                    <img src={listing.photos[0]} alt={listing.title} className="w-full h-48 object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#4A6572]">
-                      No photo
-                    </div>
+                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400">No photo</div>
                   )}
-                  {/* Status Badge */}
-                  <div className="absolute top-3 right-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      listing.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {listing.status === 'active' ? 'Active' : 'Archived'}
-                    </span>
-                  </div>
+                  <span className={`absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded ${
+                    listing.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {listing.status}
+                  </span>
                 </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-[#0A1F29] mb-2 line-clamp-2">
-                    {listing.title}
-                  </h3>
+                <div className="p-4">
+                  <h3 className="font-bold text-[#003E51] text-lg mb-1 truncate">{listing.title}</h3>
+                  <p className="text-sm text-[#4A6572] mb-1">{listing.category}</p>
+                  <p className="text-sm font-semibold text-[#003E51] mb-3">{listing.dailyPrice} SAR/day</p>
 
-                  <div className="mb-4 space-y-2 text-sm text-[#4A6572]">
-                    <p>{listing.category}</p>
-                    <p>SAR {listing.dailyRate}/day</p>
-                    <p>{listing.availabilityStartDate} to {listing.availabilityEndDate}</p>
-                    <p>{listing.viewCount || 0} views • {listing.bookingCount || 0} bookings</p>
+                  <div className="flex items-center gap-1 text-sm text-[#4A6572] mb-4">
+                    <span>★ {listing.rating?.toFixed(1) || 'N/A'}</span>
+                    <span>({listing.reviewCount} reviews)</span>
                   </div>
 
-                  {/* Blocked Dates */}
-                  {listing.blockedDates && listing.blockedDates.length > 0 && (
-                    <div className="mb-4 p-3 bg-[#F4F7F8] rounded-lg">
-                      <p className="text-xs font-semibold text-[#0A1F29] mb-2">
-                        Blocked Dates ({listing.blockedDates.length}):
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {listing.blockedDates.slice(0, 3).map(date => (
-                          <span key={date} className="text-xs bg-white px-2 py-1 rounded border border-[#D0DDE2]">
-                            {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                        ))}
-                        {listing.blockedDates.length > 3 && (
-                          <span className="text-xs bg-white px-2 py-1 rounded border border-[#D0DDE2] font-semibold text-[#4A6572]">
-                            +{listing.blockedDates.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => navigate(`/edit-listing/${listing.id}`)}
-                      className="flex-1 bg-[#003E51] hover:bg-[#002A38] text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
+                      onClick={() => navigate(`/equipment/${listing._id}`)}
+                      className="flex-1 px-3 py-2 border border-[#003E51] text-[#003E51] text-sm font-medium rounded-lg hover:bg-[#F4F7F8] transition"
                     >
-                      ✏️ Edit
+                      View
                     </button>
                     <button
-                      onClick={() => handleArchiveListing(listing.id)}
-                      className={`flex-1 font-semibold py-2 px-3 rounded-lg transition text-sm ${
-                        listing.status === 'active'
-                          ? 'bg-[#D97706] hover:bg-[#C17504] text-white'
-                          : 'bg-[#1A7F5A] hover:bg-[#156A4A] text-white'
-                      }`}
+                      onClick={() => navigate(`/edit-listing/${listing._id}`)}
+                      className="flex-1 px-3 py-2 bg-[#003E51] text-white text-sm font-medium rounded-lg hover:bg-[#002A38] transition"
                     >
-                      {listing.status === 'active' ? 'Archive' : 'Reactivate'}
+                      Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteListing(listing)}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
+                      onClick={() => setDeleteModal(listing)}
+                      className="px-3 py-2 bg-red-50 text-red-600 text-sm font-medium rounded-lg hover:bg-red-100 transition"
                     >
                       Delete
                     </button>
@@ -213,27 +139,22 @@ export default function MyListings() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete confirm modal */}
       {deleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold text-[#0A1F29] mb-4">Delete Listing?</h2>
+          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
+            <h2 className="text-xl font-bold text-[#0A1F29] mb-3">Delete Listing?</h2>
             <p className="text-[#4A6572] mb-6">
-              Are you sure you want to permanently delete <strong>"{deleteModal.title}"</strong>? This action cannot be undone.
+              Are you sure you want to delete <strong>{deleteModal.title}</strong>? This cannot be undone.
             </p>
-
             <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteModal(null)}
-                className="flex-1 bg-[#D0DDE2] text-[#0A1F29] font-semibold py-3 px-4 rounded-lg hover:bg-[#C0CDD2] transition"
-              >
+              <button onClick={() => setDeleteModal(null)}
+                className="flex-1 px-4 py-2 border border-[#D0DDE2] rounded-lg text-[#0A1F29] font-medium hover:bg-gray-50">
                 Cancel
               </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 bg-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-700 transition"
-              >
-                Delete
+              <button onClick={confirmDelete} disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50">
+                {deleting ? 'Deleting…' : 'Delete'}
               </button>
             </div>
           </div>

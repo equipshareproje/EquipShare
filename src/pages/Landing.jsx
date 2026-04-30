@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
-import listingsData from '../data/listings.json';
+import listingsApi from '../api/listings';
 
 const Landing = () => {
   const navigate = useNavigate();
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [featuredListings, setFeaturedListings] = useState([]);
+
+  useEffect(() => {
+    listingsApi.getListings({ limit: 6 })
+      .then((res) => {
+        const data = res.data.data;
+        setFeaturedListings(Array.isArray(data) ? data : data?.listings || []);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleCardClick = (id) => {
     navigate(`/equipment/${id}`);
@@ -149,11 +158,17 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {listingsData.slice(0, 6).map((listing) => (
+            {featuredListings.map((listing) => (
               <Card
-                key={listing.id}
-                {...listing}
-                onClick={() => handleCardClick(listing.id)}
+                key={listing._id}
+                id={listing._id}
+                name={listing.title}
+                image={listing.photos?.[0]}
+                dailyRate={listing.dailyPrice}
+                rating={listing.rating}
+                reviews={listing.reviewCount}
+                available={listing.status === 'Active'}
+                onClick={() => handleCardClick(listing._id)}
               />
             ))}
           </div>

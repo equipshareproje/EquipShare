@@ -5,7 +5,7 @@ import Button from '../components/Button';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -37,8 +37,8 @@ const SignUp = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
     }
 
     if (!formData.email.trim()) {
@@ -84,6 +84,8 @@ const SignUp = () => {
     }
   };
 
+  const [success, setSuccess] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -94,19 +96,22 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      signup({
-        fullName: formData.fullName,
+      await signup({
+        name: formData.name,
         email: formData.email,
         password: formData.password,
-        phone: formData.phone
+        phone: formData.phone,
       });
 
-      // Redirect to marketplace after successful signup
-      navigate('/marketplace');
+      setSuccess(
+        'Account created! Please check your email to verify your address before signing in.'
+      );
     } catch (error) {
-      setErrors({
-        submit: error.message || 'Failed to create account. Please try again.'
-      });
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to create account. Please try again.';
+      setErrors({ submit: msg });
     } finally {
       setLoading(false);
     }
@@ -121,10 +126,21 @@ const SignUp = () => {
           <p className="text-text-secondary">Join EquipShare today</p>
         </div>
 
-        {/* Submit Error */}
+        {success && (
+          <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-300">
+            <p className="text-green-700 text-sm">{success}</p>
+            <button
+              onClick={() => navigate('/signin')}
+              className="mt-2 text-sm font-medium text-green-700 underline"
+            >
+              Go to Sign In
+            </button>
+          </div>
+        )}
+
         {errors.submit && (
-          <div className="mb-6 p-4 rounded-lg bg-error bg-opacity-10 border border-error">
-            <p className="text-error text-sm">{errors.submit}</p>
+          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-300">
+            <p className="text-red-700 text-sm">{errors.submit}</p>
           </div>
         )}
 
@@ -132,22 +148,22 @@ const SignUp = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-text-primary mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-text-primary mb-1">
               Full Name
             </label>
             <input
               type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
+              id="name"
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               placeholder="John Doe"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                errors.fullName ? 'border-error' : 'border-border'
+                errors.name ? 'border-error' : 'border-border'
               }`}
             />
-            {errors.fullName && (
-              <p className="text-error text-sm mt-1">{errors.fullName}</p>
+            {errors.name && (
+              <p className="text-error text-sm mt-1">{errors.name}</p>
             )}
           </div>
 

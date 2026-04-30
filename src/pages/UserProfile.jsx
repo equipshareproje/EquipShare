@@ -11,13 +11,11 @@ const UserProfile = () => {
     bio: '',
   });
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (user) {
       setFormData({
-        fullName: user.fullName || '',
+        fullName: user.name || '',
         phone: user.phone || '',
         bio: user.bio || '',
       });
@@ -59,38 +57,8 @@ const UserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
-    setSuccess(false);
-
-    try {
-      // Update user in localStorage
-      const users = JSON.parse(localStorage.getItem('equipshare_users') || '[]');
-      const userIndex = users.findIndex(u => u.id === user.id);
-
-      if (userIndex !== -1) {
-        users[userIndex] = {
-          ...users[userIndex],
-          ...formData
-        };
-        localStorage.setItem('equipshare_users', JSON.stringify(users));
-
-        // Update current user in auth
-        const updatedUser = { ...user, ...formData };
-        localStorage.setItem('equipshare_user', JSON.stringify(updatedUser));
-
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      }
-    } catch (error) {
-      setErrors({ submit: 'Failed to update profile' });
-    } finally {
-      setLoading(false);
-    }
+    // Profile update API endpoint is not yet available on the backend.
+    setErrors({ submit: 'Profile editing is not yet supported. Please contact support to update your details.' });
   };
 
   if (!user) {
@@ -122,7 +90,7 @@ const UserProfile = () => {
                 <p className="text-sm text-text-secondary">Account Status</p>
                 <p className="text-lg font-medium">
                   <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    user.verified ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
+                    user.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
                     {user.verified ? 'Verified' : 'Pending Verification'}
                   </span>
@@ -130,17 +98,20 @@ const UserProfile = () => {
               </div>
               <div>
                 <p className="text-sm text-text-secondary">Joined</p>
-                <p className="text-lg font-medium text-text-primary">{new Date(user.joinDate).toLocaleDateString()}</p>
+                <p className="text-lg font-medium text-text-primary">
+                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
+                </p>
               </div>
+              {user.rating !== undefined && (
+                <div>
+                  <p className="text-sm text-text-secondary">Rating</p>
+                  <p className="text-lg font-medium text-text-primary">
+                    {user.rating > 0 ? `${user.rating} (${user.reviewCount} review${user.reviewCount !== 1 ? 's' : ''})` : 'No reviews yet'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Success Message */}
-          {success && (
-            <div className="mb-6 p-4 bg-success/10 border border-success rounded-lg">
-              <p className="text-success font-medium">Profile updated successfully!</p>
-            </div>
-          )}
 
           {/* Error Message */}
           {errors.submit && (
@@ -216,11 +187,8 @@ const UserProfile = () => {
 
             {/* Action Buttons */}
             <div className="flex space-x-3 pt-6 border-t border-border">
-              <Button
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
+              <Button type="submit">
+                Save Changes
               </Button>
               <Link
                 to="/dashboard"
@@ -231,17 +199,6 @@ const UserProfile = () => {
             </div>
           </form>
 
-          {/* Additional Info */}
-          <div className="mt-8 p-4 bg-surface rounded-lg">
-            <p className="text-sm text-text-secondary mb-3">
-              <strong>Rating:</strong> {user.rating ? `${user.rating} (${user.reviews} reviews)` : 'No reviews yet'}
-            </p>
-            {user.role === 'lender' && (
-              <p className="text-sm text-text-secondary">
-                <strong>Listings:</strong> {user.listings || 0} active equipment listings
-              </p>
-            )}
-          </div>
         </div>
       </div>
     </div>
