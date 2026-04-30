@@ -1,0 +1,2 @@
+# Root ../.gitignore covers node_modules, dist, .env for all sub-projects.
+# Add only backend-specific ignores here if needed.
