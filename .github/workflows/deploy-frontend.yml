@@ -23,7 +23,8 @@ on:
 # ── Global environment ────────────────────────────────────────────────────────
 env:
   AZURE_RG: rg-equipshare
-  LOCATION: eastus
+  RG_LOCATION: eastus       # Resource group is already in eastus
+  SWA_LOCATION: eastus2     # Static Web Apps not available in eastus
   APP_NAME: equipshare
 
 permissions:
@@ -49,20 +50,22 @@ jobs:
         run: |
           az group create \
             --name     ${{ env.AZURE_RG }} \
-            --location ${{ env.LOCATION }}
+            --location ${{ env.RG_LOCATION }}
 
       # Use jq to safely encode the API URL parameter
       - name: Build Bicep parameters file
         run: |
           jq -n \
-            --arg appName "${{ env.APP_NAME }}" \
-            --arg apiUrl  "${{ secrets.BACKEND_URL }}" \
+            --arg appName  "${{ env.APP_NAME }}" \
+            --arg location "${{ env.SWA_LOCATION }}" \
+            --arg apiUrl   "${{ secrets.BACKEND_URL }}" \
             '{
               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
               "contentVersion": "1.0.0.0",
               "parameters": {
-                "appName": { "value": $appName },
-                "apiUrl":  { "value": $apiUrl  }
+                "appName":  { "value": $appName  },
+                "location": { "value": $location },
+                "apiUrl":   { "value": $apiUrl   }
               }
             }' > /tmp/params.json
 
