@@ -23,7 +23,7 @@ param appName string
   'westeurope'
   'southeastasia'
 ])
-param location string = 'eastus2'
+param location string = 'eastus'
 
 @description('Backend API base URL injected as REACT_APP_API_URL (e.g. https://equipshare-api.bluerock-abc.eastus.azurecontainerapps.io)')
 param apiUrl string = ''

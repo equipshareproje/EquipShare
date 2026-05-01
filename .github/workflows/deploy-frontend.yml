@@ -23,7 +23,7 @@ on:
 # ── Global environment ────────────────────────────────────────────────────────
 env:
   AZURE_RG: rg-equipshare
-  LOCATION: eastus2
+  LOCATION: eastus
   APP_NAME: equipshare
 
 permissions:
