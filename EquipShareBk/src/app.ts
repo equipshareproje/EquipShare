@@ -24,7 +24,10 @@ app.use("/api/docs", apiReference({ spec: { url: "/api/docs/spec.json" } }));
 app.use(helmet());
 app.use(
   cors({
-    origin: ["https://witty-mud-0d2a7a10f.7.azurestaticapps.net", "http://localhost:3000"],
+    origin: [
+      "https://witty-mud-0d2a7a10f.7.azurestaticapps.net",
+      "http://localhost:3000",
+    ],
     credentials: true,
   }),
 );
