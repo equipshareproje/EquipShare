@@ -1,9 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const BASE_URL =
-  process.env.REACT_APP_API_BASE_URL ||
-  process.env.REACT_APP_API_URL ||
-  'https://equipshare-api.bluerock-abc.eastus.azurecontainerapps.io';
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_API_URL;
 
 // ── In-memory token store (never persisted to localStorage) ──────────────────
 let accessToken = null;
@@ -11,13 +8,17 @@ let isRefreshing = false;
 let failedQueue = [];
 let logoutHandler = null;
 
-export const setAccessToken = (token) => { accessToken = token; };
+export const setAccessToken = (token) => {
+  accessToken = token;
+};
 export const getAccessToken = () => accessToken;
-export const setLogoutHandler = (fn) => { logoutHandler = fn; };
+export const setLogoutHandler = (fn) => {
+  logoutHandler = fn;
+};
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(({ resolve, reject }) =>
-    error ? reject(error) : resolve(token)
+    error ? reject(error) : resolve(token),
   );
   failedQueue = [];
 };
@@ -42,9 +43,10 @@ client.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
-    const isAuthEndpoint = original.url?.includes('/api/auth/login') ||
-      original.url?.includes('/api/auth/register') ||
-      original.url?.includes('/api/auth/refresh');
+    const isAuthEndpoint =
+      original.url?.includes("/api/auth/login") ||
+      original.url?.includes("/api/auth/register") ||
+      original.url?.includes("/api/auth/refresh");
 
     if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       if (isRefreshing) {
@@ -61,7 +63,7 @@ client.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await client.post('/api/auth/refresh');
+        const res = await client.post("/api/auth/refresh");
         const newToken = res.data.data.accessToken;
         setAccessToken(newToken);
         processQueue(null, newToken);
@@ -78,7 +80,7 @@ client.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default client;
