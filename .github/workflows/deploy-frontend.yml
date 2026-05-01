@@ -23,8 +23,8 @@ on:
 # ── Global environment ────────────────────────────────────────────────────────
 env:
   AZURE_RG: rg-equipshare
-  RG_LOCATION: eastus       # Resource group is already in eastus
-  SWA_LOCATION: eastus2     # Static Web Apps not available in eastus
+  RG_LOCATION: eastus # Resource group is already in eastus
+  SWA_LOCATION: eastus2 # Static Web Apps not available in eastus
   APP_NAME: equipshare
 
 permissions:
@@ -92,6 +92,9 @@ jobs:
 
       - name: Build and Deploy to Azure Static Web Apps
         uses: azure/static-web-apps-deploy@v1
+        env:
+          REACT_APP_API_BASE_URL: ${{ secrets.BACKEND_URL }}
+          REACT_APP_API_URL: ${{ secrets.BACKEND_URL }}
         with:
           azure_static_web_apps_api_token: ${{ steps.swa_token.outputs.deployment_token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
