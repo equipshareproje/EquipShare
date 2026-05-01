@@ -45,6 +45,7 @@ resource appSettings 'Microsoft.Web/staticSites/config@2023-01-01' = {
   name: 'appsettings'
   properties: {
     REACT_APP_API_URL: apiUrl
+    REACT_APP_API_BASE_URL: apiUrl
   }
 }
 

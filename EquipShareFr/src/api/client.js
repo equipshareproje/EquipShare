@@ -2,7 +2,8 @@ import axios from 'axios';
 
 const BASE_URL =
   process.env.REACT_APP_API_BASE_URL ||
-  'https://equipshare-api.ambitiousdune-c1462722.eastus.azurecontainerapps.io';
+  process.env.REACT_APP_API_URL ||
+  'https://equipshare-api.bluerock-abc.eastus.azurecontainerapps.io';
 
 // ── In-memory token store (never persisted to localStorage) ──────────────────
 let accessToken = null;
