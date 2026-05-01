@@ -14,7 +14,7 @@ name: Build and Deploy Back-End
 
 on:
   push:
-    branches: [back-end]
+    branches: [main]
     paths:
       - "EquipShareBk/**"
       - ".github/workflows/deploy-backend.yml"
