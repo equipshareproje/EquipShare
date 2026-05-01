@@ -22,15 +22,9 @@ app.use("/api/docs", apiReference({ spec: { url: "/api/docs/spec.json" } }));
 
 // Security
 app.use(helmet());
-const allowedOrigins = env.FRONTEND_URL.split(",").map((o) => o.trim());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, server-to-server)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error(`CORS: origin ${origin} not allowed`));
-    },
+    origin: ["https://witty-mud-0d2a7a10f.7.azurestaticapps.net", "http://localhost:3000"],
     credentials: true,
   }),
 );
